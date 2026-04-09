@@ -1,0 +1,2378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoyaltyLift — Client Onboarding Portal</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23E8422F'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Inter,sans-serif' font-weight='700' font-size='40' fill='white'>L</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+/* LoyaltyLift — HubSpot CMS Styles */
+:root {
+  --ll-brand: #E8422F;
+  --ll-brand-dark: #D13A28;
+  --ll-brand-light: #FEF2F1;
+  --ll-bg: #ffffff;
+  --ll-fg: #171717;
+  --ll-gray-50: #f9fafb;
+  --ll-gray-100: #f3f4f6;
+  --ll-gray-200: #e5e7eb;
+  --ll-gray-300: #d1d5db;
+  --ll-gray-400: #9ca3af;
+  --ll-gray-500: #6b7280;
+  --ll-gray-600: #4b5563;
+  --ll-gray-700: #374151;
+  --ll-gray-800: #1f2937;
+  --ll-gray-900: #111827;
+  --ll-green-100: #dcfce7;
+  --ll-green-700: #15803d;
+  --ll-blue-100: #dbeafe;
+  --ll-blue-700: #1d4ed8;
+  --ll-yellow-100: #fef9c3;
+  --ll-yellow-700: #a16207;
+  --ll-purple-100: #f3e8ff;
+  --ll-purple-700: #7c3aed;
+  --ll-radius: 0.75rem;
+  --ll-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Reset for HubSpot embed */
+.ll-app * { box-sizing: border-box; margin: 0; padding: 0; }
+.ll-app { font-family: var(--ll-font); color: var(--ll-fg); background: var(--ll-gray-50); min-height: 100vh; }
+
+/* Layout */
+.ll-container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+.ll-flex { display: flex; }
+.ll-flex-col { flex-direction: column; }
+.ll-items-center { align-items: center; }
+.ll-justify-center { justify-content: center; }
+.ll-justify-between { justify-content: space-between; }
+.ll-gap-2 { gap: 0.5rem; }
+.ll-gap-3 { gap: 0.75rem; }
+.ll-gap-4 { gap: 1rem; }
+.ll-gap-6 { gap: 1.5rem; }
+.ll-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.ll-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+
+/* Card */
+.ll-card {
+  background: var(--ll-bg);
+  border-radius: var(--ll-radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid var(--ll-gray-200);
+  padding: 1rem 1.5rem;
+}
+.ll-card-hover:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-color: var(--ll-gray-300);
+  cursor: pointer;
+}
+
+/* Typography */
+.ll-h1 { font-size: 1.5rem; font-weight: 700; color: var(--ll-gray-900); }
+.ll-h2 { font-size: 1.25rem; font-weight: 700; color: var(--ll-gray-900); margin-bottom: 1rem; }
+.ll-h3 { font-size: 0.875rem; font-weight: 600; color: var(--ll-gray-700); }
+.ll-subtitle { font-size: 0.875rem; color: var(--ll-gray-500); }
+.ll-label { font-size: 0.75rem; font-weight: 500; color: var(--ll-gray-700); margin-bottom: 0.25rem; display: block; }
+.ll-text-sm { font-size: 0.875rem; }
+.ll-text-xs { font-size: 0.75rem; }
+.ll-text-muted { color: var(--ll-gray-400); }
+
+/* Buttons */
+.ll-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500;
+  border-radius: 0.5rem; border: none; cursor: pointer;
+  transition: all 0.15s ease; text-decoration: none;
+}
+.ll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ll-btn-primary { background: var(--ll-brand); color: white; }
+.ll-btn-primary:hover:not(:disabled) { background: var(--ll-brand-dark); }
+.ll-btn-secondary { background: white; color: var(--ll-gray-700); border: 1px solid var(--ll-gray-300); }
+.ll-btn-secondary:hover:not(:disabled) { background: var(--ll-gray-50); }
+.ll-btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; }
+
+/* Badges */
+.ll-badge {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.125rem 0.5rem; border-radius: 9999px;
+  font-size: 0.625rem; font-weight: 500;
+}
+.ll-badge-green { background: var(--ll-green-100); color: var(--ll-green-700); }
+.ll-badge-blue { background: var(--ll-blue-100); color: var(--ll-blue-700); }
+.ll-badge-yellow { background: var(--ll-yellow-100); color: var(--ll-yellow-700); }
+.ll-badge-purple { background: var(--ll-purple-100); color: var(--ll-purple-700); }
+.ll-badge-gray { background: var(--ll-gray-100); color: var(--ll-gray-600); }
+.ll-badge-red { background: var(--ll-brand-light); color: var(--ll-brand); }
+
+/* Inputs */
+.ll-input, .ll-select, .ll-textarea {
+  width: 100%; padding: 0.5rem 0.75rem;
+  font-size: 0.875rem; font-family: var(--ll-font);
+  border: 1px solid var(--ll-gray-300); border-radius: 0.5rem;
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  background: white; color: var(--ll-gray-900);
+}
+.ll-input:focus, .ll-select:focus, .ll-textarea:focus {
+  border-color: var(--ll-brand);
+  box-shadow: 0 0 0 2px rgba(232, 66, 47, 0.15);
+}
+.ll-textarea { min-height: 80px; resize: vertical; }
+.ll-input-error { border-color: var(--ll-brand); }
+.ll-error-text { font-size: 0.75rem; color: var(--ll-brand); margin-top: 0.25rem; }
+
+/* Toggle */
+.ll-toggle {
+  display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;
+}
+.ll-toggle input { display: none; }
+.ll-toggle-track {
+  width: 2.5rem; height: 1.375rem; background: var(--ll-gray-300);
+  border-radius: 9999px; position: relative; transition: background 0.2s;
+}
+.ll-toggle input:checked + .ll-toggle-track { background: var(--ll-brand); }
+.ll-toggle-thumb {
+  width: 1rem; height: 1rem; background: white; border-radius: 50%;
+  position: absolute; top: 0.1875rem; left: 0.1875rem; transition: transform 0.2s;
+}
+.ll-toggle input:checked + .ll-toggle-track .ll-toggle-thumb { transform: translateX(1.125rem); }
+
+/* Progress bar */
+.ll-progress { height: 0.5rem; background: var(--ll-gray-200); border-radius: 9999px; overflow: hidden; }
+.ll-progress-bar { height: 100%; background: var(--ll-brand); border-radius: 9999px; transition: width 0.3s ease; }
+
+/* Nav / Header */
+.ll-header {
+  background: white; border-bottom: 1px solid var(--ll-gray-200);
+  padding: 0.75rem 1.5rem;
+}
+.ll-nav { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--ll-gray-200); }
+.ll-nav-item {
+  padding: 0.5rem 1rem; font-size: 0.875rem; color: var(--ll-gray-500);
+  border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.15s;
+  background: none; border-top: none; border-left: none; border-right: none;
+  font-family: var(--ll-font);
+}
+.ll-nav-item:hover { color: var(--ll-gray-700); }
+.ll-nav-item.active { color: var(--ll-brand); border-bottom-color: var(--ll-brand); font-weight: 500; }
+
+/* Table */
+.ll-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.ll-table th {
+  text-align: left; padding: 0.625rem 0.75rem;
+  font-size: 0.75rem; font-weight: 500; color: var(--ll-gray-500);
+  background: var(--ll-gray-50); border-bottom: 1px solid var(--ll-gray-200);
+}
+.ll-table td {
+  padding: 0.625rem 0.75rem; border-bottom: 1px solid var(--ll-gray-100);
+  color: var(--ll-gray-700);
+}
+.ll-table tr:hover td { background: var(--ll-gray-50); }
+
+/* Sidebar */
+.ll-sidebar {
+  width: 280px; background: white; border-right: 1px solid var(--ll-gray-200);
+  min-height: 100vh; padding: 1.5rem 0;
+}
+.ll-sidebar-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.5rem 1.5rem; font-size: 0.875rem; color: var(--ll-gray-600);
+  cursor: pointer; transition: all 0.15s; border: none; background: none;
+  width: 100%; text-align: left; font-family: var(--ll-font);
+}
+.ll-sidebar-item:hover { background: var(--ll-gray-50); color: var(--ll-gray-900); }
+.ll-sidebar-item.active { background: var(--ll-brand-light); color: var(--ll-brand); font-weight: 500; }
+
+/* Save indicator */
+.ll-save-status {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  padding: 0.5rem 1rem; border-radius: 0.5rem;
+  font-size: 0.75rem; font-weight: 500;
+  background: white; border: 1px solid var(--ll-gray-200);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: opacity 0.3s;
+}
+.ll-save-status.saving { color: var(--ll-yellow-700); }
+.ll-save-status.saved { color: var(--ll-green-700); }
+
+/* Loading spinner */
+.ll-spinner {
+  display: inline-block; width: 1.5rem; height: 1.5rem;
+  border: 2px solid var(--ll-gray-200); border-top-color: var(--ll-brand);
+  border-radius: 50%; animation: ll-spin 0.6s linear infinite;
+}
+@keyframes ll-spin { to { transform: rotate(360deg); } }
+
+.ll-loading-page {
+  display: flex; align-items: center; justify-content: center;
+  padding: 4rem; flex-direction: column; gap: 1rem;
+}
+
+/* Glossary tooltip */
+.ll-glossary-term {
+  border-bottom: 1px dashed var(--ll-gray-400); cursor: help; position: relative;
+}
+.ll-glossary-tooltip {
+  position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  background: var(--ll-gray-900); color: white; padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem; font-size: 0.75rem; width: 250px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; z-index: 100;
+}
+.ll-glossary-term:hover .ll-glossary-tooltip { display: block; }
+
+/* Modal / Overlay */
+.ll-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center; z-index: 50;
+}
+.ll-modal {
+  background: white; border-radius: var(--ll-radius); padding: 1.5rem;
+  max-width: 480px; width: 90%; max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+/* Accordion */
+.ll-accordion-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1rem; cursor: pointer; background: var(--ll-gray-50);
+  border: 1px solid var(--ll-gray-200); border-radius: 0.5rem;
+  font-size: 0.875rem; font-weight: 500; color: var(--ll-gray-700);
+  transition: background 0.15s;
+}
+.ll-accordion-header:hover { background: var(--ll-gray-100); }
+.ll-accordion-body {
+  padding: 1rem; border: 1px solid var(--ll-gray-200);
+  border-top: none; border-radius: 0 0 0.5rem 0.5rem;
+  display: none;
+}
+.ll-accordion-body.open { display: block; }
+
+/* Comment thread */
+.ll-comment {
+  padding: 0.75rem; border-left: 2px solid var(--ll-gray-200);
+  margin-left: 0.5rem;
+}
+.ll-comment-reply { margin-left: 1.5rem; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ll-grid-2, .ll-grid-3 { grid-template-columns: 1fr; }
+  .ll-sidebar { display: none; }
+  .ll-container { padding: 1rem; }
+}
+  </style>
+</head>
+<body>
+  <div id="ll-app" class="ll-app"></div>
+
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <!-- Section Templates -->
+  <script>
+window.llSectionTemplates = {
+  tenancy: {
+    id: 'tenancy',
+    name: 'Tenancy Setup',
+    description: 'Program tenancy configuration and administrator setup',
+    phase: 'discovery',
+    questions: [
+      {
+        key: 'please_provide_the_logo_of_your',
+        label: 'Please provide the logo of your program or your company\'s logo in case your program doesn\'t have one yet.',
+        inputType: 'file',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'please_provide_the_email_addresses_at',
+        label: 'Please provide the email addresses (at least one) of the Program Administrators you would like us to invite for GRAVTY loyalty system access.',
+        inputType: 'text',
+        required: true,
+        pii: true,
+        validation: { pattern: '^[^@]+@[^@]+\\.[^@]+$', patternMessage: 'Enter a valid email address' },
+      },
+      {
+        key: 'admin_first_name',
+        label: 'Program Administrator - First Name',
+        inputType: 'text',
+        required: true,
+        pii: true,
+      },
+      {
+        key: 'admin_last_name',
+        label: 'Program Administrator - Last Name',
+        inputType: 'text',
+        required: true,
+        pii: true,
+      },
+      {
+        key: 'admin_email',
+        label: 'Program Administrator - Email',
+        inputType: 'text',
+        required: true,
+        pii: true,
+        validation: { pattern: '^[^@]+@[^@]+\\.[^@]+$', patternMessage: 'Enter a valid email address' },
+      },
+    ],
+  },
+
+  program: {
+    id: 'program',
+    name: 'Program Details',
+    description: 'Core program information including name, currency, and date formats',
+    phase: 'discovery',
+    questions: [
+      {
+        key: 'please_provide_the_name_of_your',
+        label: 'Please provide the name of your Loyalty Program.',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'Skywards Everyday',
+      },
+      {
+        key: 'please_provide_the_name_of_the',
+        label: 'Please provide the name of the company that owns the Program.',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'Emirates',
+      },
+      {
+        key: 'please_specify_the_industry_of_the',
+        label: 'Please specify the industry of the Host Program. (For Example: Retail, Airlines, Hospitality, Financial Services, Telco etc.)',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'Airlines',
+      },
+      {
+        key: 'please_provide_the_program_launch_date',
+        label: 'Please provide the Program Launch Date.',
+        inputType: 'date',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'what_is_the_programs_home_country',
+        label: 'What is the Program\'s Home Country?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'UAE',
+      },
+      {
+        key: 'what_is_the_preferred_date_format',
+        label: 'What is the preferred Date format to be followed for the entire program? 1. DD/MM/YYYY 2. MM/DD/YYYY',
+        inputType: 'select',
+        required: true,
+        pii: false,
+        placeholder: 'DD/MM/YYYY',
+      },
+      {
+        key: 'what_will_be_the_programs_home',
+        label: 'What will be the Program\'s Home Currency to be used for Financial Reporting ?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'AED',
+      },
+      {
+        key: 'do_you_reward_the_loyalty_currency',
+        label: 'Do you reward the Loyalty Currency in whole numbers or in decimals? If in decimals, please specify the decimal precision you want the system to use for display - Decimal Scale Options: 0, 1, 2, 3, and 4.',
+        inputType: 'number',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'please_specify_the_decimal_precision_you',
+        label: 'Please specify the decimal precision you want to use for calculation. - Decimal Scale Options: 0, 1, 2, 3, and 4.',
+        inputType: 'number',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'is_this_a_multi_national_program',
+        label: 'Is this a Multi-National Program?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'do_you_intend_to_launch_a',
+        label: 'Do you intend to launch a separate Program by country/geo, or will it be a single, global Program?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'Single Program',
+      },
+      {
+        key: 'please_provide_the_languages_you_would',
+        label: 'Please provide the languages you would like to configure the Program Data. Multiple languages can be specified (For Example: English, German, and Polish).',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'English',
+      },
+    ],
+  },
+
+  loyalty_accounts: {
+    id: 'loyalty_accounts',
+    name: 'Loyalty Accounts',
+    description: 'Loyalty currency accounts, tags, and expiration policies',
+    phase: 'discovery',
+    questions: [
+      {
+        key: 'currency_name',
+        label: 'Currency Name',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'description',
+        label: 'Description',
+        inputType: 'textarea',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'currency_type_for_rewarding_members_redemption',
+        label: 'Currency Type  - For Rewarding Members (Redemption Type) - For Recognizing Members via Tiers, Gamification Badges, etc. (Recognition Type) - Partner Program Currency (e.g. AAdvantageMiles in Hilton Honors Program)',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'currency_logo',
+        label: 'Currency Logo',
+        inputType: 'file',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'internal_cost_for_liability_calculation_applicable',
+        label: 'Internal Cost (for Liability Calculation) (Applicable only for Redemption Type loyalty account)',
+        inputType: 'currency',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'selling_price_base_price_for_selling',
+        label: 'Selling Price [Base Price for selling Currency to Partners] (Applicable only for Redemption Type loyalty account)',
+        inputType: 'currency',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'describe_your_expiration_policy_applicable_only',
+        label: 'Describe your Expiration Policy (Applicable only for Redemption Type loyalty account)',
+        inputType: 'textarea',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'do_you_want_balance_in_this',
+        label: 'Do you want balance in this Currency to be visible to Members? (Yes/No)',
+        inputType: 'boolean',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'do_you_want_to_have_a',
+        label: 'Do you want to have a withholding period for the redemption of earned points? (Yes/No)?',
+        inputType: 'boolean',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'define_the_withholding_period_for_redemption',
+        label: 'Define the withholding period for redemption of earned points? (In Number of Days)',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'do_you_want_to_micro_track',
+        label: 'Do you want to micro-track points earned by members using tags? If yes, please provide details. (Applicable only for Redemption Type loyalty account)',
+        inputType: 'textarea',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'do_you_want_to_expire_points',
+        label: 'Do you want to expire points at a tag level? If yes, please provide details. (Applicable only for Redemption Type loyalty account)',
+        inputType: 'textarea',
+        required: true,
+        pii: false,
+      },
+    ],
+  },
+
+  policies: {
+    id: 'policies',
+    name: 'Policy Setup & Currency Conversion',
+    description: 'Reward policies, redemption policies, membership policies, and currency conversion rates',
+    phase: 'discovery',
+    questions: [
+      {
+        key: 'do_you_expect_to_receive_member',
+        label: 'Do you expect to receive member transactions in multiple currencies? (Y/N).',
+        inputType: 'boolean',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'please_provide_all_the_currencies_that',
+        label: 'Please provide all the currencies that will be used in the Program.',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'do_you_have_a_tool_or',
+        label: 'Do you have a tool or system capable of periodically updating currency conversion rates in GRAVTY for each currency against the program home currency? e.g. Program Home Currency is USD and the customer transacts in CAD.',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'please_provide_the_initial_currency_conversion',
+        label: 'Please provide the initial currency conversion rates against the program currency. For example, if you have USD (Program Currency) and EUR as currencies, provide the conversion value of EUR against your Program currency USD (e.g., 1 USD = 0.93 Euro).',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'is_there_a_standard_reward_rate',
+        label: 'Is there a standard reward rate for each currency, such as earning 5 points for every 1 USD or 6 points for every 1 EURO?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'do_you_wish_to_impose_restrictions',
+        label: 'Do you wish to impose restrictions on rewards per activity, per day, or per month to prevent potential fraud or excess accrual due to human error? (This is a program-level setting that applies to all members.)',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'is_there_a_defined_redemption_rate',
+        label: 'Is there a defined redemption rate for each currency? If so, kindly provide the corresponding rates for each currency. The redemption rate refers to the monetary value of each point. e..g 1 Point = 0.1 USD, 1 Point = 8 INR.',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'do_you_wish_to_impose_restrictions_redemption',
+        label: 'Do you wish to impose restrictions on redemption per activity, per day, or per month to prevent potential fraud or excess points redemption due to human error? (This is a program-level setting that applies to all members.)',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'do_you_want_to_manage_the',
+        label: 'Do you want to manage the Membership Lifecycle by assigning specific Membership Stages to the Members?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'custom_membership_stage_name',
+        label: 'Custom Membership Stage Name',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'do_you_want_to_restrict_program',
+        label: 'Do you want to restrict Program Entitlements based on Program Membership Stage? (Access Rewards, Access Awards, Access Privileges, Access Offers, Access Login)',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'membership_stage',
+        label: 'Membership Stage',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'can_a_member_hold_multiple_loyalty',
+        label: 'Can a member hold multiple loyalty cards? (Y/N)',
+        inputType: 'boolean',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'do_you_allow_transferring_points_if',
+        label: 'Do you allow transferring points? If yes, please specify permissible transfers.',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'from_member_points',
+        label: 'From Member',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'do_you_allow_transferring_privileges_if',
+        label: 'Do you allow transferring Privileges? If yes, please mark permissible transfers.',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'from_member_privileges',
+        label: 'From Member',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'does_your_program_provide_family_memberships',
+        label: 'Does your Program provide Family Memberships/Householding? (Yes/No)',
+        inputType: 'boolean',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'in_case_of_family_memberships_is',
+        label: 'In case of Family Memberships, is there any restriction on the size of the Family?',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'contribution_to_family_head_do_the',
+        label: 'Contribution to Family Head Do the points earned by family members roll up to the Family Head? If yes: Is the contribution: -Policy-driven (fixed percentage defined by program), or -Member-driven (configurable by individual members)? If policy-driven, please specify the split:',
+        inputType: 'number',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'contribution_to_family_pool_do_the',
+        label: 'Contribution to Family Pool Do the points earned by family members roll up to the Family Pool? If yes: Is the contribution: -Policy-driven (fixed percentage defined by program), or -Member-driven (configurable by individual members)? If policy-driven, please specify the split:',
+        inputType: 'number',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'balance_handling_on_family_formation_when',
+        label: 'Balance Handling on Family Formation When a family is created: -Should the existing balance of the Family Head be transferred to the pool? -Should the existing balance of members joining the family be transferred to the pool?',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'redemption_rules_from_family_pool_are',
+        label: 'Redemption Rules from Family Pool Are family members allowed to redeem points from the family pool? If yes: Is redemption: -Open to all members, or -Restricted based on role (e.g., head vs member) or relationship level? Can redemption permissions be configured at: -Member level?',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'when_member_exit_from_family_if',
+        label: 'When Member Exit from Family If a member leaves the family: What happens to the points they contributed to the pool? -Remain in pool? -Returned to member?',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'complete_family_dissolution_if_all_members',
+        label: 'Complete Family Dissolution If all members leave the family: What should happen to the remaining pool balance? -Transferred to Family Head? -Distributed among members? -Expired/forfeited?',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'linking_unlinking_constraints_is_there_a',
+        label: 'Linking & Unlinking Constraints Is there a minimum cooling-off period: -For a member to unlink from a family? -For a member to join/link to another family?',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'governance_control_optional_are_there_any',
+        label: 'Governance & Control (Optional) Are there any additional rules or constraints required for: -Contribution limits? -Redemption limits? -Role-based privileges (e.g., Family Head overrides)? -Audit / visibility of contributions and redemptions?',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+    ],
+  },
+
+  sponsor_mgmt: {
+    id: 'sponsor_mgmt',
+    name: 'Sponsor Management',
+    description: 'Participating brands, partners, and sponsor hierarchy configuration',
+    phase: 'discovery',
+    questions: [
+      {
+        key: 'what_will_be_the_name_of',
+        label: 'What will be the name of the company hosting the Loyalty Program?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'FAS Rewards LLC',
+      },
+      {
+        key: 'multi_national_loyalty_program_sponsor_management',
+        label: 'Multi-National Loyalty Program Sponsor Management Related Questions',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'do_your_participating_brands_partners_operate',
+        label: 'Do your Participating Brands/Partners operate across multiple countries?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'are_the_program_offerings_rewards_redemptions',
+        label: 'Are the program offerings (rewards, redemptions, and recognition) common for partners/brands across geographies, or are these unique to each geography? For example, does Elite Plaza UK have different products compared to Elite Plaza US?',
+        inputType: 'text',
+        required: false,
+        pii: false,
+        placeholder: 'Not Applicable',
+      },
+      {
+        key: 'are_the_loyalty_promotions_offers_for',
+        label: 'Are the loyalty promotions/offers for a particular partner/brand country-specific or same across countries?',
+        inputType: 'text',
+        required: false,
+        pii: false,
+        placeholder: 'Not Applicable',
+      },
+      {
+        key: 'do_you_want_to_restrict_the',
+        label: 'Do you want to restrict the visibility of the program data (member engagement, promotions, and transactions) by geo for your participating brands/partners? For example, should the user of Elite Plaza UK not be able to view the program data for Elite Plaza US?',
+        inputType: 'text',
+        required: false,
+        pii: false,
+        placeholder: 'Not Applicable',
+      },
+      {
+        key: 'sponsor_modelling_related_questions',
+        label: 'Sponsor Modelling Related Questions',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'do_you_have_any_group_brands',
+        label: 'Do you have any Group Brands participating in your Loyalty Program?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'Yes',
+      },
+      {
+        key: 'do_you_have_any_third_party',
+        label: 'Do you have any Third-party Companies participating in your Loyalty Program?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'do_you_have_shopping_malls_participating',
+        label: 'Do you have Shopping Malls participating in the Loyalty Program? If yes, do other participating brands have locations that exist in the participating malls? For example, Elite Plaza (Retail), Fashion Show Mall, and Great Mall participate in your loyalty program. Elite Plaza has two locations - one i',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'Yes',
+      },
+      {
+        key: 'at_what_level_do_you_intend',
+        label: 'At what level do you intend to analyse Program Data? 1. Brand (Partner) Level globally 2. Brand (Partner) Level by Geo 3. Brand (Partner) Location Level',
+        inputType: 'select',
+        required: true,
+        pii: false,
+        placeholder: 'Partner Level and Partner Location Level',
+      },
+      {
+        key: 'please_provide_your_organizational_hierarchy_invol',
+        label: 'Please provide your organizational hierarchy involving the participating brands. [For better understanding, refer here]',
+        inputType: 'file',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'sponsor_reward_rate',
+        label: 'Sponsor Reward Rate',
+        inputType: 'text',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'does_the_sponsor_accrual_earn_rate_currency',
+        label: 'Does the Sponsor Accrual (Earn) Rate vary per Currency?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'does_the_sponsor_accrual_earn_rate_sponsor',
+        label: 'Does the Sponsor Accrual (Earn) Rate vary per Sponsor?',
+        inputType: 'text',
+        required: true,
+        pii: false,
+        placeholder: 'Yes',
+      },
+      {
+        key: 'please_provide_the_sponsor_details_using',
+        label: 'Please provide the Sponsor details using the sponsor details template.',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+      {
+        key: 'will_each_brand_partner_have_access',
+        label: 'Will each Brand/Partner have access to GRAVTY? (Yes/No). If Yes, please provide details of the Sponsor (Partner) level users of the program.',
+        inputType: 'boolean',
+        required: false,
+        pii: false,
+      },
+      {
+        key: 'please_provide_the_sponsor_locations_details',
+        label: 'Please provide the Sponsor Locations details using the sponsor location management template.',
+        inputType: 'text',
+        required: true,
+        pii: false,
+      },
+    ],
+  },
+};
+  </script>
+
+  <!-- Glossary -->
+  <script>
+window.llGlossary = [
+  {
+    term: 'Lookup Codes',
+    definition: 'Lookup codes are the list of values for a Lookup Data Type (dropdown) attribute in GRAVTY.',
+    example: 'Lookup Code values for Offer Category - Travel, Dining, Entertainment, etc.,',
+  },
+  {
+    term: 'Sponsor',
+    definition: '- An entity participating in the program, typically offering products and services for program members to earn loyalty rewards. \n- A sponsor may also serve as an acquisition vehicle for the program to enroll customers into the loyalty program.\n- "Sponsor" is also referred to as "Program Partner" or "Participant" or "Brand".',
+    example: 'A sponsor can be a \n- Brand or Line of Business (e.g. Elite Fashions, Elite Hypermarkets)\n- Partner (e.g. Oilex Petroleum)\n- Supplier (e.g. Levi\'s)\n',
+  },
+  {
+    term: 'Sponsor Location',
+    definition: 'A place of business of the sponsor. A sponsor location can be a physical location or an online location.',
+    example: 'A sponsor location can be \n- Physical Location: Elite Fashions @ Sanata Row, Cupertino, CA\n- Online Location: www.elitefashions.com',
+  },
+  {
+    term: 'Host Sponsor',
+    definition: 'The sponsor who operates and/or owns the program. Host Sponsor has the \'enterprise level\' visibility into the program.',
+    example: 'The host sponsor is typically the company that runs the loyalty program. e.g. Starbucks',
+  },
+  {
+    term: 'Acquiring Sponsor',
+    definition: 'The sponsor who is responsible for acquiring a new customer into the program.',
+    example: 'An acquiring sponsor can be any sponsor that brings in a new customer to the program. e.g. Zara, Aldo, etc.,',
+  },
+  {
+    term: 'Acquiring Sponsor Location',
+    definition: 'The sponsor location where a new customer is acquired by the sponsor.',
+    example: 'e.g. Aldo City Center Mall, Zara DLF Mall, etc., ',
+  },
+  {
+    term: 'Offer',
+    definition: '- An Offer in GRAVTY encapsulates the value proposition delivered to the customer in order to engage. A brand may engage customers to maximize customer\'s lifetime value and profitability.\n- Each offer may have specific short-term or long-term business goals that are set and tracked through specific Key Performance Indicators.\n- An "Offer" is also referred to as a  Loyalty "Promotions" or "Campaign".',
+    example: 'e.g.\n- Double Star Days - Earn twice the number of stars (points) on eligible purchases.\n- 10% back in points.\n- Refer a Friend, Get Rewarded!\n- Earn 10x Bonus Points on your Birthday.\n\n',
+  },
+  {
+    term: 'Reward Offer',
+    definition: 'Reward Offer is an Offer wherein members earn rewards (points, cash-back, experiential) by fulfilling an underlying call to action for engaging with a participating Brand.',
+    example: 'e.g. Double Star Days - Earn twice the number of stars (points) on eligible purchases.',
+  },
+  {
+    term: 'Award Offer',
+    definition: 'Award Offer is an Offer wherein members can redeem their Points or other loyalty assets earned for products/services/special moments offered by the Program.',
+    example: 'e.g. Redeeming Points for a ticket at AMC Theatres. ',
+  },
+  {
+    term: 'Privilege Offer',
+    definition: 'Privilege Offer is an Offer wherein the Program can grant gifts or entitlements to members without any pre-condition or call to action. These could be Surprise & Delight or even Service Recovery strategies.',
+    example: 'E.g., Free parking for members who have transacted with Panda Hypermarket at least three times a week for 4 continuous weeks .',
+  },
+  {
+    term: 'Deal Offer',
+    definition: 'Deal Offer is applicable to all the targeted Members without any individual privilege assignment. There is no call to action from the Member\'s end to receive the deal. Deal Offers are used for information purposes and can be rendered on 3rd party platforms like Mobile Apps, websites, etc. ',
+    example: 'e.g.\n- Flat 50% sale at Aldo stores.\n- Double the Joy: Buy One, Get One Free!\n',
+  },
+  {
+    term: 'BIT',
+    definition: '- BIT represents an instance of customer\'s engagement with the brand, which may comprise a specific Transaction, Behavior or Influence or a combination of all.\n- BIT" is a modern equivalent of "Transaction" or "Activity". ',
+    example: 'For example, Ms. Martha Summers shops Haircare products and Accessories, online on Luxe Retail\'s eCommerce App at 3 PM on Wednesday and pays $360 using her co-branded Finex card, and shares her purchase on Facebook.',
+  },
+  {
+    term: 'BIT Value',
+    definition: '- BIT Value: represents 3-dimensional customer value comprising\n  - Behavior value\n  - Influence value\n  - Transaction value\n- "BIT Value\u00ae" is a modern equivalent of Customer Value.',
+    example: 'e.g.\n- Payment Method is co-branded Finex card: Behaviour Value +50\n- Shares her purchase on Facebook: Influence Value +2000\n- Amount Spent: Transaction Value: BIT Amount x 1 = 360x1 = +360',
+  },
+  {
+    term: 'Loyalty Account',
+    definition: 'A Loyalty Account represents a specific program currency. A Loyalty program can have multiple Loyalty Accounts, each belonging to one of the following three types, based on the purpose they are intended to serve:\n- Redemption Account\n- Recognition Account\n- External Account\nEach Loyalty Account definition involves setting up an expiration policy, financial parameters (for liability estimation), escrow duration if applicable, visibility controls, and one or more Tags.',
+    example: 'e.g. Redemption Loyalty Account (Terminus Miles), Recognition Loyalty Account (Terminus Credits), etc., ',
+  },
+  {
+    term: 'Redemption Account',
+    definition: 'A redemption loyalty account is a designated member account enabling members to accrue points, which can subsequently be redeemed for various benefits, including purchases, privileges (vouchers), and more.',
+    example: 'e.g. Terminus Miles or Terminus BizMiles.',
+  },
+  {
+    term: 'Recognition Account',
+    definition: 'A recognition loyalty account is a dedicated member account for acknowledging and appreciating members. Member progression between tiers is determined by the points accumulated in the recognition account.',
+    example: 'e.g. Terminus Credits',
+  },
+  {
+    term: 'External Account',
+    definition: 'An external loyalty account is a dedicated member account that allows members to earn rewards in the program currency of a 3rd Party or partner loyalty program.',
+    example: 'e.g. Finex Coins, AirPoints.',
+  },
+  {
+    term: 'Tags',
+    definition: 'For each Loyalty Account, program users can setup one or more Tags (e.g. Base, Bonus, Christmas, Experience, Promotional, Event, etc.) to \n- Identify or infer Source, Activity, Timing, Motivation, or anything that the Program wants to \'Micro-track\'\n- Drive customer behavior (RFM) and \n- Have superior control over program liability.\n- Implement differential billing (for partners) by Tags\nEach Tag can follow a specific expiration policy.\n\nNote: Tags are supported only by Redemption and Recognition accounts.',
+    example: 'e.g. \n- 90 days Tag - Points earned in this tag expire in 90 days.\n- Birthday Bonus Tag - Points rewarded for Birthdays are issued using this tag.\n- Bonus Tag - Bonus points are rewarded in this tag.',
+  },
+  {
+    term: 'Zero-Party Data',
+    definition: 'Information that the member intentionally and proactively shares with the brand or company. This could include preferences, interests, communication consents, or personal details.',
+    example: 'Zero Party Data\n- Profile attributes (e.g., Date of Anniversary, Country of Residence, Member Type)\n- Intent-data (e.g., are you planning to travel Europe in the next 3-months?)',
+  },
+  {
+    term: 'First-Party Data',
+    definition: 'Data collected directly by the brand or company from its own member interactions. This includes app usage, purchase history, etc.,',
+    example: 'First Party Data\n- Loyalty Attributes (e.g., Tier Status, Points balance, Membership Stage, etc.,)\n- Tracked attributes (e.g., Total spend in the week of Christmas 2023, etc.,)\n- Derived attributes (e.g., Age of the Member, Days since last activity, etc.,)\n- Analyzed attributes (e.g., Quantum Score, BIT Value\u00ae, Influence Value, Relationship Cost, specific Persona or Cluster). These can be natively determined in GRAVTY (using GRAVTY Intelligence) or can be imported from one or more external sources.\n- Transactional attributes (e.g., Tier, Last Accrual Date, Points balance) so on and so forth\n- AI-predicted attributes (e.g., Retention Score etc.)\n',
+  },
+  {
+    term: 'Second-Party Data',
+    definition: 'Another company\'s first-party data that is shared or sold directly to the brand or company. It comes from a trusted source and maintains a direct relationship with the original data collector.',
+    example: 'Demographic data from a trusted partner, purchase history data from another retailer, or website visitor data from a data exchange.',
+  },
+  {
+    term: 'Third-Party Data',
+    definition: 'Data aggregated from numerous sources, often by data brokers, and then sold to businesses. It lacks the direct connection and quality control that first- and second-party data have.',
+    example: 'Demographic data, browsing behavior on other websites, or purchase history from unknown sources.',
+  },
+  {
+    term: 'Program Level Attributes',
+    definition: 'Captured from a customer at the time of enrollment or throughout the membership lifecycle, available across the programs, for all promotions, marketing campaigns.',
+    example: 'e.g. Gender, Name, Date of Birth, Country of Residence, Social ID, etc. ',
+  },
+  {
+    term: 'Offer Level Attributes',
+    definition: 'Offer level attributes (MTOs) are configured for an Offer to track specific member behavior and are available only within the context of the Offer.',
+    example: 'e.g., Amount spent and paid using the co-brand card, on Cosmetics during Happy Hours at Elite Fashions during Summer Bonanza offer (first party), planning to travel to Europe in the next 3 months (zero parties).',
+  },
+  {
+    term: '1-Dimensional MTO (Member Tracker at Offer Level)',
+    definition: '1-Dimensional MTO is a simple counter or flag.',
+    example: 'For example: # Amount spent by a member on online shopping on Apparels in 2021.',
+  },
+  {
+    term: '2-Dimensional MTO',
+    definition: '2-Dimensional MTO allows behavior tracking across 2-dimensions for each and every member, enabling much deeper and innovative promotional strategies.',
+    example: 'For example: #Amount spent at various Aldo Stores by a member:\n- Aldo, Santana Row, Cupertino, CA - $1,200\n- Aldo, Times Square, Manhattan, NY - $5,000\n- Aldo, Camps Corner, Columbus OH - $2,400\n\nThis allows programs to implement sophisticated promotions/game mechanics, such as\n- Reward members on every $5,000 spent at the same store of Aldo (or across all Accessories brands participating in the Club Apparel loyalty program).\n- Reward members when they have done business with any 3 unique stores of Aldo\n',
+  },
+  {
+    term: 'Activity Level Attributes',
+    definition: 'Activity Level Attributes are configured for an Activity to track specific member behavior and are available only within the Activity (Transaction) context.',
+    example: 'e.g. Aggregate spend on Lighting and Mirrors, Aggregate points earned from all applicable promotions (offers).',
+  },
+  {
+    term: 'AI Predicted and Analytics "Write-Back" Attributes',
+    definition: 'Generated natively or imported from 3rd party source, available across the programs for all promotions and marketing campaigns.',
+    example: 'e.g. Persona, Spend Objective, Sentiment Score',
+  },
+  {
+    term: 'Privilege',
+    definition: 'A Privilege (Voucher) in GRAVTY is a non-points based value-proposition that can be\n- Earned as a reward\n- Purchased/Redeemed as an Award\n- Granted as a Privilege',
+    example: 'A Privilege can be a\n- Product or Package\n- Service\n- Experience\n- Sweepstake Entry\n- Discount\n- Exclusive Access/Membership',
+  },
+  {
+    term: 'External Privilege',
+    definition: 'The external Privileges feature in GRAVTY allows program users to source special benefits from any 3rd party and issue it as a Privilege by uploading external codes (sourced from the 3rd party). Qualifying members receive a code, which they can use to avail the Privilege directly with the 3rd party. Code is automatically authorized by the 3rd party (since issued by them).',
+    example: 'e.g., 20% off at Jiffy Lube on Oil change, 3-Month Hulu Subscription, Business Class Upgrade on Etihad, Breakfast with the Stars @ Meydan',
+  },
+];
+  </script>
+
+  <!-- Supabase Client -->
+  <script>
+/**
+ * LoyaltyLift — Supabase Client
+ * Handles auth, API calls, and real-time subscriptions
+ */
+
+const LL_CONFIG = {
+  supabaseUrl: 'https://anbavrtkyjloxtncnkzm.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuYmF2cnRreWpsb3h0bmNua3ptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MjUwNzAsImV4cCI6MjA5MTMwMTA3MH0.qLZdjKvCrOu4MbUQOOekIcUzgA59qOXOoluFLFjYJqE',
+};
+
+class LoyaltyLiftClient {
+  constructor() {
+    this._supabase = null;
+    this._user = null;
+    this._profile = null;
+    this._initPromise = null;
+  }
+
+  get supabase() {
+    if (!this._supabase) {
+      this._supabase = window.supabase.createClient(
+        LL_CONFIG.supabaseUrl,
+        LL_CONFIG.supabaseAnonKey
+      );
+    }
+    return this._supabase;
+  }
+
+  async init() {
+    if (this._initPromise) return this._initPromise;
+    this._initPromise = this._doInit();
+    return this._initPromise;
+  }
+
+  async _doInit() {
+    const { data: { session } } = await this.supabase.auth.getSession();
+    if (session) {
+      this._user = session.user;
+      await this._loadProfile();
+    }
+    // Listen for auth changes
+    this.supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        this._user = session.user;
+        await this._loadProfile();
+      } else {
+        this._user = null;
+        this._profile = null;
+      }
+      window.dispatchEvent(new CustomEvent('ll-auth-change', { detail: { user: this._user, profile: this._profile } }));
+    });
+    return { user: this._user, profile: this._profile };
+  }
+
+  async _loadProfile() {
+    if (!this._user) return;
+    const { data } = await this.supabase
+      .from('profiles')
+      .select('id, email, full_name, avatar_url, role')
+      .eq('id', this._user.id)
+      .maybeSingle();
+    this._profile = data;
+  }
+
+  get user() { return this._user; }
+  get profile() { return this._profile; }
+  get isAuthenticated() { return !!this._user; }
+  get isLjiAdmin() { return this._profile?.role === 'lji_admin'; }
+  get isLjiMember() { return ['lji_admin', 'lji_member'].includes(this._profile?.role); }
+
+  // --- Auth ---
+  async signInWithMagicLink(email) {
+    const { error } = await this.supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin + window.location.pathname },
+    });
+    if (error) throw error;
+  }
+
+  async signOut() {
+    await this.supabase.auth.signOut();
+    this._user = null;
+    this._profile = null;
+  }
+
+  // --- Projects ---
+  async listProjects() {
+    const { data, error } = await this.supabase
+      .from('projects')
+      .select(`
+        id, program_name, phase, status, created_at, updated_at,
+        client_org:client_organizations(id, name, industry, logo_url),
+        sections:project_sections(id, section_id, status, phase, visible)
+      `)
+      .order('updated_at', { ascending: false });
+    if (error) { console.error('listProjects:', error); throw error; }
+    return data.map(p => ({
+      ...p,
+      progress: this._calcProgress(p.sections),
+    }));
+  }
+
+  async getProject(projectId) {
+    const { data, error } = await this.supabase
+      .from('projects')
+      .select(`
+        id, program_name, phase, status, created_at, updated_at,
+        client_org:client_organizations(id, name, industry, country, logo_url),
+        sections:project_sections(id, section_id, status, phase, visible, owner_id, completed_at),
+        members:project_members(user_id, role, joined_at)
+      `)
+      .eq('id', projectId)
+      .single();
+    if (error) { console.error('getProject:', error); throw error; }
+    data.progress = this._calcProgress(data.sections);
+    return data;
+  }
+
+  async createProject({ orgName, industry, country, programName }) {
+    // Create client org
+    const { data: org, error: orgError } = await this.supabase
+      .from('client_organizations')
+      .insert({ name: orgName, industry, country })
+      .select('id')
+      .single();
+    if (orgError) { console.error('createOrg:', orgError); throw orgError; }
+
+    // Create project
+    const { data: project, error: projError } = await this.supabase
+      .from('projects')
+      .insert({
+        client_org_id: org.id,
+        program_name: programName,
+        lji_lead_id: this._user.id,
+      })
+      .select('id')
+      .single();
+    if (projError) { console.error('createProject:', projError); throw projError; }
+
+    // Add current user as project member
+    await this.supabase
+      .from('project_members')
+      .insert({ project_id: project.id, user_id: this._user.id, role: 'lji_admin' });
+
+    // Create all sections from template
+    const sections = this._getSectionTemplate();
+    const sectionRows = sections.map(s => ({
+      project_id: project.id,
+      section_id: s.id,
+      phase: s.phase,
+      visible: !s.conditional, // conditional sections start hidden
+    }));
+    await this.supabase.from('project_sections').insert(sectionRows);
+
+    return project;
+  }
+
+  // --- Sections ---
+  async getSectionResponses(projectId, sectionId) {
+    const [responsesResult, piiResult, selectionsResult, entityResult] = await Promise.all([
+      this.supabase
+        .from('responses')
+        .select('id, question_key, value, responded_by, updated_at')
+        .eq('project_id', projectId)
+        .eq('section_id', sectionId),
+      this.supabase
+        .from('responses_pii')
+        .select('id, question_key, updated_at')
+        .eq('project_id', projectId)
+        .eq('section_id', sectionId),
+      this.supabase
+        .from('data_model_selections')
+        .select('id, attribute_name, is_required, is_custom, config')
+        .eq('project_id', projectId)
+        .eq('section_id', sectionId),
+      this.supabase
+        .from('entity_rows')
+        .select('id, row_index, data')
+        .eq('project_id', projectId)
+        .eq('section_id', sectionId)
+        .order('row_index'),
+    ]);
+
+    return {
+      responses: responsesResult.data || [],
+      piiResponses: piiResult.data || [],
+      dataModelSelections: selectionsResult.data || [],
+      entityRows: entityResult.data || [],
+    };
+  }
+
+  async saveResponse(projectId, sectionId, questionKey, value) {
+    const { error } = await this.supabase
+      .from('responses')
+      .upsert({
+        project_id: projectId,
+        section_id: sectionId,
+        question_key: questionKey,
+        value: JSON.stringify(value),
+        responded_by: this._user.id,
+      }, { onConflict: 'project_id,section_id,question_key' });
+    if (error) { console.error('saveResponse:', error); throw error; }
+
+    // Update section status to in_progress if not_started
+    await this.supabase
+      .from('project_sections')
+      .update({ status: 'in_progress' })
+      .eq('project_id', projectId)
+      .eq('section_id', sectionId)
+      .eq('status', 'not_started');
+
+    // Log activity
+    await this._logActivity(projectId, 'response_updated', { section_id: sectionId, question_key: questionKey });
+  }
+
+  async submitSection(projectId, sectionId) {
+    const { error } = await this.supabase
+      .from('project_sections')
+      .update({ status: 'in_review' })
+      .eq('project_id', projectId)
+      .eq('section_id', sectionId);
+    if (error) { console.error('submitSection:', error); throw error; }
+    await this._logActivity(projectId, 'section_submitted', { section_id: sectionId });
+  }
+
+  async approveSection(projectId, sectionId) {
+    const { error } = await this.supabase
+      .from('project_sections')
+      .update({ status: 'approved', completed_at: new Date().toISOString() })
+      .eq('project_id', projectId)
+      .eq('section_id', sectionId);
+    if (error) { console.error('approveSection:', error); throw error; }
+    await this._logActivity(projectId, 'section_approved', { section_id: sectionId });
+  }
+
+  // --- Comments ---
+  async getComments(projectId, sectionId) {
+    let query = this.supabase
+      .from('comments')
+      .select('id, section_id, question_key, body, author_id, parent_id, created_at')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: true });
+    if (sectionId) query = query.eq('section_id', sectionId);
+    const { data, error } = await query;
+    if (error) { console.error('getComments:', error); throw error; }
+    return data;
+  }
+
+  async addComment(projectId, sectionId, body, questionKey, parentId) {
+    const { data, error } = await this.supabase
+      .from('comments')
+      .insert({
+        project_id: projectId,
+        section_id: sectionId,
+        question_key: questionKey || null,
+        body,
+        author_id: this._user.id,
+        parent_id: parentId || null,
+      })
+      .select('id')
+      .single();
+    if (error) { console.error('addComment:', error); throw error; }
+    await this._logActivity(projectId, 'comment_added', { section_id: sectionId, question_key: questionKey });
+    return data;
+  }
+
+  // --- Entity Rows ---
+  async addEntityRow(projectId, sectionId, rowData) {
+    // Get max row_index
+    const { data: existing } = await this.supabase
+      .from('entity_rows')
+      .select('row_index')
+      .eq('project_id', projectId)
+      .eq('section_id', sectionId)
+      .order('row_index', { ascending: false })
+      .limit(1);
+    const nextIndex = (existing?.[0]?.row_index ?? -1) + 1;
+    const { data, error } = await this.supabase
+      .from('entity_rows')
+      .insert({ project_id: projectId, section_id: sectionId, row_index: nextIndex, data: rowData })
+      .select('id, row_index, data')
+      .single();
+    if (error) { console.error('addEntityRow:', error); throw error; }
+    return data;
+  }
+
+  async updateEntityRow(rowId, rowData) {
+    const { error } = await this.supabase
+      .from('entity_rows')
+      .update({ data: rowData })
+      .eq('id', rowId);
+    if (error) { console.error('updateEntityRow:', error); throw error; }
+  }
+
+  async deleteEntityRow(rowId) {
+    const { error } = await this.supabase
+      .from('entity_rows')
+      .delete()
+      .eq('id', rowId);
+    if (error) { console.error('deleteEntityRow:', error); throw error; }
+  }
+
+  // --- Data Model Selections ---
+  async saveDataModelSelection(projectId, sectionId, attributeName, isRequired, isCustom, config) {
+    const { error } = await this.supabase
+      .from('data_model_selections')
+      .upsert({
+        project_id: projectId,
+        section_id: sectionId,
+        attribute_name: attributeName,
+        is_required: isRequired,
+        is_custom: isCustom || false,
+        config: config || null,
+      }, { onConflict: 'project_id,section_id,attribute_name' });
+    if (error) { console.error('saveDataModelSelection:', error); throw error; }
+  }
+
+  // --- File Uploads ---
+  async uploadFile(projectId, sectionId, questionKey, file) {
+    const path = `${projectId}/${sectionId}/${questionKey}/${file.name}`;
+    const { error: uploadError } = await this.supabase.storage
+      .from('project-files')
+      .upload(path, file, { upsert: true });
+    if (uploadError) { console.error('uploadFile:', uploadError); throw uploadError; }
+
+    const { data, error } = await this.supabase
+      .from('file_uploads')
+      .insert({
+        project_id: projectId,
+        section_id: sectionId,
+        question_key: questionKey,
+        file_name: file.name,
+        storage_path: path,
+        mime_type: file.type,
+        uploaded_by: this._user.id,
+      })
+      .select('id, file_name, storage_path')
+      .single();
+    if (error) { console.error('insertFileRecord:', error); throw error; }
+    return data;
+  }
+
+  // --- Invitations ---
+  async inviteClient(projectId, email, role) {
+    // Send magic link
+    await this.signInWithMagicLink(email);
+    // Pre-create project membership
+    // Note: actual membership will be linked after user signs in
+    return { invited: email };
+  }
+
+  // --- Phase Management ---
+  async advancePhase(projectId) {
+    const project = await this.getProject(projectId);
+    const phases = ['discovery', 'design', 'launch'];
+    const currentIdx = phases.indexOf(project.phase);
+    if (currentIdx >= phases.length - 1) throw new Error('Already at final phase');
+    const nextPhase = phases[currentIdx + 1];
+
+    const { error } = await this.supabase
+      .from('projects')
+      .update({ phase: nextPhase })
+      .eq('id', projectId);
+    if (error) { console.error('advancePhase:', error); throw error; }
+
+    // Make next phase sections visible
+    await this.supabase
+      .from('project_sections')
+      .update({ visible: true })
+      .eq('project_id', projectId)
+      .eq('phase', nextPhase);
+
+    await this._logActivity(projectId, 'phase_advanced', { from: project.phase, to: nextPhase });
+  }
+
+  // --- Activity Log ---
+  async getActivityLog(projectId, limit) {
+    const { data, error } = await this.supabase
+      .from('activity_log')
+      .select('id, user_id, action, metadata, created_at')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false })
+      .limit(limit || 50);
+    if (error) { console.error('getActivityLog:', error); throw error; }
+    return data;
+  }
+
+  async _logActivity(projectId, action, metadata) {
+    await this.supabase.from('activity_log').insert({
+      project_id: projectId,
+      user_id: this._user?.id,
+      action,
+      metadata,
+    });
+  }
+
+  // --- Helpers ---
+  _calcProgress(sections) {
+    if (!sections?.length) return { total: 0, completed: 0, pct: 0 };
+    const visible = sections.filter(s => s.visible);
+    const completed = visible.filter(s => s.status === 'approved').length;
+    return {
+      total: visible.length,
+      completed,
+      pct: visible.length ? Math.round((completed / visible.length) * 100) : 0,
+    };
+  }
+
+  _getSectionTemplate() {
+    return [
+      // Phase 1: Discovery
+      { id: 'tenancy', phase: 'discovery', conditional: false },
+      { id: 'program', phase: 'discovery', conditional: false },
+      { id: 'loyalty_accounts', phase: 'discovery', conditional: false },
+      { id: 'policies', phase: 'discovery', conditional: false },
+      { id: 'sponsor_mgmt', phase: 'discovery', conditional: false },
+      { id: 'member_enrollment', phase: 'discovery', conditional: false },
+      { id: 'data_model_questions', phase: 'discovery', conditional: false },
+      { id: 'tier_mgmt', phase: 'discovery', conditional: true },
+      { id: 'accrual_redemption', phase: 'discovery', conditional: false },
+      { id: 'offers_overview', phase: 'discovery', conditional: false },
+      { id: 'data_migration', phase: 'discovery', conditional: false },
+      { id: 'marketing_connect', phase: 'discovery', conditional: false },
+      // Phase 2: Design
+      { id: 'member_data_model', phase: 'design', conditional: false },
+      { id: 'sponsor_data_model', phase: 'design', conditional: false },
+      { id: 'sponsor_details', phase: 'design', conditional: false },
+      { id: 'location_data_model', phase: 'design', conditional: false },
+      { id: 'location_details', phase: 'design', conditional: false },
+      { id: 'product_data_model', phase: 'design', conditional: false },
+      { id: 'product_details', phase: 'design', conditional: false },
+      { id: 'bit_data_model', phase: 'design', conditional: false },
+      { id: 'payment_data_model', phase: 'design', conditional: false },
+      { id: 'offer_data_model', phase: 'design', conditional: false },
+      { id: 'offer_kpi', phase: 'design', conditional: false },
+      { id: 'custom_attributes', phase: 'design', conditional: false },
+      { id: 'batches', phase: 'design', conditional: false },
+      { id: 'role_mgmt', phase: 'design', conditional: false },
+      { id: 'user_mgmt', phase: 'design', conditional: false },
+      { id: 'member_services', phase: 'design', conditional: false },
+      { id: 'marketing_use_cases', phase: 'design', conditional: false },
+      { id: 'finance', phase: 'design', conditional: false },
+      { id: 'dwh', phase: 'design', conditional: false },
+      // Phase 3: Launch
+      { id: 'vertical_entities', phase: 'launch', conditional: true },
+      { id: 'aisense', phase: 'launch', conditional: true },
+      { id: 'airecommend', phase: 'launch', conditional: true },
+      { id: 'airetain', phase: 'launch', conditional: true },
+      { id: 'aitrust', phase: 'launch', conditional: true },
+      { id: 'airport_entity', phase: 'launch', conditional: true },
+      { id: 'distance_table', phase: 'launch', conditional: true },
+      { id: 'cobranded_cards', phase: 'launch', conditional: true },
+      { id: 'subscription', phase: 'launch', conditional: true },
+      { id: 'retro_request', phase: 'launch', conditional: true },
+      { id: 'airline_redemption', phase: 'launch', conditional: true },
+    ];
+  }
+}
+
+// Global instance
+window.llClient = new LoyaltyLiftClient();
+  </script>
+
+  <!-- Form Engine -->
+  <script>
+/**
+ * LoyaltyLift — Form Engine
+ * Renders questions dynamically, handles auto-save, conditional visibility, validation
+ */
+
+class LLFormEngine {
+  constructor(containerId) {
+    this.container = document.getElementById(containerId);
+    this.projectId = null;
+    this.sectionId = null;
+    this.sectionConfig = null;
+    this.responses = {};
+    this.saveTimers = {};
+    this.saveStatus = null;
+    this._createSaveIndicator();
+  }
+
+  _createSaveIndicator() {
+    this.saveStatus = document.createElement('div');
+    this.saveStatus.className = 'll-save-status saved';
+    this.saveStatus.style.opacity = '0';
+    this.saveStatus.textContent = 'Saved';
+    document.body.appendChild(this.saveStatus);
+  }
+
+  async load(projectId, sectionId, sectionConfig) {
+    this.projectId = projectId;
+    this.sectionId = sectionId;
+    this.sectionConfig = sectionConfig;
+
+    // Load existing responses
+    this.container.innerHTML = '<div class="ll-loading-page"><div class="ll-spinner"></div><span class="ll-text-sm ll-text-muted">Loading section...</span></div>';
+    const data = await window.llClient.getSectionResponses(projectId, sectionId);
+    this.responses = {};
+    data.responses.forEach(r => {
+      try { this.responses[r.question_key] = JSON.parse(r.value); }
+      catch { this.responses[r.question_key] = r.value; }
+    });
+
+    this._render();
+  }
+
+  _render() {
+    const section = this.sectionConfig;
+    let html = `
+      <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom: 1.5rem;">
+        <div>
+          <h2 class="ll-h2" style="margin-bottom: 0.25rem;">${this._esc(section.name)}</h2>
+          <p class="ll-subtitle">${this._esc(section.description || '')}</p>
+        </div>
+        <div class="ll-flex ll-gap-2">
+          <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llFormEngine.onBack()">Back</button>
+          <button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-submit-btn" onclick="llFormEngine.onSubmit()">Submit for Review</button>
+        </div>
+      </div>
+      <div class="ll-card" style="padding: 1.5rem;">
+    `;
+
+    section.questions.forEach((q, i) => {
+      const visible = this._checkVisibility(q);
+      html += `<div class="ll-question" id="ll-q-${q.key}" style="margin-bottom: 1.5rem; ${visible ? '' : 'display:none;'}" data-key="${q.key}">`;
+      html += this._renderQuestion(q, i);
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+    this.container.innerHTML = html;
+    this._bindEvents();
+  }
+
+  _renderQuestion(q, index) {
+    const value = this.responses[q.key];
+    const reqMark = q.required ? '<span style="color:var(--ll-brand);">*</span>' : '';
+    let label = `<label class="ll-label">${this._esc(q.label)} ${reqMark}</label>`;
+
+    if (q.helpText) {
+      label += `<p class="ll-text-xs ll-text-muted" style="margin-bottom: 0.5rem;">${this._esc(q.helpText)}</p>`;
+    }
+
+    if (q.glossaryTerm) {
+      label = `<label class="ll-label">
+        ${this._esc(q.label)} ${reqMark}
+        <span class="ll-glossary-term">${this._esc(q.glossaryTerm)}
+          <span class="ll-glossary-tooltip">${this._getGlossaryDef(q.glossaryTerm)}</span>
+        </span>
+      </label>`;
+    }
+
+    let input = '';
+    const strVal = value != null ? String(value) : '';
+
+    switch (q.inputType) {
+      case 'text':
+        input = `<input type="text" class="ll-input" data-key="${q.key}" value="${this._escAttr(strVal)}" placeholder="${this._escAttr(q.placeholder || '')}" />`;
+        break;
+
+      case 'textarea':
+        input = `<textarea class="ll-textarea" data-key="${q.key}" placeholder="${this._escAttr(q.placeholder || '')}">${this._esc(strVal)}</textarea>`;
+        break;
+
+      case 'number':
+        input = `<input type="number" class="ll-input" data-key="${q.key}" value="${this._escAttr(strVal)}" placeholder="${this._escAttr(q.placeholder || '')}" ${q.validation?.min != null ? `min="${q.validation.min}"` : ''} ${q.validation?.max != null ? `max="${q.validation.max}"` : ''} />`;
+        break;
+
+      case 'date':
+        input = `<input type="date" class="ll-input" data-key="${q.key}" value="${this._escAttr(strVal)}" />`;
+        break;
+
+      case 'currency':
+        input = `<div class="ll-flex ll-gap-2">
+          <select class="ll-select" style="width:100px;" data-key="${q.key}_currency" onchange="llFormEngine._onCurrencyChange('${q.key}', this)">
+            <option value="USD" ${(this.responses[q.key + '_currency'] || 'USD') === 'USD' ? 'selected' : ''}>USD</option>
+            <option value="EUR" ${this.responses[q.key + '_currency'] === 'EUR' ? 'selected' : ''}>EUR</option>
+            <option value="GBP" ${this.responses[q.key + '_currency'] === 'GBP' ? 'selected' : ''}>GBP</option>
+            <option value="AED" ${this.responses[q.key + '_currency'] === 'AED' ? 'selected' : ''}>AED</option>
+            <option value="SAR" ${this.responses[q.key + '_currency'] === 'SAR' ? 'selected' : ''}>SAR</option>
+            <option value="INR" ${this.responses[q.key + '_currency'] === 'INR' ? 'selected' : ''}>INR</option>
+          </select>
+          <input type="number" class="ll-input" data-key="${q.key}" value="${this._escAttr(strVal)}" placeholder="0.00" step="0.01" />
+        </div>`;
+        break;
+
+      case 'select':
+        input = `<select class="ll-select" data-key="${q.key}">
+          <option value="">Select...</option>
+          ${(q.options || []).map(o => `<option value="${this._escAttr(o.value)}" ${strVal === o.value ? 'selected' : ''}>${this._esc(o.label)}</option>`).join('')}
+        </select>`;
+        break;
+
+      case 'multi_select':
+        input = `<div class="ll-flex ll-flex-col ll-gap-2" data-key="${q.key}" data-type="multi_select">
+          ${(q.options || []).map(o => {
+            const checked = Array.isArray(value) && value.includes(o.value);
+            return `<label class="ll-flex ll-items-center ll-gap-2" style="font-size:0.875rem;">
+              <input type="checkbox" value="${this._escAttr(o.value)}" ${checked ? 'checked' : ''} onchange="llFormEngine._onMultiSelect('${q.key}')" />
+              ${this._esc(o.label)}
+            </label>`;
+          }).join('')}
+        </div>`;
+        break;
+
+      case 'boolean':
+        input = `<div class="ll-flex ll-gap-4">
+          <label class="ll-toggle">
+            <input type="radio" name="ll-bool-${q.key}" value="true" data-key="${q.key}" ${strVal === 'true' ? 'checked' : ''} />
+            <span style="font-size:0.875rem; cursor:pointer; padding:0.375rem 1rem; border-radius:0.375rem; border:1px solid var(--ll-gray-300); ${strVal === 'true' ? 'background:var(--ll-brand); color:white; border-color:var(--ll-brand);' : ''}">Yes</span>
+          </label>
+          <label class="ll-toggle">
+            <input type="radio" name="ll-bool-${q.key}" value="false" data-key="${q.key}" ${strVal === 'false' ? 'checked' : ''} />
+            <span style="font-size:0.875rem; cursor:pointer; padding:0.375rem 1rem; border-radius:0.375rem; border:1px solid var(--ll-gray-300); ${strVal === 'false' ? 'background:var(--ll-gray-600); color:white; border-color:var(--ll-gray-600);' : ''}">No</span>
+          </label>
+        </div>`;
+        break;
+
+      case 'file':
+        input = `<div>
+          <input type="file" id="ll-file-${q.key}" style="display:none;" onchange="llFormEngine._onFileSelect('${q.key}', this)" />
+          <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="document.getElementById('ll-file-${q.key}').click()">Choose File</button>
+          <span class="ll-text-xs ll-text-muted" id="ll-file-name-${q.key}" style="margin-left:0.5rem;">${strVal ? this._esc(strVal) : 'No file selected'}</span>
+        </div>`;
+        break;
+
+      case 'grid':
+        input = `<div id="ll-grid-${q.key}" class="ll-text-sm ll-text-muted">Grid editor loaded separately</div>`;
+        break;
+
+      default:
+        input = `<input type="text" class="ll-input" data-key="${q.key}" value="${this._escAttr(strVal)}" placeholder="${this._escAttr(q.placeholder || '')}" />`;
+    }
+
+    return `${label}${input}<div class="ll-error-text" id="ll-err-${q.key}" style="display:none;"></div>`;
+  }
+
+  _bindEvents() {
+    // Blur-save for text inputs and textareas
+    this.container.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(el => {
+      const key = el.dataset.key;
+      if (!key) return;
+      el.addEventListener('blur', () => this._saveField(key, el.value));
+    });
+
+    // Change-save for selects
+    this.container.querySelectorAll('select[data-key]').forEach(el => {
+      const key = el.dataset.key;
+      el.addEventListener('change', () => this._saveField(key, el.value));
+    });
+
+    // Change-save for date inputs
+    this.container.querySelectorAll('input[type="date"]').forEach(el => {
+      const key = el.dataset.key;
+      if (!key) return;
+      el.addEventListener('change', () => this._saveField(key, el.value));
+    });
+
+    // Radio buttons (boolean)
+    this.container.querySelectorAll('input[type="radio"]').forEach(el => {
+      el.addEventListener('change', () => {
+        const key = el.dataset.key;
+        this._saveField(key, el.value);
+        // Update radio button styles
+        const parent = el.closest('.ll-flex');
+        parent.querySelectorAll('span').forEach(s => {
+          s.style.background = '';
+          s.style.color = '';
+          s.style.borderColor = 'var(--ll-gray-300)';
+        });
+        const span = el.nextElementSibling;
+        if (el.value === 'true') {
+          span.style.background = 'var(--ll-brand)';
+          span.style.color = 'white';
+          span.style.borderColor = 'var(--ll-brand)';
+        } else {
+          span.style.background = 'var(--ll-gray-600)';
+          span.style.color = 'white';
+          span.style.borderColor = 'var(--ll-gray-600)';
+        }
+        this._updateConditionalVisibility();
+      });
+    });
+  }
+
+  async _saveField(key, value) {
+    if (this.saveTimers[key]) clearTimeout(this.saveTimers[key]);
+
+    this.responses[key] = value;
+    this._updateConditionalVisibility();
+
+    // Validate
+    const q = this.sectionConfig.questions.find(q => q.key === key);
+    if (q) {
+      const err = this._validate(q, value);
+      const errEl = document.getElementById(`ll-err-${key}`);
+      if (errEl) {
+        errEl.textContent = err || '';
+        errEl.style.display = err ? 'block' : 'none';
+      }
+    }
+
+    // Debounced save
+    this._showSaveStatus('saving');
+    this.saveTimers[key] = setTimeout(async () => {
+      try {
+        await window.llClient.saveResponse(this.projectId, this.sectionId, key, value);
+        this._showSaveStatus('saved');
+      } catch (err) {
+        console.error('Save failed:', err);
+        this._showSaveStatus('error');
+      }
+    }, 500);
+  }
+
+  _validate(q, value) {
+    if (q.required && (!value || (typeof value === 'string' && !value.trim()))) {
+      return 'This field is required';
+    }
+    if (q.validation) {
+      const v = q.validation;
+      if (v.minLength && typeof value === 'string' && value.length < v.minLength) {
+        return `Minimum ${v.minLength} characters`;
+      }
+      if (v.maxLength && typeof value === 'string' && value.length > v.maxLength) {
+        return `Maximum ${v.maxLength} characters`;
+      }
+      if (v.pattern && typeof value === 'string' && !new RegExp(v.pattern).test(value)) {
+        return v.patternMessage || 'Invalid format';
+      }
+    }
+    return null;
+  }
+
+  _checkVisibility(q) {
+    if (!q.visibleIf) return true;
+    const refValue = this.responses[q.visibleIf.questionKey];
+    return this._evaluateCondition(q.visibleIf, refValue);
+  }
+
+  _evaluateCondition(rule, refValue) {
+    switch (rule.operator) {
+      case 'eq': return String(refValue) === String(rule.value);
+      case 'neq': return String(refValue) !== String(rule.value);
+      case 'in': return Array.isArray(rule.value) && rule.value.includes(String(refValue));
+      case 'contains':
+        if (Array.isArray(refValue)) return refValue.includes(rule.value);
+        return String(refValue).includes(String(rule.value));
+      default: return true;
+    }
+  }
+
+  _updateConditionalVisibility() {
+    if (!this.sectionConfig) return;
+    this.sectionConfig.questions.forEach(q => {
+      const el = document.getElementById(`ll-q-${q.key}`);
+      if (!el) return;
+      const visible = this._checkVisibility(q);
+      el.style.display = visible ? '' : 'none';
+    });
+  }
+
+  _showSaveStatus(state) {
+    this.saveStatus.className = `ll-save-status ${state}`;
+    this.saveStatus.textContent = state === 'saving' ? 'Saving...' : state === 'saved' ? 'Saved' : 'Error saving';
+    this.saveStatus.style.opacity = '1';
+    if (state === 'saved') {
+      setTimeout(() => { this.saveStatus.style.opacity = '0'; }, 2000);
+    }
+  }
+
+  static _onMultiSelect(key) {
+    const container = document.querySelector(`[data-key="${key}"][data-type="multi_select"]`);
+    const checked = Array.from(container.querySelectorAll('input:checked')).map(c => c.value);
+    window.llFormEngine._saveField(key, checked);
+  }
+
+  static _onCurrencyChange(key, select) {
+    window.llFormEngine._saveField(key + '_currency', select.value);
+  }
+
+  static async _onFileSelect(key, input) {
+    const file = input.files[0];
+    if (!file) return;
+    const nameEl = document.getElementById(`ll-file-name-${key}`);
+    nameEl.textContent = 'Uploading...';
+    try {
+      await window.llClient.uploadFile(
+        window.llFormEngine.projectId,
+        window.llFormEngine.sectionId,
+        key,
+        file
+      );
+      nameEl.textContent = file.name;
+      window.llFormEngine._saveField(key, file.name);
+    } catch (err) {
+      console.error('File upload failed:', err);
+      nameEl.textContent = 'Upload failed';
+    }
+  }
+
+  validateAll() {
+    let valid = true;
+    this.sectionConfig.questions.forEach(q => {
+      if (!this._checkVisibility(q)) return;
+      const value = this.responses[q.key];
+      const err = this._validate(q, value);
+      const errEl = document.getElementById(`ll-err-${q.key}`);
+      if (errEl) {
+        errEl.textContent = err || '';
+        errEl.style.display = err ? 'block' : 'none';
+      }
+      if (err) valid = false;
+    });
+    return valid;
+  }
+
+  async onSubmit() {
+    if (!this.validateAll()) {
+      alert('Please fill in all required fields before submitting.');
+      return;
+    }
+    const btn = document.getElementById('ll-submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    try {
+      await window.llClient.submitSection(this.projectId, this.sectionId);
+      alert('Section submitted for review!');
+      this.onBack();
+    } catch (err) {
+      console.error('Submit failed:', err);
+      alert('Failed to submit section. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit for Review';
+    }
+  }
+
+  onBack() {
+    window.dispatchEvent(new CustomEvent('ll-navigate', { detail: { page: 'project', projectId: this.projectId } }));
+  }
+
+  _getGlossaryDef(term) {
+    if (window.llGlossary) {
+      const entry = window.llGlossary.find(g => g.term.toLowerCase() === term.toLowerCase());
+      if (entry) return this._esc(entry.definition);
+    }
+    return 'Definition not found';
+  }
+
+  _esc(str) {
+    if (!str) return '';
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  _escAttr(str) {
+    if (!str) return '';
+    return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+}
+
+window.LLFormEngine = LLFormEngine;
+  </script>
+
+  <!-- Main Application -->
+  <script>
+/**
+ * LoyaltyLift — Main Application
+ * Handles routing, page rendering, navigation
+ */
+
+class LLApp {
+  constructor(containerId) {
+    this.container = document.getElementById(containerId);
+    this.formEngine = null;
+    this.currentPage = null;
+    this.currentProject = null;
+
+    window.addEventListener('ll-auth-change', (e) => this._onAuthChange(e.detail));
+    window.addEventListener('ll-navigate', (e) => this.navigate(e.detail.page, e.detail));
+    window.addEventListener('hashchange', () => this._handleRoute());
+  }
+
+  async init() {
+    this._showLoading();
+    const { user } = await window.llClient.init();
+    if (user) {
+      this._handleRoute();
+    } else {
+      this._showLogin();
+    }
+  }
+
+  navigate(page, params) {
+    const hash = params?.projectId ? `#${page}/${params.projectId}${params.sectionId ? '/' + params.sectionId : ''}` : `#${page}`;
+    window.location.hash = hash;
+  }
+
+  _handleRoute() {
+    const hash = window.location.hash.replace('#', '');
+    const parts = hash.split('/');
+    const page = parts[0] || 'dashboard';
+
+    if (!window.llClient.isAuthenticated) {
+      this._showLogin();
+      return;
+    }
+
+    switch (page) {
+      case 'dashboard':
+        this._showDashboard();
+        break;
+      case 'project':
+        this._showProject(parts[1]);
+        break;
+      case 'section':
+        this._showSection(parts[1], parts[2]);
+        break;
+      case 'new-project':
+        this._showNewProject();
+        break;
+      default:
+        this._showDashboard();
+    }
+  }
+
+  _onAuthChange({ user }) {
+    if (user) {
+      this._handleRoute();
+    } else {
+      this._showLogin();
+    }
+  }
+
+  // --- Login Page ---
+  _showLogin() {
+    this.currentPage = 'login';
+    this.container.innerHTML = `
+      <div class="ll-flex ll-items-center ll-justify-center" style="min-height:100vh; background:var(--ll-gray-50);">
+        <div class="ll-card" style="width:100%; max-width:400px; padding:2rem;">
+          <div style="text-align:center; margin-bottom:2rem;">
+            <h1 class="ll-h1" style="color:var(--ll-brand); margin-bottom:0.5rem;">LoyaltyLift</h1>
+            <p class="ll-subtitle">Client Onboarding Portal</p>
+          </div>
+          <div id="ll-login-form">
+            <label class="ll-label">Email address</label>
+            <input type="email" class="ll-input" id="ll-login-email" placeholder="you@company.com" style="margin-bottom:1rem;" />
+            <button class="ll-btn ll-btn-primary" style="width:100%;" id="ll-login-btn" onclick="llApp._doLogin()">
+              Send Magic Link
+            </button>
+          </div>
+          <div id="ll-login-sent" style="display:none; text-align:center;">
+            <p style="color:var(--ll-green-700); font-size:0.875rem; margin-bottom:0.5rem;">Check your email!</p>
+            <p class="ll-text-sm ll-text-muted">We sent a sign-in link to your email. Click it to continue.</p>
+          </div>
+        </div>
+      </div>
+    `;
+    // Handle enter key
+    const emailInput = document.getElementById('ll-login-email');
+    emailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this._doLogin();
+    });
+  }
+
+  async _doLogin() {
+    const email = document.getElementById('ll-login-email').value.trim();
+    if (!email) return;
+    const btn = document.getElementById('ll-login-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    try {
+      await window.llClient.signInWithMagicLink(email);
+      document.getElementById('ll-login-form').style.display = 'none';
+      document.getElementById('ll-login-sent').style.display = 'block';
+    } catch (err) {
+      console.error('Login error:', err);
+      alert('Failed to send magic link. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Send Magic Link';
+    }
+  }
+
+  // --- Dashboard ---
+  async _showDashboard() {
+    this.currentPage = 'dashboard';
+    this._showLoading();
+    try {
+      const projects = await window.llClient.listProjects();
+      this._renderDashboard(projects);
+    } catch (err) {
+      console.error('Dashboard error:', err);
+      this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p class="ll-text-sm" style="color:var(--ll-brand);">Failed to load projects. ${err.message}</p></div></div>`;
+    }
+  }
+
+  _renderDashboard(projects) {
+    const isLji = window.llClient.isLjiMember;
+    const phaseLabels = { discovery: 'Discovery', design: 'Solution Design', launch: 'Launch Readiness' };
+    const statusBadges = {
+      active: 'll-badge-green',
+      paused: 'll-badge-yellow',
+      completed: 'll-badge-blue',
+      archived: 'll-badge-gray',
+    };
+
+    this.container.innerHTML = `
+      <div class="ll-header">
+        <div class="ll-flex ll-justify-between ll-items-center">
+          <h1 class="ll-h1" style="color:var(--ll-brand);">LoyaltyLift</h1>
+          <div class="ll-flex ll-items-center ll-gap-3">
+            <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
+            <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._signOut()">Sign Out</button>
+          </div>
+        </div>
+      </div>
+      <div class="ll-container">
+        <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1.5rem;">
+          <div>
+            <h2 class="ll-h2" style="margin-bottom:0;">Projects</h2>
+            <p class="ll-subtitle">${projects.length} project${projects.length !== 1 ? 's' : ''}</p>
+          </div>
+          ${isLji ? `<button class="ll-btn ll-btn-primary" onclick="llApp.navigate('new-project')">New Project</button>` : ''}
+        </div>
+
+        ${projects.length === 0 ? `
+          <div class="ll-card" style="text-align:center; padding:3rem;">
+            <p class="ll-h3" style="margin-bottom:0.5rem;">No projects yet</p>
+            <p class="ll-text-sm ll-text-muted">${isLji ? 'Create your first project to get started.' : 'You have not been invited to any projects yet.'}</p>
+          </div>
+        ` : `
+          <div class="ll-flex ll-flex-col ll-gap-4">
+            ${projects.map(p => `
+              <div class="ll-card ll-card-hover" onclick="llApp.navigate('project', { projectId: '${p.id}' })">
+                <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:0.75rem;">
+                  <div>
+                    <h3 class="ll-h3" style="font-size:1rem;">${this._esc(p.program_name)}</h3>
+                    <p class="ll-text-xs ll-text-muted">${this._esc(p.client_org?.name || '')}</p>
+                  </div>
+                  <div class="ll-flex ll-gap-2">
+                    <span class="ll-badge ${statusBadges[p.status] || 'll-badge-gray'}">${p.status}</span>
+                    <span class="ll-badge ll-badge-purple">${phaseLabels[p.phase] || p.phase}</span>
+                  </div>
+                </div>
+                <div class="ll-flex ll-items-center ll-gap-3">
+                  <div class="ll-progress" style="flex:1;">
+                    <div class="ll-progress-bar" style="width:${p.progress.pct}%;"></div>
+                  </div>
+                  <span class="ll-text-xs ll-text-muted">${p.progress.completed}/${p.progress.total} sections</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `}
+      </div>
+    `;
+  }
+
+  // --- New Project ---
+  _showNewProject() {
+    this.currentPage = 'new-project';
+    this.container.innerHTML = `
+      <div class="ll-header">
+        <div class="ll-flex ll-items-center ll-gap-3">
+          <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('dashboard')">Back</button>
+          <h1 class="ll-h1" style="color:var(--ll-brand);">New Project</h1>
+        </div>
+      </div>
+      <div class="ll-container" style="max-width:600px;">
+        <div class="ll-card" style="padding:1.5rem;">
+          <div style="margin-bottom:1rem;">
+            <label class="ll-label">Client Organization Name</label>
+            <input type="text" class="ll-input" id="ll-np-org" placeholder="e.g., Emirates Group" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label class="ll-label">Industry</label>
+            <select class="ll-select" id="ll-np-industry">
+              <option value="">Select industry...</option>
+              <option value="Retail">Retail</option>
+              <option value="Airlines">Airlines</option>
+              <option value="Hospitality">Hospitality</option>
+              <option value="Financial Services">Financial Services</option>
+              <option value="Telco">Telco</option>
+              <option value="Real Estate">Real Estate</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label class="ll-label">Country</label>
+            <input type="text" class="ll-input" id="ll-np-country" placeholder="e.g., United Arab Emirates" />
+          </div>
+          <div style="margin-bottom:1.5rem;">
+            <label class="ll-label">Program Name</label>
+            <input type="text" class="ll-input" id="ll-np-program" placeholder="e.g., Emirates Skywards Everyday" />
+          </div>
+          <button class="ll-btn ll-btn-primary" style="width:100%;" id="ll-np-btn" onclick="llApp._createProject()">Create Project</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async _createProject() {
+    const orgName = document.getElementById('ll-np-org').value.trim();
+    const industry = document.getElementById('ll-np-industry').value;
+    const country = document.getElementById('ll-np-country').value.trim();
+    const programName = document.getElementById('ll-np-program').value.trim();
+
+    if (!orgName || !programName) {
+      alert('Organization name and program name are required.');
+      return;
+    }
+
+    const btn = document.getElementById('ll-np-btn');
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+    try {
+      const project = await window.llClient.createProject({ orgName, industry, country, programName });
+      this.navigate('project', { projectId: project.id });
+    } catch (err) {
+      console.error('Create project error:', err);
+      alert('Failed to create project. ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Create Project';
+    }
+  }
+
+  // --- Project Detail ---
+  async _showProject(projectId) {
+    this.currentPage = 'project';
+    this._showLoading();
+    try {
+      const project = await window.llClient.getProject(projectId);
+      this.currentProject = project;
+      this._renderProject(project);
+    } catch (err) {
+      console.error('Project error:', err);
+      this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p style="color:var(--ll-brand);">Failed to load project. ${err.message}</p></div></div>`;
+    }
+  }
+
+  _renderProject(project) {
+    const phaseLabels = { discovery: 'Discovery', design: 'Solution Design', launch: 'Launch Readiness' };
+    const statusIcons = {
+      not_started: { badge: 'll-badge-gray', label: 'Not Started' },
+      in_progress: { badge: 'll-badge-blue', label: 'In Progress' },
+      in_review: { badge: 'll-badge-yellow', label: 'In Review' },
+      approved: { badge: 'll-badge-green', label: 'Approved' },
+      skipped: { badge: 'll-badge-gray', label: 'Skipped' },
+    };
+    const isLji = window.llClient.isLjiMember;
+    const sectionNames = this._getSectionNames();
+
+    // Group sections by phase
+    const phases = ['discovery', 'design', 'launch'];
+    const grouped = {};
+    phases.forEach(ph => { grouped[ph] = project.sections.filter(s => s.phase === ph); });
+
+    this.container.innerHTML = `
+      <div class="ll-header">
+        <div class="ll-flex ll-justify-between ll-items-center">
+          <div class="ll-flex ll-items-center ll-gap-3">
+            <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('dashboard')">Back</button>
+            <div>
+              <h1 class="ll-h1">${this._esc(project.program_name)}</h1>
+              <p class="ll-text-xs ll-text-muted">${this._esc(project.client_org?.name || '')} &middot; ${this._esc(project.client_org?.industry || '')}</p>
+            </div>
+          </div>
+          <div class="ll-flex ll-gap-2 ll-items-center">
+            <span class="ll-badge ll-badge-purple">${phaseLabels[project.phase]}</span>
+            ${isLji && project.phase !== 'launch' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._advancePhase('${project.id}')">Advance Phase</button>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="ll-container">
+        <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:0.5rem;">
+          <span class="ll-text-sm ll-text-muted">Overall progress</span>
+          <span class="ll-text-sm" style="font-weight:600;">${project.progress.pct}%</span>
+        </div>
+        <div class="ll-progress" style="margin-bottom:2rem;">
+          <div class="ll-progress-bar" style="width:${project.progress.pct}%;"></div>
+        </div>
+
+        ${phases.map(ph => {
+          const phaseSections = grouped[ph] || [];
+          const visible = phaseSections.filter(s => s.visible);
+          if (visible.length === 0 && ph !== project.phase) return '';
+          const isCurrentPhase = ph === project.phase;
+          return `
+            <div style="margin-bottom:2rem;">
+              <h3 class="ll-h3" style="margin-bottom:0.75rem; ${!isCurrentPhase ? 'opacity:0.5;' : ''}">${phaseLabels[ph]}</h3>
+              <div class="ll-flex ll-flex-col ll-gap-2">
+                ${visible.map(s => {
+                  const si = statusIcons[s.status] || statusIcons.not_started;
+                  const name = sectionNames[s.section_id] || s.section_id;
+                  const clickable = isCurrentPhase || s.status !== 'not_started';
+                  return `
+                    <div class="ll-card ${clickable ? 'll-card-hover' : ''}" ${clickable ? `onclick="llApp.navigate('section', { projectId: '${project.id}', sectionId: '${s.section_id}' })"` : ''} style="${!isCurrentPhase ? 'opacity:0.6;' : ''}">
+                      <div class="ll-flex ll-justify-between ll-items-center">
+                        <span class="ll-text-sm" style="font-weight:500;">${this._esc(name)}</span>
+                        <div class="ll-flex ll-gap-2 ll-items-center">
+                          <span class="ll-badge ${si.badge}">${si.label}</span>
+                          ${isLji && s.status === 'in_review' ? `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="event.stopPropagation(); llApp._approveSection('${project.id}', '${s.section_id}')">Approve</button>` : ''}
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  // --- Section Form ---
+  async _showSection(projectId, sectionId) {
+    this.currentPage = 'section';
+    this._showLoading();
+
+    // Load section config from templates
+    const sectionConfig = await this._loadSectionConfig(sectionId);
+    if (!sectionConfig) {
+      this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p>Section template not found: ${sectionId}</p></div></div>`;
+      return;
+    }
+
+    this.container.innerHTML = `
+      <div class="ll-header">
+        <div class="ll-flex ll-items-center ll-gap-3">
+          <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('project', { projectId: '${projectId}' })">Back</button>
+          <h1 class="ll-h1" style="color:var(--ll-brand);">LoyaltyLift</h1>
+        </div>
+      </div>
+      <div class="ll-container" style="max-width:800px;" id="ll-section-form"></div>
+    `;
+
+    this.formEngine = new LLFormEngine('ll-section-form');
+    window.llFormEngine = this.formEngine;
+    await this.formEngine.load(projectId, sectionId, sectionConfig);
+  }
+
+  async _loadSectionConfig(sectionId) {
+    // Section configs will be loaded from the template JS files
+    if (window.llSectionTemplates && window.llSectionTemplates[sectionId]) {
+      return window.llSectionTemplates[sectionId];
+    }
+    // Fallback: try to load dynamically
+    try {
+      const script = document.createElement('script');
+      script.src = `/loyaltylift/templates/${sectionId}.js`;
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      return window.llSectionTemplates?.[sectionId] || null;
+    } catch (err) {
+      console.error('Failed to load section template:', sectionId, err);
+      return null;
+    }
+  }
+
+  async _approveSection(projectId, sectionId) {
+    if (!confirm('Approve this section?')) return;
+    try {
+      await window.llClient.approveSection(projectId, sectionId);
+      this._showProject(projectId);
+    } catch (err) {
+      console.error('Approve error:', err);
+      alert('Failed to approve section.');
+    }
+  }
+
+  async _advancePhase(projectId) {
+    if (!confirm('Advance to the next phase? This will unlock new sections.')) return;
+    try {
+      await window.llClient.advancePhase(projectId);
+      this._showProject(projectId);
+    } catch (err) {
+      console.error('Advance phase error:', err);
+      alert('Failed to advance phase.');
+    }
+  }
+
+  async _signOut() {
+    await window.llClient.signOut();
+    window.location.hash = '';
+  }
+
+  _showLoading() {
+    this.container.innerHTML = '<div class="ll-loading-page"><div class="ll-spinner"></div></div>';
+  }
+
+  _getSectionNames() {
+    return {
+      tenancy: 'Tenancy Setup',
+      program: 'Program Details',
+      loyalty_accounts: 'Loyalty Accounts & Currency',
+      policies: 'Policies & Currency Conversion',
+      sponsor_mgmt: 'Sponsor Management',
+      member_enrollment: 'Member Enrollment & Opt-Out',
+      data_model_questions: 'Data Model Scoping Questions',
+      tier_mgmt: 'Tier Management',
+      accrual_redemption: 'Earning & Redemption Rules',
+      offers_overview: 'Offers Overview',
+      data_migration: 'Data Migration',
+      marketing_connect: 'Marketing & Communications',
+      member_data_model: 'Member Data Model',
+      sponsor_data_model: 'Sponsor Data Model',
+      sponsor_details: 'Sponsor Details',
+      location_data_model: 'Sponsor Location Data Model',
+      location_details: 'Sponsor Location Details',
+      product_data_model: 'Product Data Model',
+      product_details: 'Sponsor Reward Products',
+      bit_data_model: 'Transaction (BIT) Data Model',
+      payment_data_model: 'Payment Data Model',
+      offer_data_model: 'Offer Data Model',
+      offer_kpi: 'Offer KPI Setup',
+      custom_attributes: 'Custom Attributes',
+      batches: 'Batch Processing Setup',
+      role_mgmt: 'Role & Permission Management',
+      user_mgmt: 'User Management',
+      member_services: 'Member Services Configuration',
+      marketing_use_cases: 'Marketing Communication Use Cases',
+      finance: 'Finance Connect',
+      dwh: 'DWH Integration',
+      vertical_entities: 'Vertical Entities',
+      aisense: 'AiSense Alert Configuration',
+      airecommend: 'AiRecommend Setup',
+      airetain: 'AiRetain Setup',
+      aitrust: 'AiTrust Setup',
+      airport_entity: 'Airport Entity',
+      distance_table: 'Distance Table',
+      cobranded_cards: 'Co-branded Cards',
+      subscription: 'Subscription Module',
+      retro_request: 'Retro Request Setup',
+      airline_redemption: 'Airline Redemption Setup',
+    };
+  }
+
+  _esc(str) {
+    if (!str) return '';
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+}
+
+// Boot
+document.addEventListener('DOMContentLoaded', () => {
+  window.llApp = new LLApp('ll-app');
+  window.llApp.init();
+});
+  </script>
+</body>
+</html>
