@@ -452,6 +452,33 @@
   .ll-help-panel { width: 100%; }
 }
 
+/* Feedback modal */
+.ll-feedback-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; }
+.ll-feedback-tab {
+  flex: 1; padding: 0.75rem; text-align: center; font-size: 0.8125rem; font-weight: 600;
+  cursor: pointer; background: var(--ll-surface-low); color: var(--ll-on-surface-variant);
+  border: none; font-family: var(--ll-font); transition: all 0.15s;
+}
+.ll-feedback-tab:first-child { border-radius: 0.5rem 0 0 0.5rem; }
+.ll-feedback-tab:last-child { border-radius: 0 0.5rem 0.5rem 0; }
+.ll-feedback-tab.active { background: var(--ll-primary); color: white; }
+.ll-stars { display: flex; gap: 0.25rem; margin-bottom: 1rem; }
+.ll-star {
+  font-size: 2rem; cursor: pointer; color: var(--ll-surface-high);
+  transition: color 0.1s; background: none; border: none; padding: 0; line-height: 1;
+}
+.ll-star.filled { color: #F59E0B; }
+.ll-star:hover, .ll-star:hover ~ .ll-star { color: #F59E0B; }
+.ll-feedback-btn {
+  position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 40;
+  padding: 0.5rem 1rem; border-radius: 2rem;
+  background: var(--ll-primary); color: white;
+  font-size: 0.75rem; font-weight: 600; font-family: var(--ll-font);
+  border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(30,42,58,0.2);
+  transition: all 0.15s; display: flex; align-items: center; gap: 0.375rem;
+}
+.ll-feedback-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,42,58,0.3); }
+
 /* Responsive */
 @media (max-width: 768px) {
   .ll-grid-2, .ll-grid-3 { grid-template-columns: 1fr; }
@@ -463,6 +490,7 @@
 <body>
   <div id="ll-app" class="ll-app"></div>
   <footer style="text-align:center; padding:1.5rem; font-size:0.625rem; color:#44474c; text-transform:uppercase; letter-spacing:0.08em; font-family:'Inter',sans-serif;">LOYALTYLIFT DISCOVERY V0.2 | &copy; 2026 T2D3 LLC</footer>
+  <button class="ll-feedback-btn" onclick="llApp._showFeedback()">&#9993; Feedback</button>
 
   <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -2125,6 +2153,65 @@ class LLApp {
     }
   }
 
+  // --- Admin Feedback Tab ---
+  async _renderAdminFeedback(content) {
+    const { data, error } = await window.llClient.supabase
+      .from('feedback')
+      .select('id, user_id, type, rating, message, detail, status, admin_notes, created_at')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    const items = data || [];
+    const profiles = await window.llClient.listAllProfiles();
+
+    const statusBadge = { new: 'll-badge-blue', in_progress: 'll-badge-yellow', resolved: 'll-badge-green', closed: 'll-badge-gray' };
+    const typeBadge = { suggestion: 'll-badge-blue', review: 'll-badge-purple', bug: 'll-badge-red' };
+    const statusLabels = { new: 'New', in_progress: 'In Progress', resolved: 'Resolved', closed: 'Closed' };
+
+    content.innerHTML = `
+      <h2 class="ll-h2">Feedback (${items.length})</h2>
+      ${items.length === 0 ? '<div class="ll-card"><p class="ll-text-sm ll-text-muted">No feedback submitted yet.</p></div>' : `
+        <div class="ll-flex ll-flex-col ll-gap-3">
+          ${items.map(fb => {
+            const profile = profiles.find(p => p.id === fb.user_id);
+            const stars = fb.rating ? '&#9733;'.repeat(fb.rating) + '&#9734;'.repeat(5 - fb.rating) : '';
+            return `
+              <div class="ll-card" style="padding:1.25rem;">
+                <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:0.75rem;">
+                  <div class="ll-flex ll-gap-2 ll-items-center">
+                    <span class="ll-badge ${typeBadge[fb.type] || 'll-badge-gray'}">${fb.type}</span>
+                    <span class="ll-badge ${statusBadge[fb.status]}">${statusLabels[fb.status]}</span>
+                    ${stars ? `<span style="color:#F59E0B; font-size:0.875rem;">${stars}</span>` : ''}
+                  </div>
+                  <span class="ll-text-xs ll-text-muted">${new Date(fb.created_at).toLocaleDateString()}</span>
+                </div>
+                <p class="ll-text-sm" style="font-weight:500; margin-bottom:0.375rem;">${this._esc(fb.message)}</p>
+                ${fb.detail ? `<p class="ll-text-xs ll-text-muted" style="margin-bottom:0.5rem;">${this._esc(fb.detail)}</p>` : ''}
+                <p class="ll-text-xs ll-text-muted">From: ${this._esc(profile?.full_name || profile?.email || 'Unknown')}</p>
+                <div class="ll-flex ll-gap-2 ll-items-center" style="margin-top:0.75rem;">
+                  <select class="ll-input" style="width:140px; font-size:0.75rem; padding:0.25rem 0.5rem;" onchange="llApp._updateFeedbackStatus('${fb.id}', this.value)">
+                    ${['new','in_progress','resolved','closed'].map(s => `<option value="${s}" ${fb.status === s ? 'selected' : ''}>${statusLabels[s]}</option>`).join('')}
+                  </select>
+                  <input class="ll-input" style="flex:1; font-size:0.75rem; padding:0.25rem 0.5rem;" placeholder="Admin notes..." value="${this._esc(fb.admin_notes || '')}" onblur="llApp._updateFeedbackNotes('${fb.id}', this.value)" />
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `}
+    `;
+  }
+
+  async _updateFeedbackStatus(id, status) {
+    const { error } = await window.llClient.supabase.from('feedback').update({ status }).eq('id', id);
+    if (error) { console.error('Update feedback status:', error); llToast.error('Failed to update status.'); return; }
+    llToast.success('Status updated.');
+  }
+
+  async _updateFeedbackNotes(id, notes) {
+    const { error } = await window.llClient.supabase.from('feedback').update({ admin_notes: notes }).eq('id', id);
+    if (error) { console.error('Update feedback notes:', error); return; }
+  }
+
   // --- Manage Members Modal ---
   async _showManageMembers(projectId) {
     const project = await window.llClient.getProject(projectId);
@@ -2249,6 +2336,7 @@ class LLApp {
           <button class="ll-nav-item ${this._adminTab === 'users' ? 'active' : ''}" onclick="llApp._switchAdminTab('users')">Users</button>
           <button class="ll-nav-item ${this._adminTab === 'projects' ? 'active' : ''}" onclick="llApp._switchAdminTab('projects')">Projects</button>
           <button class="ll-nav-item ${this._adminTab === 'templates' ? 'active' : ''}" onclick="llApp._switchAdminTab('templates')">Survey Templates</button>
+          <button class="ll-nav-item ${this._adminTab === 'feedback' ? 'active' : ''}" onclick="llApp._switchAdminTab('feedback')">Feedback</button>
         </div>
         <div id="ll-admin-content" style="margin-top:1.5rem;">
           <div class="ll-loading-page"><div class="ll-spinner"></div></div>
@@ -2270,6 +2358,7 @@ class LLApp {
     if (tab === 'users') navItems[0]?.classList.add('active');
     else if (tab === 'projects') navItems[1]?.classList.add('active');
     else if (tab === 'templates') navItems[2]?.classList.add('active');
+    else if (tab === 'feedback') navItems[3]?.classList.add('active');
 
     const content = document.getElementById('ll-admin-content');
     content.innerHTML = '<div class="ll-loading-page"><div class="ll-spinner"></div></div>';
@@ -2283,6 +2372,7 @@ class LLApp {
         case 'users': await this._renderAdminUsers(content); break;
         case 'projects': await this._renderAdminProjects(content); break;
         case 'templates': await this._renderAdminTemplates(content); break;
+        case 'feedback': await this._renderAdminFeedback(content); break;
       }
     } catch (err) {
       console.error('Admin tab error:', err);
@@ -2820,6 +2910,99 @@ class LLApp {
     const isOpen = body.classList.contains('open');
     body.classList.toggle('open', !isOpen);
     header.classList.toggle('open', !isOpen);
+  }
+
+  // --- Feedback ---
+  _showFeedback() {
+    if (document.getElementById('ll-feedback-overlay')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'll-feedback-overlay';
+    overlay.className = 'll-confirm-overlay';
+    overlay.innerHTML = `
+      <div class="ll-confirm-box" style="max-width:480px;">
+        <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1rem;">
+          <h3 class="ll-h2" style="margin:0;">Send Feedback</h3>
+          <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="document.getElementById('ll-feedback-overlay').remove()">Close</button>
+        </div>
+        <div class="ll-feedback-tabs">
+          <button class="ll-feedback-tab active" onclick="llApp._switchFeedbackTab('suggestion', this)">Suggestion</button>
+          <button class="ll-feedback-tab" onclick="llApp._switchFeedbackTab('review', this)">Review</button>
+          <button class="ll-feedback-tab" onclick="llApp._switchFeedbackTab('bug', this)">Bug Report</button>
+        </div>
+        <div id="ll-feedback-body">${this._feedbackForm('suggestion')}</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  }
+
+  _switchFeedbackTab(type, btn) {
+    document.querySelectorAll('.ll-feedback-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('ll-feedback-body').innerHTML = this._feedbackForm(type);
+  }
+
+  _feedbackForm(type) {
+    if (type === 'suggestion') {
+      return `
+        <p class="ll-subtitle" style="margin-bottom:1rem;">What would you like to see in LoyaltyLift and why?</p>
+        <label class="ll-label">Your Suggestion</label>
+        <textarea class="ll-textarea" id="ll-fb-message" placeholder="I'd like to see..." style="margin-bottom:0.75rem;"></textarea>
+        <label class="ll-label">Why is this important to you?</label>
+        <textarea class="ll-textarea" id="ll-fb-detail" placeholder="This would help because..." style="margin-bottom:1.25rem;"></textarea>
+        <button class="ll-btn ll-btn-primary" style="width:100%;" onclick="llApp._submitFeedback('suggestion')">Submit Suggestion</button>
+      `;
+    }
+    if (type === 'review') {
+      return `
+        <p class="ll-subtitle" style="margin-bottom:1rem;">How would you rate your experience?</p>
+        <div class="ll-stars" id="ll-fb-stars">
+          ${[1,2,3,4,5].map(n => `<button class="ll-star" data-rating="${n}" onclick="llApp._setRating(${n})">&#9733;</button>`).join('')}
+        </div>
+        <input type="hidden" id="ll-fb-rating" value="0" />
+        <label class="ll-label">What do you enjoy most?</label>
+        <textarea class="ll-textarea" id="ll-fb-message" placeholder="I really enjoy..." style="margin-bottom:1.25rem;"></textarea>
+        <button class="ll-btn ll-btn-primary" style="width:100%;" onclick="llApp._submitFeedback('review')">Submit Review</button>
+      `;
+    }
+    return `
+      <p class="ll-subtitle" style="margin-bottom:1rem;">Help us fix issues by describing what happened.</p>
+      <label class="ll-label">What happened?</label>
+      <textarea class="ll-textarea" id="ll-fb-message" placeholder="When I clicked on..." style="margin-bottom:0.75rem;"></textarea>
+      <label class="ll-label">What did you expect to happen?</label>
+      <textarea class="ll-textarea" id="ll-fb-detail" placeholder="I expected..." style="margin-bottom:1.25rem;"></textarea>
+      <button class="ll-btn ll-btn-primary" style="width:100%;" onclick="llApp._submitFeedback('bug')">Submit Bug Report</button>
+    `;
+  }
+
+  _setRating(n) {
+    document.getElementById('ll-fb-rating').value = n;
+    document.querySelectorAll('.ll-star').forEach(s => {
+      s.classList.toggle('filled', parseInt(s.dataset.rating) <= n);
+    });
+  }
+
+  async _submitFeedback(type) {
+    const message = document.getElementById('ll-fb-message')?.value?.trim();
+    if (!message) { llToast.warning('Please enter a message.'); return; }
+    const detail = document.getElementById('ll-fb-detail')?.value?.trim() || null;
+    const rating = type === 'review' ? parseInt(document.getElementById('ll-fb-rating')?.value || '0') : null;
+    if (type === 'review' && (!rating || rating < 1)) { llToast.warning('Please select a star rating.'); return; }
+    const btn = document.querySelector('#ll-feedback-body .ll-btn-primary');
+    btn.disabled = true; btn.textContent = 'Sending...';
+    try {
+      const { error } = await window.llClient.supabase.from('feedback').insert({
+        user_id: window.llClient.user?.id, type, rating, message, detail,
+      });
+      if (error) throw error;
+      llToast.success('Thank you for your feedback!');
+      document.getElementById('ll-feedback-overlay')?.remove();
+    } catch (err) {
+      console.error('Feedback error:', err);
+      llToast.error('Failed to send feedback.');
+      btn.disabled = false;
+      btn.textContent = type === 'suggestion' ? 'Submit Suggestion' : type === 'review' ? 'Submit Review' : 'Submit Bug Report';
+    }
   }
 
   _esc(str) {
