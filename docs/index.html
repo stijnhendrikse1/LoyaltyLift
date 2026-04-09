@@ -2506,11 +2506,51 @@ class LLApp {
     const typeBadge = { suggestion: 'll-badge-blue', review: 'll-badge-purple', bug: 'll-badge-red' };
     const statusLabels = { new: 'New', in_progress: 'In Progress', resolved: 'Resolved', closed: 'Closed' };
 
+    this._feedbackItems = items;
+    this._feedbackProfiles = profiles;
+    this._feedbackFilterStatus = this._feedbackFilterStatus || 'all';
+    this._feedbackFilterType = this._feedbackFilterType || 'all';
+
+    const statusCounts = { all: items.length, new: 0, in_progress: 0, resolved: 0, closed: 0 };
+    items.forEach(fb => { statusCounts[fb.status] = (statusCounts[fb.status] || 0) + 1; });
+    const typeCounts = { all: items.length, suggestion: 0, review: 0, bug: 0 };
+    items.forEach(fb => { typeCounts[fb.type] = (typeCounts[fb.type] || 0) + 1; });
+
+    const filtered = items.filter(fb =>
+      (this._feedbackFilterStatus === 'all' || fb.status === this._feedbackFilterStatus) &&
+      (this._feedbackFilterType === 'all' || fb.type === this._feedbackFilterType)
+    );
+
+    const filterBtn = (label, value, field, count) => {
+      const isActive = this['_feedbackFilter' + (field === 'status' ? 'Status' : 'Type')] === value;
+      return `<button class="ll-btn ${isActive ? 'll-btn-primary' : 'll-btn-secondary'} ll-btn-sm" onclick="llApp._filterFeedback('${field}', '${value}')" style="font-size:0.6875rem;">${label} <span style="opacity:0.7;">(${count})</span></button>`;
+    };
+
     content.innerHTML = `
-      <h2 class="ll-h2">Feedback (${items.length})</h2>
-      ${items.length === 0 ? '<div class="ll-card"><p class="ll-text-sm ll-text-muted">No feedback submitted yet.</p></div>' : `
+      <h2 class="ll-h2">Feedback</h2>
+      <div style="margin-bottom:1rem;">
+        <div class="ll-label" style="margin-bottom:0.375rem;">Status</div>
+        <div class="ll-flex ll-gap-2" style="flex-wrap:wrap;">
+          ${filterBtn('All', 'all', 'status', statusCounts.all)}
+          ${filterBtn('New', 'new', 'status', statusCounts.new)}
+          ${filterBtn('In Progress', 'in_progress', 'status', statusCounts.in_progress)}
+          ${filterBtn('Resolved', 'resolved', 'status', statusCounts.resolved)}
+          ${filterBtn('Closed', 'closed', 'status', statusCounts.closed)}
+        </div>
+      </div>
+      <div style="margin-bottom:1.25rem;">
+        <div class="ll-label" style="margin-bottom:0.375rem;">Type</div>
+        <div class="ll-flex ll-gap-2" style="flex-wrap:wrap;">
+          ${filterBtn('All', 'all', 'type', typeCounts.all)}
+          ${filterBtn('Suggestions', 'suggestion', 'type', typeCounts.suggestion)}
+          ${filterBtn('Reviews', 'review', 'type', typeCounts.review)}
+          ${filterBtn('Bug Reports', 'bug', 'type', typeCounts.bug)}
+        </div>
+      </div>
+      <p class="ll-text-xs ll-text-muted" style="margin-bottom:0.75rem;">${filtered.length} of ${items.length} items</p>
+      ${filtered.length === 0 ? '<div class="ll-card"><p class="ll-text-sm ll-text-muted">No feedback matching filters.</p></div>' : `
         <div class="ll-flex ll-flex-col ll-gap-3">
-          ${items.map(fb => {
+          ${filtered.map(fb => {
             const profile = profiles.find(p => p.id === fb.user_id);
             const stars = fb.rating ? '&#9733;'.repeat(fb.rating) + '&#9734;'.repeat(5 - fb.rating) : '';
             return `
@@ -2538,6 +2578,13 @@ class LLApp {
         </div>
       `}
     `;
+  }
+
+  _filterFeedback(field, value) {
+    if (field === 'status') this._feedbackFilterStatus = value;
+    if (field === 'type') this._feedbackFilterType = value;
+    const content = document.getElementById('ll-admin-content');
+    this._renderAdminFeedback(content);
   }
 
   async _updateFeedbackStatus(id, status) {
@@ -2693,16 +2740,20 @@ class LLApp {
           </div>
         </div>
       </div>
-      <div class="ll-container">
-        <div class="ll-nav" id="ll-admin-nav">
-          <button class="ll-nav-item ${this._adminTab === 'users' ? 'active' : ''}" onclick="llApp._switchAdminTab('users')">Users</button>
-          <button class="ll-nav-item ${this._adminTab === 'projects' ? 'active' : ''}" onclick="llApp._switchAdminTab('projects')">Projects</button>
-          <button class="ll-nav-item ${this._adminTab === 'templates' ? 'active' : ''}" onclick="llApp._switchAdminTab('templates')">Survey Templates</button>
-          <button class="ll-nav-item ${this._adminTab === 'feedback' ? 'active' : ''}" onclick="llApp._switchAdminTab('feedback')">Feedback</button>
-          <button class="ll-nav-item ${this._adminTab === 'template_editor' ? 'active' : ''}" onclick="llApp._switchAdminTab('template_editor')">Template Editor</button>
-        </div>
-        <div id="ll-admin-content" style="margin-top:1.5rem;">
-          <div class="ll-loading-page"><div class="ll-spinner"></div></div>
+      <div class="ll-container" style="max-width:1400px;">
+        <div class="ll-flex ll-gap-6" style="align-items:flex-start;">
+          <div style="width:200px; flex-shrink:0;">
+            <div class="ll-flex ll-flex-col ll-gap-1" id="ll-admin-nav">
+              <button class="ll-nav-item ${this._adminTab === 'users' ? 'active' : ''}" onclick="llApp._switchAdminTab('users')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Users</button>
+              <button class="ll-nav-item ${this._adminTab === 'projects' ? 'active' : ''}" onclick="llApp._switchAdminTab('projects')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Projects</button>
+              <button class="ll-nav-item ${this._adminTab === 'templates' ? 'active' : ''}" onclick="llApp._switchAdminTab('templates')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Survey Templates</button>
+              <button class="ll-nav-item ${this._adminTab === 'template_editor' ? 'active' : ''}" onclick="llApp._switchAdminTab('template_editor')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Template Editor</button>
+              <button class="ll-nav-item ${this._adminTab === 'feedback' ? 'active' : ''}" onclick="llApp._switchAdminTab('feedback')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Feedback</button>
+            </div>
+          </div>
+          <div id="ll-admin-content" style="flex:1; min-width:0;">
+            <div class="ll-loading-page"><div class="ll-spinner"></div></div>
+          </div>
         </div>
       </div>
     `;
@@ -2715,14 +2766,10 @@ class LLApp {
     document.querySelectorAll('#ll-admin-nav .ll-nav-item').forEach(btn => {
       btn.classList.toggle('active', btn.textContent.trim().toLowerCase().replace('survey ', '') === tab);
     });
-    // Fix: match button text to tab name
     const navItems = document.querySelectorAll('#ll-admin-nav .ll-nav-item');
     navItems.forEach(btn => btn.classList.remove('active'));
-    if (tab === 'users') navItems[0]?.classList.add('active');
-    else if (tab === 'projects') navItems[1]?.classList.add('active');
-    else if (tab === 'templates') navItems[2]?.classList.add('active');
-    else if (tab === 'feedback') navItems[3]?.classList.add('active');
-    else if (tab === 'template_editor') navItems[4]?.classList.add('active');
+    const tabMap = { users: 0, projects: 1, templates: 2, template_editor: 3, feedback: 4 };
+    navItems[tabMap[tab]]?.classList.add('active');
 
     const content = document.getElementById('ll-admin-content');
     content.innerHTML = '<div class="ll-loading-page"><div class="ll-spinner"></div></div>';
