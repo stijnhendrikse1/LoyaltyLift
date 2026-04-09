@@ -1236,10 +1236,11 @@ class LLFormEngine {
     document.body.appendChild(this.saveStatus);
   }
 
-  async load(projectId, sectionId, sectionConfig) {
+  async load(projectId, sectionId, sectionConfig, readOnly) {
     this.projectId = projectId;
     this.sectionId = sectionId;
     this.sectionConfig = sectionConfig;
+    this.readOnly = readOnly || false;
 
     // Load existing responses
     this.container.innerHTML = '<div class="ll-loading-page"><div class="ll-spinner"></div><span class="ll-text-sm ll-text-muted">Loading section...</span></div>';
@@ -1263,7 +1264,7 @@ class LLFormEngine {
         </div>
         <div class="ll-flex ll-gap-2">
           <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="window.llFormEngine?.onBack()">Back</button>
-          <button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-submit-btn" onclick="window.llFormEngine?.onSubmit()">Submit for Review</button>
+          ${this.readOnly ? '<span class="ll-badge ll-badge-gray" style="padding:0.375rem 0.75rem; font-size:0.75rem;">Read Only</span>' : '<button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-submit-btn" onclick="window.llFormEngine?.onSubmit()">Submit for Review</button>'}
         </div>
       </div>
       <div class="ll-card" style="padding: 2rem;">
@@ -1278,7 +1279,12 @@ class LLFormEngine {
 
     html += `</div>`;
     this.container.innerHTML = html;
-    this._bindEvents();
+    if (this.readOnly) {
+      this.container.querySelectorAll('input, textarea, select, button[type="file"]').forEach(el => { el.disabled = true; el.style.opacity = '0.7'; });
+      this.container.querySelectorAll('.ll-toggle, [onclick]').forEach(el => { if (!el.textContent.includes('Back')) el.style.pointerEvents = 'none'; });
+    } else {
+      this._bindEvents();
+    }
   }
 
   _renderQuestion(q, index) {
@@ -2090,7 +2096,11 @@ class LLApp {
 
     this.formEngine = new LLFormEngine('ll-section-form');
     window.llFormEngine = this.formEngine;
-    await this.formEngine.load(projectId, sectionId, sectionConfig);
+    // Check if this is an example project (read-only for non-LJI staff)
+    const project = this.currentProject || await window.llClient.getProject(projectId);
+    const isExample = project?.program_name?.startsWith('[Example]');
+    const readOnly = isExample && !window.llClient.isLjiMember;
+    await this.formEngine.load(projectId, sectionId, sectionConfig, readOnly);
   }
 
   async _loadSectionConfig(sectionId) {
