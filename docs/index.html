@@ -349,6 +349,108 @@
 }
 .ll-comment-reply { margin-left: 1.5rem; }
 
+/* Help Panel */
+.ll-help-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem; border-radius: 50%;
+  background: var(--ll-surface-low); border: 1px solid var(--ll-outline);
+  color: var(--ll-on-surface-variant); font-size: 0.875rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; font-family: var(--ll-font);
+  line-height: 1; padding: 0;
+}
+.ll-help-btn:hover {
+  background: var(--ll-secondary); color: white; border-color: var(--ll-secondary);
+}
+.ll-help-overlay {
+  position: fixed; inset: 0; background: rgba(9,21,37,0.35);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  z-index: 60; animation: ll-fade-in 0.2s ease;
+}
+.ll-help-panel {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 480px;
+  background: var(--ll-surface-lowest); overflow-y: auto;
+  box-shadow: -8px 0 32px rgba(9,21,37,0.12); z-index: 61;
+  animation: ll-help-slide-in 0.3s ease;
+}
+@keyframes ll-help-slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.ll-help-panel.ll-help-closing {
+  animation: ll-help-slide-out 0.25s ease forwards;
+}
+@keyframes ll-help-slide-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+.ll-help-panel-header {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem; background: var(--ll-primary);
+  color: white;
+}
+.ll-help-panel-header h2 {
+  font-size: 1.125rem; font-weight: 700; letter-spacing: -0.02em; margin: 0;
+}
+.ll-help-close {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: none;
+  color: white; font-size: 1.125rem; cursor: pointer;
+  transition: background 0.15s; line-height: 1; padding: 0;
+}
+.ll-help-close:hover { background: rgba(255,255,255,0.3); }
+.ll-help-content { padding: 1rem 1.5rem 2rem; }
+.ll-help-section { margin-bottom: 0.5rem; }
+.ll-help-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1rem; cursor: pointer;
+  background: var(--ll-surface-low); border: none; width: 100%;
+  border-radius: var(--ll-radius-sm);
+  font-size: 0.875rem; font-weight: 600; color: var(--ll-on-surface);
+  font-family: var(--ll-font); text-align: left;
+  transition: background 0.15s;
+}
+.ll-help-section-header:hover { background: var(--ll-surface-high); }
+.ll-help-section-header .ll-help-chevron {
+  font-size: 0.625rem; color: var(--ll-on-surface-variant);
+  transition: transform 0.2s;
+}
+.ll-help-section-header.open .ll-help-chevron { transform: rotate(180deg); }
+.ll-help-section-body {
+  display: none; padding: 0.75rem 1rem 1rem;
+  font-size: 0.8125rem; line-height: 1.65;
+  color: var(--ll-on-surface-variant);
+}
+.ll-help-section-body.open { display: block; }
+.ll-help-section-body ul {
+  list-style: disc; padding-left: 1.25rem; margin: 0.5rem 0;
+}
+.ll-help-section-body li { margin-bottom: 0.375rem; }
+.ll-help-section-body strong { color: var(--ll-on-surface); }
+.ll-help-section-body p { margin: 0.5rem 0; }
+.ll-help-table {
+  width: 100%; border-collapse: collapse; font-size: 0.6875rem;
+  margin: 0.75rem 0;
+}
+.ll-help-table th {
+  text-align: left; padding: 0.5rem 0.375rem;
+  font-weight: 600; color: var(--ll-on-surface);
+  background: var(--ll-surface-low); border-bottom: 2px solid var(--ll-surface-high);
+  white-space: nowrap;
+}
+.ll-help-table td {
+  padding: 0.375rem; border-bottom: 1px solid var(--ll-surface-low);
+  color: var(--ll-on-surface-variant); text-align: center;
+}
+.ll-help-table td:first-child { text-align: left; font-weight: 500; color: var(--ll-on-surface); }
+.ll-help-table .ll-check { color: var(--ll-teal); font-weight: 700; }
+.ll-help-table .ll-cross { color: var(--ll-outline); }
+
+@media (max-width: 560px) {
+  .ll-help-panel { width: 100%; }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .ll-grid-2, .ll-grid-3 { grid-template-columns: 1fr; }
@@ -1703,6 +1805,7 @@ class LLApp {
             <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
             ${window.llClient.isLjiAdmin ? '<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate(\'admin\')">Admin</button>' : ''}
             <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._signOut()">Sign Out</button>
+            <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
           </div>
         </div>
       </div>
@@ -1753,9 +1856,12 @@ class LLApp {
     this.currentPage = 'new-project';
     this.container.innerHTML = `
       <div class="ll-header">
-        <div class="ll-flex ll-items-center ll-gap-3">
-          <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('dashboard')">Back</button>
-          <h1 class="ll-h1">New Project</h1>
+        <div class="ll-flex ll-justify-between ll-items-center">
+          <div class="ll-flex ll-items-center ll-gap-3">
+            <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('dashboard')">Back</button>
+            <h1 class="ll-h1">New Project</h1>
+          </div>
+          <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
         </div>
       </div>
       <div class="ll-container" style="max-width:600px;">
@@ -1873,6 +1979,7 @@ class LLApp {
           <div class="ll-flex ll-gap-2 ll-items-center">
             <span class="ll-badge ll-badge-blue">${phaseLabels[project.phase]}</span>
             ${isLji && project.phase !== 'launch' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._advancePhase('${project.id}')">Advance Phase</button>` : ''}
+            <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
           </div>
         </div>
       </div>
@@ -1926,12 +2033,15 @@ class LLApp {
     // Render shell immediately
     this.container.innerHTML = `
       <div class="ll-header">
-        <div class="ll-flex ll-items-center ll-gap-3">
-          <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('project', { projectId: '${projectId}' })">Back</button>
-          <div class="ll-flex ll-items-center ll-gap-2">
-            <img src="lji-logo.png" alt="LJI" style="height:28px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
-            <span style="font-size:0.875rem; font-weight:700; color:var(--ll-primary); letter-spacing:-0.02em;">LoyaltyLift</span>
+        <div class="ll-flex ll-justify-between ll-items-center">
+          <div class="ll-flex ll-items-center ll-gap-3">
+            <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('project', { projectId: '${projectId}' })">Back</button>
+            <div class="ll-flex ll-items-center ll-gap-2">
+              <img src="lji-logo.png" alt="LJI" style="height:28px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
+              <span style="font-size:0.875rem; font-weight:700; color:var(--ll-primary); letter-spacing:-0.02em;">LoyaltyLift</span>
+            </div>
           </div>
+          <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
         </div>
       </div>
       <div class="ll-container" style="max-width:800px;" id="ll-section-form">
@@ -2033,6 +2143,7 @@ class LLApp {
           <div class="ll-flex ll-items-center ll-gap-3">
             <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
             <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._signOut()">Sign Out</button>
+            <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
           </div>
         </div>
       </div>
@@ -2385,6 +2496,208 @@ class LLApp {
       retro_request: 'Retro Request Setup',
       airline_redemption: 'Airline Redemption Setup',
     };
+  }
+
+  // --- Help Panel ---
+  _showHelp() {
+    // Prevent duplicates
+    if (document.getElementById('ll-help-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'll-help-overlay';
+    overlay.className = 'll-help-overlay';
+    overlay.addEventListener('click', () => this._hideHelp());
+
+    const panel = document.createElement('div');
+    panel.id = 'll-help-panel';
+    panel.className = 'll-help-panel';
+    panel.addEventListener('click', (e) => e.stopPropagation());
+
+    const Y = '\u2713';
+    const N = '\u2014';
+
+    panel.innerHTML = `
+      <div class="ll-help-panel-header">
+        <h2>Help &amp; Documentation</h2>
+        <button class="ll-help-close" onclick="llApp._hideHelp()" title="Close">&times;</button>
+      </div>
+      <div class="ll-help-content">
+
+        <!-- Getting Started -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Getting Started <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <ul>
+              <li><strong>LoyaltyLift</strong> is a client onboarding questionnaire platform built by Loyalty Juggernaut (LJI) for configuring the GRAVTY loyalty platform.</li>
+              <li>It replaces the traditional 35+ tab Excel spreadsheet with a structured, guided digital experience.</li>
+              <li>The questionnaire is organized into <strong>3 phases</strong>: Discovery, Solution Design, and Launch Readiness.</li>
+              <li>Each phase contains multiple sections, and each section contains questions specific to that topic.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            How It Works <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <p><strong>Projects</strong> &mdash; Each client engagement has its own project. A project tracks the entire onboarding questionnaire for one loyalty program.</p>
+
+            <p><strong>Phases</strong> &mdash; Projects progress through 3 phases:</p>
+            <ul>
+              <li><strong>Discovery</strong> (12 sections): Core program setup &mdash; tenancy, program details, loyalty accounts, policies, sponsors, member enrollment, tiers, earning/redemption rules, offers, data migration, and marketing.</li>
+              <li><strong>Solution Design</strong> (19 sections): Detailed data models, entity configurations, member services, batch processing, role management, and integrations.</li>
+              <li><strong>Launch Readiness</strong> (11 sections): Industry-specific modules (Airlines, Hospitality), AI features (AiSense, AiRecommend, AiRetain, AiTrust), and specialized configurations.</li>
+            </ul>
+
+            <p><strong>Sections</strong> &mdash; Each section covers a specific topic. Sections have statuses:</p>
+            <ul>
+              <li><strong>Not Started</strong> &mdash; No responses yet.</li>
+              <li><strong>In Progress</strong> &mdash; Some responses saved (auto-saved on blur).</li>
+              <li><strong>In Review</strong> &mdash; Submitted by the user for LJI review.</li>
+              <li><strong>Approved</strong> &mdash; Reviewed and approved by an LJI admin.</li>
+              <li><strong>Skipped</strong> &mdash; Not applicable for this project.</li>
+            </ul>
+
+            <p><strong>Auto-save</strong> &mdash; All form inputs save automatically when you click away from the field. A "Saved" indicator appears in the bottom-right corner.</p>
+
+            <p><strong>Conditional Questions</strong> &mdash; Some questions appear or disappear based on your answers to other questions. For example, tier management questions only show if you indicate your program has tiers.</p>
+
+            <p><strong>Phase Advancement</strong> &mdash; Once all sections in a phase are approved (or skipped), an LJI admin can advance the project to the next phase, unlocking new sections.</p>
+          </div>
+        </div>
+
+        <!-- Roles & Permissions -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Roles &amp; Permissions <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <table class="ll-help-table">
+              <thead>
+                <tr>
+                  <th>Permission</th>
+                  <th>LJI Admin</th>
+                  <th>LJI Member</th>
+                  <th>Client Admin</th>
+                  <th>Client Member</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>View assigned projects</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
+                <tr><td>Fill in questionnaire</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
+                <tr><td>Submit sections for review</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
+                <tr><td>Approve/reject sections</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Create new projects</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Delete projects</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Advance project phases</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Invite users to projects</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}*</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Access admin panel</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Manage user roles</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Edit survey templates</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>View PII-encrypted data</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:0.75rem; margin-top:0.25rem;">* Client Admins can only invite client roles.</p>
+
+            <ul>
+              <li><strong>LJI Admin</strong> &mdash; Full control. Can create projects, manage users, approve sections, advance phases, edit survey templates, and access the admin panel. This is for LJI's project leads and senior staff.</li>
+              <li><strong>LJI Member</strong> &mdash; Can view and fill in questionnaires for assigned projects. Cannot approve, create projects, or access admin features. For LJI team members supporting the onboarding.</li>
+              <li><strong>Client Admin</strong> &mdash; The primary client contact. Can fill in questionnaires and invite other client team members. Cannot approve sections or access LJI admin features.</li>
+              <li><strong>Client Member</strong> &mdash; Can fill in questionnaire responses for assigned projects. Most restricted role &mdash; for client team members who contribute to specific sections.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Data Security -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Data Security <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <ul>
+              <li>All data is stored in Supabase PostgreSQL with Row Level Security (RLS).</li>
+              <li>PII (Personally Identifiable Information) fields are flagged and stored with column-level encryption using pgcrypto AES.</li>
+              <li>Only LJI Admins and Client Admins can view PII data.</li>
+              <li>Client Members can enter PII data but cannot read it back (write-only access).</li>
+              <li>Each project is isolated &mdash; users can only see projects they are members of.</li>
+              <li>File uploads are stored in secure Supabase Storage with project-scoped access.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Glossary -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Glossary <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <p>GRAVTY-specific terms have <span style="border-bottom:1px dashed var(--ll-on-surface-variant);">dotted-underline tooltips</span> throughout the questionnaire.</p>
+            <p>Hover over any underlined term to see its definition.</p>
+            <p>The glossary covers terms like <strong>BIT</strong> (Business Intelligence Transaction), <strong>Sponsor</strong>, <strong>Tier</strong>, <strong>Loyalty Account</strong>, <strong>Lookup Codes</strong>, <strong>Privileges</strong>, <strong>Offers</strong>, and more.</p>
+          </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Admin Panel (LJI Admins only) <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <ul>
+              <li><strong>Users tab</strong> &mdash; View all registered users, change their roles.</li>
+              <li><strong>Projects tab</strong> &mdash; View all projects, create new ones, delete existing ones.</li>
+              <li><strong>Survey Templates tab</strong> &mdash; Customize the questionnaire &mdash; toggle questions as required/optional, set default values. Changes apply to all new form loads.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Tips <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <ul>
+              <li>Use the keyboard <strong>Tab</strong> key to move between fields quickly.</li>
+              <li>Required fields are marked with a red asterisk (<span style="color:var(--ll-error); font-weight:700;">*</span>).</li>
+              <li>Help text appears below each question label in gray.</li>
+              <li>The progress bar on the dashboard shows overall completion percentage.</li>
+              <li>Click the LJI logo in the top-left to return to the dashboard from any page.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+  }
+
+  _hideHelp() {
+    const overlay = document.getElementById('ll-help-overlay');
+    const panel = document.getElementById('ll-help-panel');
+    if (!overlay || !panel) return;
+
+    panel.classList.add('ll-help-closing');
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.25s ease';
+
+    setTimeout(() => {
+      overlay.remove();
+      panel.remove();
+    }, 250);
+  }
+
+  _toggleHelpSection(header) {
+    const body = header.nextElementSibling;
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    header.classList.toggle('open', !isOpen);
   }
 
   _esc(str) {
