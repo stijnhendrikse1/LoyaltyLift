@@ -4,44 +4,38 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LoyaltyLift — Client Onboarding Portal</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23E8422F'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Inter,sans-serif' font-weight='700' font-size='40' fill='white'>L</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231E2A3A'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Inter,sans-serif' font-weight='700' font-size='40' fill='white'>L</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-/* LoyaltyLift — HubSpot CMS Styles */
+/* LoyaltyLift — Brand-Aligned Styles */
 :root {
-  --ll-brand: #E8422F;
-  --ll-brand-dark: #D13A28;
-  --ll-brand-light: #FEF2F1;
-  --ll-bg: #ffffff;
-  --ll-fg: #171717;
-  --ll-gray-50: #f9fafb;
-  --ll-gray-100: #f3f4f6;
-  --ll-gray-200: #e5e7eb;
-  --ll-gray-300: #d1d5db;
-  --ll-gray-400: #9ca3af;
-  --ll-gray-500: #6b7280;
-  --ll-gray-600: #4b5563;
-  --ll-gray-700: #374151;
-  --ll-gray-800: #1f2937;
-  --ll-gray-900: #111827;
-  --ll-green-100: #dcfce7;
-  --ll-green-700: #15803d;
-  --ll-blue-100: #dbeafe;
-  --ll-blue-700: #1d4ed8;
-  --ll-yellow-100: #fef9c3;
-  --ll-yellow-700: #a16207;
-  --ll-purple-100: #f3e8ff;
-  --ll-purple-700: #7c3aed;
-  --ll-radius: 0.75rem;
+  --ll-primary: #1E2A3A;
+  --ll-primary-dark: #091525;
+  --ll-secondary: #3B82F6;
+  --ll-teal: #0D9488;
+  --ll-surface: #f7f9fb;
+  --ll-surface-low: #f2f4f6;
+  --ll-surface-lowest: #ffffff;
+  --ll-surface-high: #e6e8ea;
+  --ll-on-surface: #191c1e;
+  --ll-on-surface-variant: #44474c;
+  --ll-outline: #c5c6cc;
+  --ll-error: #DC2626;
+  --ll-success: #16A34A;
+  --ll-warning: #F59E0B;
+  --ll-radius: 1.5rem;
+  --ll-radius-sm: 0.5rem;
   --ll-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ll-shadow: 0 32px 48px -12px rgba(83,95,113,0.06);
+  --ll-shadow-sm: 0 4px 16px -4px rgba(83,95,113,0.08);
 }
 
-/* Reset for HubSpot embed */
+/* Reset */
 .ll-app * { box-sizing: border-box; margin: 0; padding: 0; }
-.ll-app { font-family: var(--ll-font); color: var(--ll-fg); background: var(--ll-gray-50); min-height: 100vh; }
+.ll-app { font-family: var(--ll-font); color: var(--ll-on-surface); background: var(--ll-surface); min-height: 100vh; }
 
 /* Layout */
 .ll-container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
@@ -59,70 +53,91 @@
 
 /* Card */
 .ll-card {
-  background: var(--ll-bg);
+  background: var(--ll-surface-lowest);
   border-radius: var(--ll-radius);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  border: 1px solid var(--ll-gray-200);
-  padding: 1rem 1.5rem;
+  box-shadow: var(--ll-shadow);
+  border: none;
+  padding: 2rem;
 }
 .ll-card-hover:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  border-color: var(--ll-gray-300);
+  box-shadow: 0 32px 48px -12px rgba(83,95,113,0.12);
+  background: var(--ll-surface-lowest);
   cursor: pointer;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
 }
 
 /* Typography */
-.ll-h1 { font-size: 1.5rem; font-weight: 700; color: var(--ll-gray-900); }
-.ll-h2 { font-size: 1.25rem; font-weight: 700; color: var(--ll-gray-900); margin-bottom: 1rem; }
-.ll-h3 { font-size: 0.875rem; font-weight: 600; color: var(--ll-gray-700); }
-.ll-subtitle { font-size: 0.875rem; color: var(--ll-gray-500); }
-.ll-label { font-size: 0.75rem; font-weight: 500; color: var(--ll-gray-700); margin-bottom: 0.25rem; display: block; }
+.ll-h1 { font-size: 1.5rem; font-weight: 700; color: var(--ll-primary); letter-spacing: -0.02em; }
+.ll-h2 { font-size: 1.25rem; font-weight: 700; color: var(--ll-primary); margin-bottom: 1rem; letter-spacing: -0.02em; }
+.ll-h3 { font-size: 0.875rem; font-weight: 600; color: var(--ll-on-surface); }
+.ll-subtitle { font-size: 0.875rem; color: var(--ll-on-surface-variant); }
+.ll-label {
+  font-size: 0.6875rem; font-weight: 600; color: var(--ll-on-surface-variant);
+  margin-bottom: 0.375rem; display: block;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
 .ll-text-sm { font-size: 0.875rem; }
 .ll-text-xs { font-size: 0.75rem; }
-.ll-text-muted { color: var(--ll-gray-400); }
+.ll-text-muted { color: var(--ll-on-surface-variant); }
 
 /* Buttons */
 .ll-btn {
   display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500;
-  border-radius: 0.5rem; border: none; cursor: pointer;
-  transition: all 0.15s ease; text-decoration: none;
+  padding: 0.5rem 1.25rem; font-size: 0.875rem; font-weight: 600;
+  border-radius: var(--ll-radius-sm); border: none; cursor: pointer;
+  transition: all 0.2s ease; text-decoration: none;
 }
 .ll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.ll-btn-primary { background: var(--ll-brand); color: white; }
-.ll-btn-primary:hover:not(:disabled) { background: var(--ll-brand-dark); }
-.ll-btn-secondary { background: white; color: var(--ll-gray-700); border: 1px solid var(--ll-gray-300); }
-.ll-btn-secondary:hover:not(:disabled) { background: var(--ll-gray-50); }
+.ll-btn-primary {
+  background: linear-gradient(135deg, var(--ll-primary-dark), var(--ll-primary));
+  color: white;
+  box-shadow: 0 4px 12px -2px rgba(30,42,58,0.3);
+}
+.ll-btn-primary:hover:not(:disabled) {
+  box-shadow: 0 6px 20px -2px rgba(30,42,58,0.4);
+  transform: translateY(-1px);
+}
+.ll-btn-secondary {
+  background: transparent; color: var(--ll-on-surface);
+  border: 1px solid rgba(197,198,204,0.15);
+}
+.ll-btn-secondary:hover:not(:disabled) { background: var(--ll-surface-high); }
 .ll-btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; }
 
 /* Badges */
 .ll-badge {
   display: inline-flex; align-items: center; gap: 0.25rem;
-  padding: 0.125rem 0.5rem; border-radius: 9999px;
-  font-size: 0.625rem; font-weight: 500;
+  padding: 0.1875rem 0.625rem; border-radius: 9999px;
+  font-size: 0.625rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
 }
-.ll-badge-green { background: var(--ll-green-100); color: var(--ll-green-700); }
-.ll-badge-blue { background: var(--ll-blue-100); color: var(--ll-blue-700); }
-.ll-badge-yellow { background: var(--ll-yellow-100); color: var(--ll-yellow-700); }
-.ll-badge-purple { background: var(--ll-purple-100); color: var(--ll-purple-700); }
-.ll-badge-gray { background: var(--ll-gray-100); color: var(--ll-gray-600); }
-.ll-badge-red { background: var(--ll-brand-light); color: var(--ll-brand); }
+.ll-badge-green { background: rgba(13,148,136,0.1); color: var(--ll-teal); }
+.ll-badge-blue { background: rgba(59,130,246,0.1); color: var(--ll-secondary); }
+.ll-badge-yellow { background: rgba(245,158,11,0.1); color: var(--ll-warning); }
+.ll-badge-purple { background: rgba(59,130,246,0.08); color: var(--ll-secondary); }
+.ll-badge-gray { background: var(--ll-surface-low); color: var(--ll-on-surface-variant); }
+.ll-badge-red { background: rgba(220,38,38,0.08); color: var(--ll-error); }
 
 /* Inputs */
 .ll-input, .ll-select, .ll-textarea {
-  width: 100%; padding: 0.5rem 0.75rem;
+  width: 100%; padding: 0.625rem 0;
   font-size: 0.875rem; font-family: var(--ll-font);
-  border: 1px solid var(--ll-gray-300); border-radius: 0.5rem;
-  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
-  background: white; color: var(--ll-gray-900);
+  border: none; border-bottom: 2px solid var(--ll-on-surface-variant);
+  border-radius: 0;
+  outline: none; transition: border-color 0.2s ease;
+  background: transparent; color: var(--ll-on-surface);
 }
 .ll-input:focus, .ll-select:focus, .ll-textarea:focus {
-  border-color: var(--ll-brand);
-  box-shadow: 0 0 0 2px rgba(232, 66, 47, 0.15);
+  border-bottom-color: var(--ll-secondary);
+  box-shadow: none;
 }
-.ll-textarea { min-height: 80px; resize: vertical; }
-.ll-input-error { border-color: var(--ll-brand); }
-.ll-error-text { font-size: 0.75rem; color: var(--ll-brand); margin-top: 0.25rem; }
+.ll-textarea { min-height: 80px; resize: vertical; border: 2px solid var(--ll-surface-high); border-radius: var(--ll-radius-sm); padding: 0.625rem 0.75rem; }
+.ll-textarea:focus { border-color: var(--ll-secondary); }
+.ll-select { border: 2px solid var(--ll-surface-high); border-radius: var(--ll-radius-sm); padding: 0.625rem 0.75rem; }
+.ll-select:focus { border-color: var(--ll-secondary); }
+.ll-input-error { border-bottom-color: var(--ll-error); }
+.ll-error-text { font-size: 0.75rem; color: var(--ll-error); margin-top: 0.25rem; }
 
 /* Toggle */
 .ll-toggle {
@@ -130,78 +145,89 @@
 }
 .ll-toggle input { display: none; }
 .ll-toggle-track {
-  width: 2.5rem; height: 1.375rem; background: var(--ll-gray-300);
+  width: 2.5rem; height: 1.375rem; background: var(--ll-surface-high);
   border-radius: 9999px; position: relative; transition: background 0.2s;
 }
-.ll-toggle input:checked + .ll-toggle-track { background: var(--ll-brand); }
+.ll-toggle input:checked + .ll-toggle-track { background: var(--ll-teal); }
 .ll-toggle-thumb {
   width: 1rem; height: 1rem; background: white; border-radius: 50%;
   position: absolute; top: 0.1875rem; left: 0.1875rem; transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
 .ll-toggle input:checked + .ll-toggle-track .ll-toggle-thumb { transform: translateX(1.125rem); }
 
 /* Progress bar */
-.ll-progress { height: 0.5rem; background: var(--ll-gray-200); border-radius: 9999px; overflow: hidden; }
-.ll-progress-bar { height: 100%; background: var(--ll-brand); border-radius: 9999px; transition: width 0.3s ease; }
+.ll-progress { height: 0.5rem; background: var(--ll-surface-high); border-radius: 9999px; overflow: hidden; }
+.ll-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ll-secondary), #60a5fa);
+  border-radius: 9999px; transition: width 0.3s ease;
+}
 
-/* Nav / Header */
+/* Nav / Header — glassmorphism */
 .ll-header {
-  background: white; border-bottom: 1px solid var(--ll-gray-200);
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   padding: 0.75rem 1.5rem;
+  box-shadow: 0 1px 0 rgba(197,198,204,0.15);
+  position: sticky; top: 0; z-index: 40;
 }
-.ll-nav { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--ll-gray-200); }
+.ll-nav { display: flex; gap: 0.25rem; }
 .ll-nav-item {
-  padding: 0.5rem 1rem; font-size: 0.875rem; color: var(--ll-gray-500);
-  border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.15s;
-  background: none; border-top: none; border-left: none; border-right: none;
-  font-family: var(--ll-font);
+  padding: 0.5rem 1rem; font-size: 0.875rem; color: var(--ll-on-surface-variant);
+  border: none; cursor: pointer; transition: all 0.15s;
+  background: none; font-family: var(--ll-font);
+  border-radius: var(--ll-radius-sm);
 }
-.ll-nav-item:hover { color: var(--ll-gray-700); }
-.ll-nav-item.active { color: var(--ll-brand); border-bottom-color: var(--ll-brand); font-weight: 500; }
+.ll-nav-item:hover { background: var(--ll-surface-high); color: var(--ll-on-surface); }
+.ll-nav-item.active { background: var(--ll-primary); color: white; font-weight: 600; }
 
 /* Table */
 .ll-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
 .ll-table th {
-  text-align: left; padding: 0.625rem 0.75rem;
-  font-size: 0.75rem; font-weight: 500; color: var(--ll-gray-500);
-  background: var(--ll-gray-50); border-bottom: 1px solid var(--ll-gray-200);
+  text-align: left; padding: 0.75rem 1rem;
+  font-size: 0.6875rem; font-weight: 600; color: var(--ll-on-surface-variant);
+  background: var(--ll-surface-low); border: none;
+  text-transform: uppercase; letter-spacing: 0.06em;
 }
 .ll-table td {
-  padding: 0.625rem 0.75rem; border-bottom: 1px solid var(--ll-gray-100);
-  color: var(--ll-gray-700);
+  padding: 0.75rem 1rem; border: none;
+  color: var(--ll-on-surface-variant);
 }
-.ll-table tr:hover td { background: var(--ll-gray-50); }
+.ll-table tr:hover td { background: var(--ll-surface-low); }
 
 /* Sidebar */
 .ll-sidebar {
-  width: 280px; background: white; border-right: 1px solid var(--ll-gray-200);
+  width: 280px; background: var(--ll-surface-low);
   min-height: 100vh; padding: 1.5rem 0;
 }
 .ll-sidebar-item {
   display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.5rem 1.5rem; font-size: 0.875rem; color: var(--ll-gray-600);
+  padding: 0.5rem 1.5rem; font-size: 0.875rem; color: var(--ll-on-surface-variant);
   cursor: pointer; transition: all 0.15s; border: none; background: none;
   width: 100%; text-align: left; font-family: var(--ll-font);
 }
-.ll-sidebar-item:hover { background: var(--ll-gray-50); color: var(--ll-gray-900); }
-.ll-sidebar-item.active { background: var(--ll-brand-light); color: var(--ll-brand); font-weight: 500; }
+.ll-sidebar-item:hover { background: var(--ll-surface-high); color: var(--ll-on-surface); }
+.ll-sidebar-item.active { background: rgba(59,130,246,0.1); color: var(--ll-secondary); font-weight: 600; }
 
-/* Save indicator */
+/* Save indicator — glassmorphism */
 .ll-save-status {
   position: fixed; bottom: 1.5rem; right: 1.5rem;
-  padding: 0.5rem 1rem; border-radius: 0.5rem;
-  font-size: 0.75rem; font-weight: 500;
-  background: white; border: 1px solid var(--ll-gray-200);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 0.5rem 1rem; border-radius: var(--ll-radius-sm);
+  font-size: 0.75rem; font-weight: 600;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--ll-shadow-sm);
   transition: opacity 0.3s;
+  text-transform: uppercase; letter-spacing: 0.04em;
 }
-.ll-save-status.saving { color: var(--ll-yellow-700); }
-.ll-save-status.saved { color: var(--ll-green-700); }
+.ll-save-status.saving { color: var(--ll-warning); }
+.ll-save-status.saved { color: var(--ll-teal); }
 
 /* Loading spinner */
 .ll-spinner {
   display: inline-block; width: 1.5rem; height: 1.5rem;
-  border: 2px solid var(--ll-gray-200); border-top-color: var(--ll-brand);
+  border: 2px solid var(--ll-surface-high); border-top-color: var(--ll-secondary);
   border-radius: 50%; animation: ll-spin 0.6s linear infinite;
 }
 @keyframes ll-spin { to { transform: rotate(360deg); } }
@@ -213,25 +239,28 @@
 
 /* Glossary tooltip */
 .ll-glossary-term {
-  border-bottom: 1px dashed var(--ll-gray-400); cursor: help; position: relative;
+  border-bottom: 1px dashed var(--ll-on-surface-variant); cursor: help; position: relative;
 }
 .ll-glossary-tooltip {
   position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
-  background: var(--ll-gray-900); color: white; padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem; font-size: 0.75rem; width: 250px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; z-index: 100;
+  background: var(--ll-primary-dark); color: white; padding: 0.75rem 1rem;
+  border-radius: var(--ll-radius-sm); font-size: 0.75rem; width: 250px;
+  box-shadow: var(--ll-shadow); display: none; z-index: 100;
 }
 .ll-glossary-term:hover .ll-glossary-tooltip { display: block; }
 
-/* Modal / Overlay */
+/* Modal / Overlay — glassmorphism */
 .ll-modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  position: fixed; inset: 0; background: rgba(9,21,37,0.4);
   display: flex; align-items: center; justify-content: center; z-index: 50;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
 }
 .ll-modal {
-  background: white; border-radius: var(--ll-radius); padding: 1.5rem;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-radius: 2rem; padding: 2.5rem;
   max-width: 480px; width: 90%; max-height: 80vh; overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  box-shadow: var(--ll-shadow);
 }
 
 /* Toast notifications */
@@ -241,17 +270,17 @@
   pointer-events: none;
 }
 .ll-toast {
-  padding: 0.75rem 1.25rem; border-radius: 0.5rem;
-  font-size: 0.875rem; font-weight: 500;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 0.75rem 1.25rem; border-radius: var(--ll-radius-sm);
+  font-size: 0.875rem; font-weight: 600;
+  box-shadow: var(--ll-shadow);
   pointer-events: auto; max-width: 400px;
   animation: ll-toast-in 0.25s ease;
   display: flex; align-items: center; gap: 0.75rem;
 }
-.ll-toast-success { background: var(--ll-green-700); color: white; }
-.ll-toast-error { background: var(--ll-brand); color: white; }
-.ll-toast-info { background: var(--ll-gray-800); color: white; }
-.ll-toast-warning { background: var(--ll-yellow-700); color: white; }
+.ll-toast-success { background: var(--ll-success); color: white; }
+.ll-toast-error { background: var(--ll-error); color: white; }
+.ll-toast-info { background: var(--ll-primary); color: white; }
+.ll-toast-warning { background: var(--ll-warning); color: white; }
 .ll-toast-close {
   background: none; border: none; color: inherit; cursor: pointer;
   font-size: 1.125rem; opacity: 0.7; padding: 0; line-height: 1;
@@ -266,39 +295,42 @@
   to { transform: translateX(100%); opacity: 0; }
 }
 
-/* Confirm dialog */
+/* Confirm dialog — glassmorphism */
 .ll-confirm-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  position: fixed; inset: 0; background: rgba(9,21,37,0.4);
   display: flex; align-items: center; justify-content: center; z-index: 100;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
   animation: ll-fade-in 0.15s ease;
 }
 @keyframes ll-fade-in { from { opacity: 0; } to { opacity: 1; } }
 .ll-confirm-box {
-  background: white; border-radius: var(--ll-radius); padding: 1.5rem;
-  max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-radius: 1.5rem; padding: 2rem;
+  max-width: 400px; width: 90%; box-shadow: var(--ll-shadow);
 }
-.ll-confirm-msg { font-size: 0.9375rem; color: var(--ll-gray-800); margin-bottom: 1.25rem; line-height: 1.5; }
+.ll-confirm-msg { font-size: 0.9375rem; color: var(--ll-on-surface); margin-bottom: 1.25rem; line-height: 1.5; }
 .ll-confirm-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
 
 /* Accordion */
 .ll-accordion-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0.75rem 1rem; cursor: pointer; background: var(--ll-gray-50);
-  border: 1px solid var(--ll-gray-200); border-radius: 0.5rem;
-  font-size: 0.875rem; font-weight: 500; color: var(--ll-gray-700);
+  padding: 0.875rem 1.25rem; cursor: pointer; background: var(--ll-surface-low);
+  border: none; border-radius: var(--ll-radius-sm);
+  font-size: 0.875rem; font-weight: 600; color: var(--ll-on-surface);
   transition: background 0.15s;
 }
-.ll-accordion-header:hover { background: var(--ll-gray-100); }
+.ll-accordion-header:hover { background: var(--ll-surface-high); }
 .ll-accordion-body {
-  padding: 1rem; border: 1px solid var(--ll-gray-200);
-  border-top: none; border-radius: 0 0 0.5rem 0.5rem;
+  padding: 1rem; background: var(--ll-surface-lowest);
+  border-radius: 0 0 var(--ll-radius-sm) var(--ll-radius-sm);
   display: none;
 }
 .ll-accordion-body.open { display: block; }
 
 /* Comment thread */
 .ll-comment {
-  padding: 0.75rem; border-left: 2px solid var(--ll-gray-200);
+  padding: 0.75rem; border-left: 2px solid var(--ll-secondary);
   margin-left: 0.5rem;
 }
 .ll-comment-reply { margin-left: 1.5rem; }
@@ -313,7 +345,7 @@
 </head>
 <body>
   <div id="ll-app" class="ll-app"></div>
-  <footer style="text-align:center; padding:1.5rem; font-size:0.6875rem; color:#9ca3af;">&copy; 2026 T2D3 LLC. All rights reserved.</footer>
+  <footer style="text-align:center; padding:1.5rem; font-size:0.625rem; color:#44474c; text-transform:uppercase; letter-spacing:0.08em; font-family:'Inter',sans-serif;">LOYALTYLIFT ANALYTICS ENGINE V2.4 | &copy; 2026 T2D3 LLC</footer>
 
   <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -1085,7 +1117,7 @@ class LLFormEngine {
           <button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-submit-btn" onclick="llFormEngine.onSubmit()">Submit for Review</button>
         </div>
       </div>
-      <div class="ll-card" style="padding: 1.5rem;">
+      <div class="ll-card" style="padding: 2rem;">
     `;
 
     section.questions.forEach((q, i) => {
@@ -1102,7 +1134,7 @@ class LLFormEngine {
 
   _renderQuestion(q, index) {
     const value = this.responses[q.key];
-    const reqMark = q.required ? '<span style="color:var(--ll-brand);">*</span>' : '';
+    const reqMark = q.required ? '<span style="color:var(--ll-error);">*</span>' : '';
     let label = `<label class="ll-label">${this._esc(q.label)} ${reqMark}</label>`;
 
     if (q.helpText) {
@@ -1175,11 +1207,11 @@ class LLFormEngine {
         input = `<div class="ll-flex ll-gap-4">
           <label class="ll-toggle">
             <input type="radio" name="ll-bool-${q.key}" value="true" data-key="${q.key}" ${strVal === 'true' ? 'checked' : ''} />
-            <span style="font-size:0.875rem; cursor:pointer; padding:0.375rem 1rem; border-radius:0.375rem; border:1px solid var(--ll-gray-300); ${strVal === 'true' ? 'background:var(--ll-brand); color:white; border-color:var(--ll-brand);' : ''}">Yes</span>
+            <span style="font-size:0.875rem; cursor:pointer; padding:0.375rem 1rem; border-radius:0.375rem; border:1px solid rgba(197,198,204,0.15); ${strVal === 'true' ? 'background:linear-gradient(135deg,var(--ll-primary-dark),var(--ll-primary)); color:white; border-color:var(--ll-primary);' : ''}">Yes</span>
           </label>
           <label class="ll-toggle">
             <input type="radio" name="ll-bool-${q.key}" value="false" data-key="${q.key}" ${strVal === 'false' ? 'checked' : ''} />
-            <span style="font-size:0.875rem; cursor:pointer; padding:0.375rem 1rem; border-radius:0.375rem; border:1px solid var(--ll-gray-300); ${strVal === 'false' ? 'background:var(--ll-gray-600); color:white; border-color:var(--ll-gray-600);' : ''}">No</span>
+            <span style="font-size:0.875rem; cursor:pointer; padding:0.375rem 1rem; border-radius:0.375rem; border:1px solid rgba(197,198,204,0.15); ${strVal === 'false' ? 'background:var(--ll-on-surface-variant); color:white; border-color:var(--ll-on-surface-variant);' : ''}">No</span>
           </label>
         </div>`;
         break;
@@ -1234,17 +1266,17 @@ class LLFormEngine {
         parent.querySelectorAll('span').forEach(s => {
           s.style.background = '';
           s.style.color = '';
-          s.style.borderColor = 'var(--ll-gray-300)';
+          s.style.borderColor = 'rgba(197,198,204,0.15)';
         });
         const span = el.nextElementSibling;
         if (el.value === 'true') {
-          span.style.background = 'var(--ll-brand)';
+          span.style.background = 'linear-gradient(135deg,var(--ll-primary-dark),var(--ll-primary))';
           span.style.color = 'white';
-          span.style.borderColor = 'var(--ll-brand)';
+          span.style.borderColor = 'var(--ll-primary)';
         } else {
-          span.style.background = 'var(--ll-gray-600)';
+          span.style.background = 'var(--ll-on-surface-variant)';
           span.style.color = 'white';
-          span.style.borderColor = 'var(--ll-gray-600)';
+          span.style.borderColor = 'var(--ll-on-surface-variant)';
         }
         this._updateConditionalVisibility();
       });
@@ -1561,21 +1593,26 @@ class LLApp {
   _showLogin() {
     this.currentPage = 'login';
     this.container.innerHTML = `
-      <div class="ll-flex ll-items-center ll-justify-center" style="min-height:100vh; background:var(--ll-gray-50);">
-        <div class="ll-card" style="width:100%; max-width:400px; padding:2rem;">
+      <div class="ll-flex ll-items-center ll-justify-center" style="min-height:100vh; background:linear-gradient(180deg, var(--ll-primary-dark) 0%, var(--ll-primary) 40%, var(--ll-surface) 100%);">
+        <div class="ll-card" style="width:100%; max-width:420px; padding:2.5rem;">
           <div style="text-align:center; margin-bottom:2rem;">
-            <img src="lji-logo.png" alt="LJI" style="height:48px; margin-bottom:0.5rem; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
-            <p class="ll-subtitle">Client Onboarding Portal</p>
+            <div class="ll-flex ll-items-center ll-justify-center ll-gap-3" style="margin-bottom:0.5rem;">
+              <img src="lji-logo.png" alt="LJI" style="height:48px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
+              <div style="text-align:left;">
+                <div style="font-size:1.25rem; font-weight:700; color:var(--ll-primary); letter-spacing:-0.02em;">LoyaltyLift</div>
+                <div style="font-size:0.5625rem; font-weight:600; color:var(--ll-on-surface-variant); text-transform:uppercase; letter-spacing:0.1em;">Enterprise Edition</div>
+              </div>
+            </div>
           </div>
           <div id="ll-login-form">
             <label class="ll-label">Email address</label>
-            <input type="email" class="ll-input" id="ll-login-email" placeholder="you@company.com" style="margin-bottom:1rem;" />
-            <button class="ll-btn ll-btn-primary" style="width:100%;" id="ll-login-btn" onclick="llApp._doLogin()">
+            <input type="email" class="ll-input" id="ll-login-email" placeholder="you@company.com" style="margin-bottom:1.5rem;" />
+            <button class="ll-btn ll-btn-primary" style="width:100%; justify-content:center; padding:0.75rem 1.25rem;" id="ll-login-btn" onclick="llApp._doLogin()">
               Send Magic Link
             </button>
           </div>
           <div id="ll-login-sent" style="display:none; text-align:center;">
-            <p style="color:var(--ll-green-700); font-size:0.875rem; margin-bottom:0.5rem;">Check your email!</p>
+            <p style="color:var(--ll-teal); font-size:0.875rem; font-weight:600; margin-bottom:0.5rem;">Check your email!</p>
             <p class="ll-text-sm ll-text-muted">We sent a sign-in link to your email. Click it to continue.</p>
           </div>
         </div>
@@ -1615,7 +1652,7 @@ class LLApp {
       this._renderDashboard(projects);
     } catch (err) {
       console.error('Dashboard error:', err);
-      this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p class="ll-text-sm" style="color:var(--ll-brand);">Failed to load projects. ${err.message}</p></div></div>`;
+      this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p class="ll-text-sm" style="color:var(--ll-error);">Failed to load projects. ${err.message}</p></div></div>`;
     }
   }
 
@@ -1632,7 +1669,13 @@ class LLApp {
     this.container.innerHTML = `
       <div class="ll-header">
         <div class="ll-flex ll-justify-between ll-items-center">
-          <img src="lji-logo.png" alt="LJI" style="height:32px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
+          <div class="ll-flex ll-items-center ll-gap-3">
+            <img src="lji-logo.png" alt="LJI" style="height:32px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
+            <div>
+              <span style="font-size:1rem; font-weight:700; color:var(--ll-primary); letter-spacing:-0.02em;">LoyaltyLift</span>
+              <span style="font-size:0.5rem; font-weight:600; color:var(--ll-on-surface-variant); text-transform:uppercase; letter-spacing:0.1em; margin-left:0.5rem;">Enterprise Edition</span>
+            </div>
+          </div>
           <div class="ll-flex ll-items-center ll-gap-3">
             <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
             ${window.llClient.isLjiAdmin ? '<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate(\'admin\')">Admin</button>' : ''}
@@ -1657,15 +1700,15 @@ class LLApp {
         ` : `
           <div class="ll-flex ll-flex-col ll-gap-4">
             ${projects.map(p => `
-              <div class="ll-card ll-card-hover" onclick="llApp.navigate('project', { projectId: '${p.id}' })">
+              <div class="ll-card ll-card-hover" onclick="llApp.navigate('project', { projectId: '${p.id}' })" style="transition:all 0.2s ease;">
                 <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:0.75rem;">
                   <div>
-                    <h3 class="ll-h3" style="font-size:1rem;">${this._esc(p.program_name)}</h3>
+                    <h3 class="ll-h3" style="font-size:1rem; color:var(--ll-primary);">${this._esc(p.program_name)}</h3>
                     <p class="ll-text-xs ll-text-muted">${this._esc(p.client_org?.name || '')}</p>
                   </div>
                   <div class="ll-flex ll-gap-2">
                     <span class="ll-badge ${statusBadges[p.status] || 'll-badge-gray'}">${p.status}</span>
-                    <span class="ll-badge ll-badge-purple">${phaseLabels[p.phase] || p.phase}</span>
+                    <span class="ll-badge ll-badge-blue">${phaseLabels[p.phase] || p.phase}</span>
                   </div>
                 </div>
                 <div class="ll-flex ll-items-center ll-gap-3">
@@ -1689,11 +1732,11 @@ class LLApp {
       <div class="ll-header">
         <div class="ll-flex ll-items-center ll-gap-3">
           <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('dashboard')">Back</button>
-          <h1 class="ll-h1" style="color:var(--ll-brand);">New Project</h1>
+          <h1 class="ll-h1">New Project</h1>
         </div>
       </div>
       <div class="ll-container" style="max-width:600px;">
-        <div class="ll-card" style="padding:1.5rem;">
+        <div class="ll-card" style="padding:2rem;">
           <div style="margin-bottom:1rem;">
             <label class="ll-label">Client Organization Name</label>
             <input type="text" class="ll-input" id="ll-np-org" placeholder="e.g., Emirates Group" />
@@ -1760,7 +1803,7 @@ class LLApp {
       this._renderProject(project);
     } catch (err) {
       console.error('Project error:', err);
-      this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p style="color:var(--ll-brand);">Failed to load project. ${err.message}</p></div></div>`;
+      this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p style="color:var(--ll-error);">Failed to load project. ${err.message}</p></div></div>`;
     }
   }
 
@@ -1792,7 +1835,7 @@ class LLApp {
             </div>
           </div>
           <div class="ll-flex ll-gap-2 ll-items-center">
-            <span class="ll-badge ll-badge-purple">${phaseLabels[project.phase]}</span>
+            <span class="ll-badge ll-badge-blue">${phaseLabels[project.phase]}</span>
             ${isLji && project.phase !== 'launch' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._advancePhase('${project.id}')">Advance Phase</button>` : ''}
           </div>
         </div>
@@ -1856,7 +1899,10 @@ class LLApp {
       <div class="ll-header">
         <div class="ll-flex ll-items-center ll-gap-3">
           <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('project', { projectId: '${projectId}' })">Back</button>
-          <img src="lji-logo.png" alt="LJI" style="height:32px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
+          <div class="ll-flex ll-items-center ll-gap-2">
+            <img src="lji-logo.png" alt="LJI" style="height:28px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
+            <span style="font-size:0.875rem; font-weight:700; color:var(--ll-primary); letter-spacing:-0.02em;">LoyaltyLift</span>
+          </div>
         </div>
       </div>
       <div class="ll-container" style="max-width:800px;" id="ll-section-form"></div>
@@ -1944,7 +1990,7 @@ class LLApp {
         <div class="ll-flex ll-justify-between ll-items-center">
           <div class="ll-flex ll-items-center ll-gap-3">
             <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('dashboard')">Back</button>
-            <h1 class="ll-h1" style="color:var(--ll-brand);">Admin Panel</h1>
+            <h1 class="ll-h1">Admin Panel</h1>
           </div>
           <div class="ll-flex ll-items-center ll-gap-3">
             <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
@@ -1994,7 +2040,7 @@ class LLApp {
       }
     } catch (err) {
       console.error('Admin tab error:', err);
-      content.innerHTML = `<div class="ll-card"><p class="ll-text-sm" style="color:var(--ll-brand);">Failed to load: ${err.message}</p></div>`;
+      content.innerHTML = `<div class="ll-card"><p class="ll-text-sm" style="color:var(--ll-error);">Failed to load: ${err.message}</p></div>`;
     }
   }
 
@@ -2002,7 +2048,7 @@ class LLApp {
     const profiles = await window.llClient.listAllProfiles();
     const roles = ['lji_admin', 'lji_member', 'client_admin', 'client_member'];
     content.innerHTML = `
-      <div class="ll-card" style="overflow-x:auto;">
+      <div class="ll-card" style="overflow-x:auto; padding:2rem;">
         <h2 class="ll-h2">All Users (${profiles.length})</h2>
         <table class="ll-table">
           <thead>
@@ -2074,12 +2120,12 @@ class LLApp {
                 <td style="font-weight:500;">${this._esc(p.program_name)}</td>
                 <td>${this._esc(p.client_org?.name || '--')}</td>
                 <td>${this._esc(p.client_org?.industry || '--')}</td>
-                <td><span class="ll-badge ll-badge-purple">${phaseLabels[p.phase] || p.phase}</span></td>
+                <td><span class="ll-badge ll-badge-blue">${phaseLabels[p.phase] || p.phase}</span></td>
                 <td><span class="ll-badge ${statusBadges[p.status] || 'll-badge-gray'}">${p.status}</span></td>
                 <td>${p.progress.pct}%</td>
                 <td class="ll-text-xs ll-text-muted">${new Date(p.created_at).toLocaleDateString()}</td>
                 <td>
-                  <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-brand);" onclick="event.stopPropagation(); llApp._adminDeleteProject('${p.id}', '${this._esc(p.program_name)}')">Delete</button>
+                  <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error);" onclick="event.stopPropagation(); llApp._adminDeleteProject('${p.id}', '${this._esc(p.program_name)}')">Delete</button>
                 </td>
               </tr>
             `).join('')}
@@ -2129,7 +2175,7 @@ class LLApp {
                 <span>${this._esc(sectionNames[sid] || section.name || sid)}</span>
                 <span class="ll-flex ll-gap-2 ll-items-center">
                   <span class="ll-badge ll-badge-gray">${questions.length} questions</span>
-                  <span class="ll-badge ll-badge-purple">${section.phase || '--'}</span>
+                  <span class="ll-badge ll-badge-blue">${section.phase || '--'}</span>
                   <span id="ll-tmpl-arrow-${sid}" style="transition:transform 0.2s;">&#9654;</span>
                 </span>
               </div>
