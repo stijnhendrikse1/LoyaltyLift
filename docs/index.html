@@ -711,6 +711,7 @@ class LoyaltyLiftClient {
 
   // --- Sections ---
   async getSectionResponses(projectId, sectionId) {
+    return this._cached('section_' + projectId + '_' + sectionId, async () => {
     const [responsesResult, piiResult, selectionsResult, entityResult] = await Promise.all([
       this.supabase
         .from('responses')
@@ -741,6 +742,7 @@ class LoyaltyLiftClient {
       dataModelSelections: selectionsResult.data || [],
       entityRows: entityResult.data || [],
     };
+    });
   }
 
   async saveResponse(projectId, sectionId, questionKey, value) {
@@ -754,7 +756,7 @@ class LoyaltyLiftClient {
         responded_by: this._user.id,
       }, { onConflict: 'project_id,section_id,question_key' });
     if (error) { console.error('saveResponse:', error); throw error; }
-
+    this._invalidate('section_' + projectId);
     // Update section status + log activity in parallel, non-blocking
     this.supabase.from('project_sections').update({ status: 'in_progress' }).eq('project_id', projectId).eq('section_id', sectionId).eq('status', 'not_started');
     this._logActivity(projectId, 'response_updated', { section_id: sectionId, question_key: questionKey });
@@ -1664,6 +1666,13 @@ class LLApp {
     try {
       const projects = await window.llClient.listProjects();
       this._renderDashboard(projects);
+      // Prefetch all project details in background
+      projects.forEach(p => {
+        window.llClient.getProject(p.id);
+      });
+      // Prefetch templates + overrides in background
+      if (window._loadTemplates) window._loadTemplates();
+      window.llClient.getSurveyOverrides();
     } catch (err) {
       console.error('Dashboard error:', err);
       this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p class="ll-text-sm" style="color:var(--ll-error);">Failed to load projects. ${err.message}</p></div></div>`;
@@ -1822,6 +1831,10 @@ class LLApp {
       const project = await window.llClient.getProject(projectId);
       this.currentProject = project;
       if (this.currentPage === 'project') this._renderProject(project);
+      // Prefetch responses for visible sections in background
+      (project.sections || []).filter(s => s.visible && s.status !== 'not_started').forEach(s => {
+        window.llClient.getSectionResponses(projectId, s.section_id);
+      });
     } catch (err) {
       console.error('Project error:', err);
       if (!this.currentProject || this.currentProject.id !== projectId) {
