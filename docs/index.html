@@ -554,7 +554,7 @@ class LoyaltyLiftClient {
     this._profile = null;
     this._initPromise = null;
     this._cache = {};
-    this._cacheTTL = 30000; // 30s cache
+    this._cacheTTL = 300000; // 5 min cache
   }
 
   _cached(key, fn) {
@@ -1810,14 +1810,23 @@ class LLApp {
   // --- Project Detail ---
   async _showProject(projectId) {
     this.currentPage = 'project';
-    this._showLoading();
+    // Try to render immediately from cached list data
+    const cachedList = window.llClient._cache['projects'];
+    if (cachedList) {
+      const cached = cachedList.data.find(p => p.id === projectId);
+      if (cached) { this.currentProject = cached; this._renderProject(cached); }
+      else { this._showLoading(); }
+    } else { this._showLoading(); }
+    // Fetch full data in background and re-render
     try {
       const project = await window.llClient.getProject(projectId);
       this.currentProject = project;
-      this._renderProject(project);
+      if (this.currentPage === 'project') this._renderProject(project);
     } catch (err) {
       console.error('Project error:', err);
-      this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p style="color:var(--ll-error);">Failed to load project. ${err.message}</p></div></div>`;
+      if (!this.currentProject || this.currentProject.id !== projectId) {
+        this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p style="color:var(--ll-error);">Failed to load project. ${err.message}</p></div></div>`;
+      }
     }
   }
 
@@ -1900,15 +1909,8 @@ class LLApp {
   // --- Section Form ---
   async _showSection(projectId, sectionId) {
     this.currentPage = 'section';
-    this._showLoading();
 
-    // Load section config from templates
-    const sectionConfig = await this._loadSectionConfig(sectionId);
-    if (!sectionConfig) {
-      this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p>Section template not found: ${sectionId}</p></div></div>`;
-      return;
-    }
-
+    // Render shell immediately
     this.container.innerHTML = `
       <div class="ll-header">
         <div class="ll-flex ll-items-center ll-gap-3">
@@ -1919,8 +1921,17 @@ class LLApp {
           </div>
         </div>
       </div>
-      <div class="ll-container" style="max-width:800px;" id="ll-section-form"></div>
+      <div class="ll-container" style="max-width:800px;" id="ll-section-form">
+        <div class="ll-loading-page"><div class="ll-spinner"></div></div>
+      </div>
     `;
+
+    // Load config (templates are likely already cached)
+    const sectionConfig = await this._loadSectionConfig(sectionId);
+    if (!sectionConfig) {
+      document.getElementById('ll-section-form').innerHTML = `<div class="ll-card"><p>Section template not found: ${sectionId}</p></div>`;
+      return;
+    }
 
     this.formEngine = new LLFormEngine('ll-section-form');
     window.llFormEngine = this.formEngine;
