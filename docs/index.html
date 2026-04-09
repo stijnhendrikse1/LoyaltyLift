@@ -7068,7 +7068,7 @@ class LLApp {
       <div class="ll-flex ll-items-center ll-justify-center" style="min-height:100vh; background:var(--ll-gray-50);">
         <div class="ll-card" style="width:100%; max-width:400px; padding:2rem;">
           <div style="text-align:center; margin-bottom:2rem;">
-            <img src="lji-logo.png" alt="LJI" style="height:48px; margin-bottom:0.5rem;" />
+            <img src="lji-logo.png" alt="LJI" style="height:48px; margin-bottom:0.5rem; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
             <p class="ll-subtitle">Client Onboarding Portal</p>
           </div>
           <div id="ll-login-form">
@@ -7136,7 +7136,7 @@ class LLApp {
     this.container.innerHTML = `
       <div class="ll-header">
         <div class="ll-flex ll-justify-between ll-items-center">
-          <img src="lji-logo.png" alt="LJI" style="height:32px;" />
+          <img src="lji-logo.png" alt="LJI" style="height:32px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
           <div class="ll-flex ll-items-center ll-gap-3">
             <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
             ${window.llClient.isLjiAdmin ? '<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate(\'admin\')">Admin</button>' : ''}
@@ -7360,7 +7360,7 @@ class LLApp {
       <div class="ll-header">
         <div class="ll-flex ll-items-center ll-gap-3">
           <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('project', { projectId: '${projectId}' })">Back</button>
-          <img src="lji-logo.png" alt="LJI" style="height:32px;" />
+          <img src="lji-logo.png" alt="LJI" style="height:32px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
         </div>
       </div>
       <div class="ll-container" style="max-width:800px;" id="ll-section-form"></div>
