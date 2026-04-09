@@ -2141,7 +2141,7 @@ class LLApp {
       <div class="ll-flex ll-items-center ll-justify-center" style="min-height:100vh; background:var(--ll-gray-50);">
         <div class="ll-card" style="width:100%; max-width:400px; padding:2rem;">
           <div style="text-align:center; margin-bottom:2rem;">
-            <h1 class="ll-h1" style="color:var(--ll-brand); margin-bottom:0.5rem;">LoyaltyLift</h1>
+            <img src="lji-logo.png" alt="LJI" style="height:48px; margin-bottom:0.5rem;" />
             <p class="ll-subtitle">Client Onboarding Portal</p>
           </div>
           <div id="ll-login-form">
@@ -2209,7 +2209,7 @@ class LLApp {
     this.container.innerHTML = `
       <div class="ll-header">
         <div class="ll-flex ll-justify-between ll-items-center">
-          <h1 class="ll-h1" style="color:var(--ll-brand);">LoyaltyLift</h1>
+          <img src="lji-logo.png" alt="LJI" style="height:32px;" />
           <div class="ll-flex ll-items-center ll-gap-3">
             <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
             <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._signOut()">Sign Out</button>
@@ -2432,7 +2432,7 @@ class LLApp {
       <div class="ll-header">
         <div class="ll-flex ll-items-center ll-gap-3">
           <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('project', { projectId: '${projectId}' })">Back</button>
-          <h1 class="ll-h1" style="color:var(--ll-brand);">LoyaltyLift</h1>
+          <img src="lji-logo.png" alt="LJI" style="height:32px;" />
         </div>
       </div>
       <div class="ll-container" style="max-width:800px;" id="ll-section-form"></div>
