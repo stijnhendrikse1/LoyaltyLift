@@ -3539,64 +3539,82 @@ class LLApp {
       </div>
       <div class="ll-help-content">
 
-        <!-- Getting Started -->
+        <!-- 1. Getting Started -->
         <div class="ll-help-section">
           <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
             Getting Started <span class="ll-help-chevron">&#9660;</span>
           </button>
           <div class="ll-help-section-body">
+            <p><strong>LoyaltyLift Discovery</strong> is a client onboarding questionnaire platform by Loyalty Juggernaut (LJI) for configuring the GRAVTY loyalty platform. It replaces a 35+ tab Excel spreadsheet with a structured, guided digital experience.</p>
+            <p>The questionnaire contains <strong>42 sections</strong> organized into <strong>3 phases</strong> with over <strong>500 questions</strong> covering every aspect of loyalty program configuration.</p>
             <ul>
-              <li><strong>LoyaltyLift</strong> is a client onboarding questionnaire platform built by Loyalty Juggernaut (LJI) for configuring the GRAVTY loyalty platform.</li>
-              <li>It replaces the traditional 35+ tab Excel spreadsheet with a structured, guided digital experience.</li>
-              <li>The questionnaire is organized into <strong>3 phases</strong>: Discovery, Solution Design, and Launch Readiness.</li>
-              <li>Each phase contains multiple sections, and each section contains questions specific to that topic.</li>
-              <li>Both <strong>LJI staff</strong> and <strong>clients</strong> can create projects. A client who creates a project automatically becomes the <strong>Client Admin</strong> for that project.</li>
-              <li>The app is hosted on GitHub Pages at <strong>smfhcp.github.io/LoyaltyLift</strong>.</li>
+              <li>Any user can create a project &mdash; clients who create a project automatically become the <strong>Client Admin</strong> for that project.</li>
+              <li>LJI staff create and manage projects on behalf of their clients.</li>
+              <li>New users automatically get access to <strong>Example projects</strong> (marked <strong>[Example]</strong>) in read-only mode to explore the platform before working on real projects.</li>
+              <li>Access the app at <strong>smfhcp.github.io/LoyaltyLift</strong>.</li>
             </ul>
           </div>
         </div>
 
-        <!-- How It Works -->
+        <!-- 2. Projects & Phases -->
         <div class="ll-help-section">
           <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
-            How It Works <span class="ll-help-chevron">&#9660;</span>
+            Projects &amp; Phases <span class="ll-help-chevron">&#9660;</span>
           </button>
           <div class="ll-help-section-body">
-            <p><strong>Projects</strong> &mdash; Each client engagement has its own project. A project tracks the entire onboarding questionnaire for one loyalty program.</p>
+            <p>Each project represents one client loyalty program onboarding. Projects progress through <strong>3 phases</strong>:</p>
 
-            <p><strong>Phases</strong> &mdash; Projects progress through 3 phases with <strong>42 total sections</strong>:</p>
+            <p><strong>Discovery (12 sections)</strong></p>
             <ul>
-              <li><strong>Discovery</strong> (12 sections): Core program setup &mdash; tenancy, program details, loyalty accounts, policies, sponsors, member enrollment, tiers, earning/redemption rules, offers, data migration, and marketing.</li>
-              <li><strong>Solution Design</strong> (19 sections): Detailed data models, entity configurations, member services, batch processing, role management, and integrations.</li>
-              <li><strong>Launch Readiness</strong> (11 sections): Industry-specific modules (Airlines, Hospitality), AI features (AiSense, AiRecommend, AiRetain, AiTrust), and specialized configurations.</li>
+              <li>Program setup, tenancy, loyalty accounts, policies, sponsors, member enrollment, tiers, earning/redemption, offers, data migration, marketing.</li>
             </ul>
 
-            <p><strong>Sections</strong> &mdash; Each section covers a specific topic. Sections have statuses:</p>
+            <p><strong>Solution Design (19 sections)</strong></p>
+            <ul>
+              <li>Data models (member, sponsor, location, product, BIT, payment, offer), entity details, offer KPIs, custom attributes, batches, roles, users, member services (20 sub-services), marketing use cases, finance, DWH.</li>
+            </ul>
+
+            <p><strong>Launch Readiness (11 sections)</strong></p>
+            <ul>
+              <li><strong>Industry-specific:</strong> Airlines (airport entity, distance table, retro request, airline redemption) and Hospitality (vertical entities).</li>
+              <li><strong>AI modules:</strong> AiSense, AiRecommend, AiRetain, AiTrust.</li>
+              <li>Co-branded cards, subscription.</li>
+            </ul>
+
+            <p><strong>Section statuses:</strong></p>
             <ul>
               <li><strong>Not Started</strong> &mdash; No responses yet.</li>
-              <li><strong>In Progress</strong> &mdash; Some responses saved (auto-saved on blur).</li>
+              <li><strong>In Progress</strong> &mdash; Some responses saved.</li>
               <li><strong>In Review</strong> &mdash; Submitted by the user for LJI review.</li>
-              <li><strong>Approved</strong> &mdash; Reviewed and approved by an LJI admin.</li>
+              <li><strong>Approved</strong> &mdash; Reviewed and approved by LJI.</li>
               <li><strong>Skipped</strong> &mdash; Not applicable for this project.</li>
             </ul>
-
-            <p><strong>Auto-save</strong> &mdash; All form inputs save automatically when you leave the field (on blur), not on every keystroke. A <strong>"Saved"</strong> indicator appears briefly in the bottom-right corner to confirm each save.</p>
-
-            <p><strong>Conditional Visibility</strong> &mdash; Both individual questions and entire sections can appear or disappear based on your answers. For example, tier management questions only show if you indicate your program has tiers, and industry-specific sections are hidden unless the relevant industry is selected.</p>
-
-            <p><strong>Survey Template Customization</strong> &mdash; LJI Admins can customize the survey templates via the Admin Panel &mdash; toggling questions as required or optional and setting default values. These customizations apply to all new form loads.</p>
-
-            <p><strong>Survey Templates</strong> &mdash; LJI staff can create custom survey templates in the Admin panel's Template Editor. Templates can be selected when creating a new project.</p>
-
-            <p><strong>Export</strong> &mdash; LJI staff can export survey results as Excel spreadsheets &mdash; either the full project or individual sections.</p>
-
-            <p><strong>Example Projects</strong> &mdash; New users automatically get access to example projects (marked with [Example]) in read-only mode to explore the platform.</p>
-
-            <p><strong>Phase Advancement</strong> &mdash; Once all sections in a phase are approved (or skipped), an LJI admin can advance the project to the next phase, unlocking new sections.</p>
+            <p>All sections in a phase must be <strong>Approved</strong> (or Skipped) before an LJI staff member can advance the project to the next phase.</p>
           </div>
         </div>
 
-        <!-- Roles & Permissions -->
+        <!-- 3. Filling Out the Questionnaire -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Filling Out the Questionnaire <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <ul>
+              <li>Click a section to open its form.</li>
+              <li>Questions <strong>auto-save</strong> when you click away from a field (blur save) &mdash; look for the <strong>"Saved"</strong> indicator.</li>
+              <li>Required fields are marked with a red asterisk (<span style="color:var(--ll-error); font-weight:700;">*</span>).</li>
+              <li>Help text appears below each question in gray.</li>
+              <li>Placeholder text shows example values in light gray inside input fields.</li>
+              <li>GRAVTY-specific terms have <span style="border-bottom:1px dashed var(--ll-on-surface-variant);">dotted underlines</span> &mdash; hover to see definitions from the glossary.</li>
+              <li>Some questions appear or disappear based on your answers (<strong>conditional visibility</strong>).</li>
+            </ul>
+            <p style="margin-top:0.75rem;"><strong>Question types:</strong> text, textarea, number, date, yes/no toggle, dropdown, multi-select checkboxes, file upload, currency.</p>
+            <p>Click <strong>"Submit for Review"</strong> when a section is complete &mdash; this sends it to LJI for approval.</p>
+            <p>Example projects are <strong>read-only</strong> for non-LJI users (shown with a "Read Only" badge).</p>
+          </div>
+        </div>
+
+        <!-- 4. Roles & Permissions -->
         <div class="ll-help-section">
           <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
             Roles &amp; Permissions <span class="ll-help-chevron">&#9660;</span>
@@ -3614,126 +3632,131 @@ class LLApp {
               </thead>
               <tbody>
                 <tr><td>View assigned projects</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
+                <tr><td>Create projects</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
                 <tr><td>Fill in questionnaire</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
                 <tr><td>Submit sections for review</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
-                <tr><td>Create projects</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
-                <tr><td>Manage project members</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}*</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Approve/reject sections</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Delete projects</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Advance project phases</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Customize survey templates</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Export survey results (Excel)</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Access admin panel</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Customize survey templates</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Create custom survey templates</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Manage project members</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}*</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Delete projects</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Manage user roles</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>View PII-encrypted data</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Export survey results</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Create survey templates</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Delete users</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>View PII-encrypted data</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td></tr>
               </tbody>
             </table>
             <p style="font-size:0.75rem; margin-top:0.25rem;">* Client Admins can manage members for their own project only.</p>
 
             <ul>
-              <li><strong>LJI Admin</strong> &mdash; Full control. Can create projects, manage users, delete users, manage project members, delete projects, approve sections, advance phases, edit survey templates, export data, and access the admin panel. This is for LJI's project leads and senior staff.</li>
-              <li><strong>LJI Member</strong> &mdash; Can view and fill in questionnaires for assigned projects, approve sections, advance phases, customize templates, access admin panel, and export data. For LJI team members supporting the onboarding.</li>
-              <li><strong>Client Admin</strong> &mdash; The primary client contact. Creates projects and becomes admin of those projects. Can fill in questionnaires, invite other client team members, and manage members of own projects. Cannot approve sections or access LJI admin features.</li>
-              <li><strong>Client Member</strong> &mdash; Can fill in questionnaire responses for assigned projects. Most restricted role &mdash; for client team members who contribute to specific sections.</li>
+              <li><strong>LJI Admin</strong> &mdash; Full platform control. Manage users, projects, and templates. Approve sections, delete users and projects, manage user roles. Has access to the admin panel with all tabs.</li>
+              <li><strong>LJI Member</strong> &mdash; LJI staff supporting onboarding. Can approve sections, advance phases, export data, customize templates, and access the admin panel. Cannot delete users/projects or manage user roles.</li>
+              <li><strong>Client Admin</strong> &mdash; Primary client contact. Creates and manages their own projects, can add team members to their projects. Cannot access admin features.</li>
+              <li><strong>Client Member</strong> &mdash; Client team member contributing to specific sections. Most restricted role.</li>
+              <li><strong>Superadmin</strong> &mdash; A protected LJI Admin whose role cannot be changed or deleted by other admins.</li>
             </ul>
           </div>
         </div>
 
-        <!-- Data Security -->
+        <!-- 5. Admin Panel (LJI Staff) -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Admin Panel (LJI Staff) <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <p>The admin panel has a vertical navigation on the left with these tabs:</p>
+            <ul>
+              <li><strong>Users</strong> &mdash; View all registered users, change roles via dropdown, delete users (superadmins are protected). Shows superadmin badge where applicable.</li>
+              <li><strong>Projects</strong> &mdash; View all projects with progress stats, create new projects, delete projects with confirmation.</li>
+              <li><strong>Survey Templates</strong> &mdash; Expand each section to see its questions. Toggle required/optional per question, set default values, save changes per section. These overrides apply to all form loads.</li>
+              <li><strong>Template Editor</strong> &mdash; Create custom survey templates that start as a copy of the default. Edit section names, descriptions, phases. Add/remove/reorder sections and questions. Change question types, required status, help text, placeholders, options for dropdowns. Custom templates can be selected when creating new projects.</li>
+              <li><strong>Feedback</strong> &mdash; View all user feedback with filter buttons for status (New, In Progress, Resolved, Closed) and type (Suggestion, Review, Bug Report). Each item shows the message, submitter, date, star rating (for reviews), status dropdown, and admin notes field.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 6. Managing Project Members -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Managing Project Members <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <ul>
+              <li>LJI Admins see a <strong>"Manage Members"</strong> button on each project.</li>
+              <li>Add any registered user with a role (lji_admin, lji_member, client_admin, client_member).</li>
+              <li>Change member roles via dropdown.</li>
+              <li>Remove members (superadmins cannot be removed).</li>
+              <li>Users can only see projects they are members of.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 7. Exporting Data -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Exporting Data <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <ul>
+              <li>LJI staff see an <strong>"Export"</strong> button on the project detail page.</li>
+              <li>Exports all survey responses as an Excel spreadsheet (<strong>.xlsx</strong>).</li>
+              <li>Includes a <strong>Summary sheet</strong> with project info and section statuses.</li>
+              <li>One sheet per section with columns: Question, Answer, Help Text, Required, Last Updated.</li>
+              <li>Per-section export also available via the download button on each section card.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 8. Feedback -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Feedback <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <p>All users can submit feedback via the floating button in the bottom-left corner. Three types are available:</p>
+            <ul>
+              <li><strong>Suggestion</strong> &mdash; What you'd like to see and why.</li>
+              <li><strong>Review</strong> &mdash; 5-star rating plus what you enjoy most.</li>
+              <li><strong>Bug Report</strong> &mdash; What happened and what you expected.</li>
+            </ul>
+            <p>LJI admins review feedback in the Admin panel's <strong>Feedback</strong> tab. Filter by status and type, update status, and add admin notes.</p>
+          </div>
+        </div>
+
+        <!-- 9. Data Security -->
         <div class="ll-help-section">
           <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
             Data Security <span class="ll-help-chevron">&#9660;</span>
           </button>
           <div class="ll-help-section-body">
             <ul>
-              <li>All data is stored in Supabase PostgreSQL with Row Level Security (RLS).</li>
-              <li>The Supabase project is hosted in the EU (<strong>eu-west-1</strong>).</li>
-              <li>All communication between the browser and the server is over <strong>HTTPS</strong>.</li>
-              <li>PII (Personally Identifiable Information) fields are flagged and stored with column-level encryption using pgcrypto AES.</li>
+              <li>All data stored in <strong>Supabase PostgreSQL</strong> with Row Level Security (RLS).</li>
+              <li>PII fields are encrypted with <strong>AES via pgcrypto</strong>.</li>
               <li>Only LJI Admins and Client Admins can view PII data.</li>
-              <li>Client Members can enter PII data but cannot read it back (write-only access).</li>
-              <li>Each project is isolated &mdash; users can only see projects they are members of.</li>
-              <li>File uploads are stored in secure Supabase Storage with project-scoped access.</li>
-              <li>A <strong>5-minute client-side cache</strong> is used for performance, reducing redundant network requests.</li>
+              <li>Users can only access projects they are members of.</li>
+              <li>File uploads stored in secure <strong>Supabase Storage</strong>.</li>
+              <li>Supabase hosted in EU (<strong>eu-west-1</strong>).</li>
+              <li>All communication over <strong>HTTPS</strong>.</li>
+              <li><strong>5-minute client-side cache</strong> for performance.</li>
             </ul>
           </div>
         </div>
 
-        <!-- Glossary -->
+        <!-- 10. Tips & Shortcuts -->
         <div class="ll-help-section">
           <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
-            Glossary <span class="ll-help-chevron">&#9660;</span>
-          </button>
-          <div class="ll-help-section-body">
-            <p>GRAVTY-specific terms have <span style="border-bottom:1px dashed var(--ll-on-surface-variant);">dotted-underline tooltips</span> throughout the questionnaire.</p>
-            <p>Hover over any underlined term to see its definition.</p>
-            <p>The glossary covers terms like <strong>BIT</strong> (Business Intelligence Transaction), <strong>Sponsor</strong>, <strong>Tier</strong>, <strong>Loyalty Account</strong>, <strong>Lookup Codes</strong>, <strong>Privileges</strong>, <strong>Offers</strong>, and more.</p>
-          </div>
-        </div>
-
-        <!-- Admin Panel -->
-        <div class="ll-help-section">
-          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
-            Admin Panel (LJI Admins only) <span class="ll-help-chevron">&#9660;</span>
+            Tips &amp; Shortcuts <span class="ll-help-chevron">&#9660;</span>
           </button>
           <div class="ll-help-section-body">
             <ul>
-              <li><strong>Users tab</strong> &mdash; View all registered users and change their roles. LJI Admins can also delete users (removes them from all projects and deletes their profile).</li>
-              <li><strong>Projects tab</strong> &mdash; View all projects across all clients, create new projects, and delete existing ones.</li>
-              <li><strong>Survey Templates tab</strong> &mdash; Expand each section to see its questions. Toggle individual questions as required or optional, set default values for any field, and save changes per section. Customizations apply to all new form loads.</li>
-              <li><strong>Template Editor tab</strong> &mdash; Create new survey templates (starts as a copy of the default template). Edit section names, descriptions, and phases. Add, remove, and reorder sections and questions. Change question types, required status, help text, and placeholders. Add options for select/multi-select questions. Templates can be selected when creating new projects.</li>
-              <li><strong>Feedback tab</strong> &mdash; Review user-submitted feedback. Track status from New to In Progress to Resolved to Closed.</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Manage Members -->
-        <div class="ll-help-section">
-          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
-            Manage Members <span class="ll-help-chevron">&#9660;</span>
-          </button>
-          <div class="ll-help-section-body">
-            <ul>
-              <li>LJI Admins see a <strong>"Manage Members"</strong> button on each project card on the dashboard.</li>
-              <li>From the Manage Members dialog, you can add any registered user to the project and assign them a specific role (LJI Member, Client Admin, or Client Member).</li>
-              <li>You can also remove existing members from the project.</li>
-              <li>Users can only see projects they are members of &mdash; adding a member grants them access, and removing one revokes it.</li>
-              <li>Client Admins can manage members for their own project only.</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Feedback -->
-        <div class="ll-help-section">
-          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
-            Feedback <span class="ll-help-chevron">&#9660;</span>
-          </button>
-          <div class="ll-help-section-body">
-            <ul>
-              <li>All users can submit feedback via the floating button in the bottom-left corner.</li>
-              <li>Three feedback types are available: <strong>Suggestion</strong>, <strong>Review</strong> (with 5-star rating), and <strong>Bug Report</strong>.</li>
-              <li>LJI Admins can review all submitted feedback in the Admin panel's <strong>Feedback tab</strong>.</li>
-              <li>Feedback status is tracked through: <strong>New</strong> &rarr; <strong>In Progress</strong> &rarr; <strong>Resolved</strong> &rarr; <strong>Closed</strong>.</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Tips -->
-        <div class="ll-help-section">
-          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
-            Tips <span class="ll-help-chevron">&#9660;</span>
-          </button>
-          <div class="ll-help-section-body">
-            <ul>
-              <li>Click the <strong>LJI logo</strong> in the top-left to return to the dashboard from any page.</li>
+              <li>Click the <strong>LJI logo</strong> to return to the dashboard from any page.</li>
               <li>Use the <strong>"?"</strong> button on any page to open this help panel.</li>
-              <li>Use the keyboard <strong>Tab</strong> key to move between fields quickly.</li>
-              <li>Required fields are marked with a red asterisk (<span style="color:var(--ll-error); font-weight:700;">*</span>).</li>
-              <li>Help text appears below each question label in gray.</li>
-              <li>The progress bar on the dashboard shows overall completion percentage.</li>
-              <li>If you see stale data, try a hard-refresh with <strong>Ctrl+Shift+R</strong> (or Cmd+Shift+R on Mac).</li>
+              <li>Use <strong>Tab</strong> to move between fields quickly.</li>
+              <li>Hard-refresh (<strong>Ctrl+Shift+R</strong>) if you see stale data.</li>
+              <li>The progress bar shows overall completion percentage.</li>
+              <li>Example projects let you explore the platform without affecting real data.</li>
             </ul>
           </div>
         </div>
