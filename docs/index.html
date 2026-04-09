@@ -1161,6 +1161,18 @@ class LoyaltyLiftClient {
     this._user = null;
     this._profile = null;
     this._initPromise = null;
+    this._cache = {};
+    this._cacheTTL = 30000; // 30s cache
+  }
+
+  _cached(key, fn) {
+    const entry = this._cache[key];
+    if (entry && Date.now() - entry.ts < this._cacheTTL) return Promise.resolve(entry.data);
+    return fn().then(data => { this._cache[key] = { data, ts: Date.now() }; return data; });
+  }
+
+  _invalidate(prefix) {
+    Object.keys(this._cache).forEach(k => { if (k.startsWith(prefix)) delete this._cache[k]; });
   }
 
   get supabase() {
@@ -1232,35 +1244,39 @@ class LoyaltyLiftClient {
 
   // --- Projects ---
   async listProjects() {
-    const { data, error } = await this.supabase
-      .from('projects')
-      .select(`
-        id, program_name, phase, status, created_at, updated_at,
-        client_org:client_organizations(id, name, industry, logo_url),
-        sections:project_sections(id, section_id, status, phase, visible)
-      `)
-      .order('updated_at', { ascending: false });
-    if (error) { console.error('listProjects:', error); throw error; }
-    return data.map(p => ({
-      ...p,
-      progress: this._calcProgress(p.sections),
-    }));
+    return this._cached('projects', async () => {
+      const { data, error } = await this.supabase
+        .from('projects')
+        .select(`
+          id, program_name, phase, status, created_at, updated_at,
+          client_org:client_organizations(id, name, industry, logo_url),
+          sections:project_sections(id, section_id, status, phase, visible)
+        `)
+        .order('updated_at', { ascending: false });
+      if (error) { console.error('listProjects:', error); throw error; }
+      return data.map(p => ({
+        ...p,
+        progress: this._calcProgress(p.sections),
+      }));
+    });
   }
 
   async getProject(projectId) {
-    const { data, error } = await this.supabase
-      .from('projects')
-      .select(`
-        id, program_name, phase, status, created_at, updated_at,
-        client_org:client_organizations(id, name, industry, country, logo_url),
-        sections:project_sections(id, section_id, status, phase, visible, owner_id, completed_at),
-        members:project_members(user_id, role, joined_at)
-      `)
-      .eq('id', projectId)
-      .single();
-    if (error) { console.error('getProject:', error); throw error; }
-    data.progress = this._calcProgress(data.sections);
-    return data;
+    return this._cached('project_' + projectId, async () => {
+      const { data, error } = await this.supabase
+        .from('projects')
+        .select(`
+          id, program_name, phase, status, created_at, updated_at,
+          client_org:client_organizations(id, name, industry, country, logo_url),
+          sections:project_sections(id, section_id, status, phase, visible, owner_id, completed_at),
+          members:project_members(user_id, role, joined_at)
+        `)
+        .eq('id', projectId)
+        .single();
+      if (error) { console.error('getProject:', error); throw error; }
+      data.progress = this._calcProgress(data.sections);
+      return data;
+    });
   }
 
   async createProject({ orgName, industry, country, programName }) {
@@ -1284,21 +1300,20 @@ class LoyaltyLiftClient {
       .single();
     if (projError) { console.error('createProject:', projError); throw projError; }
 
-    // Add current user as project member
-    await this.supabase
-      .from('project_members')
-      .insert({ project_id: project.id, user_id: this._user.id, role: 'lji_admin' });
-
-    // Create all sections from template
+    // Add member + create sections in parallel
     const sections = this._getSectionTemplate();
     const sectionRows = sections.map(s => ({
       project_id: project.id,
       section_id: s.id,
       phase: s.phase,
-      visible: !s.conditional, // conditional sections start hidden
+      visible: !s.conditional,
     }));
-    await this.supabase.from('project_sections').insert(sectionRows);
+    await Promise.all([
+      this.supabase.from('project_members').insert({ project_id: project.id, user_id: this._user.id, role: 'lji_admin' }),
+      this.supabase.from('project_sections').insert(sectionRows),
+    ]);
 
+    this._invalidate('projects');
     return project;
   }
 
@@ -1348,16 +1363,9 @@ class LoyaltyLiftClient {
       }, { onConflict: 'project_id,section_id,question_key' });
     if (error) { console.error('saveResponse:', error); throw error; }
 
-    // Update section status to in_progress if not_started
-    await this.supabase
-      .from('project_sections')
-      .update({ status: 'in_progress' })
-      .eq('project_id', projectId)
-      .eq('section_id', sectionId)
-      .eq('status', 'not_started');
-
-    // Log activity
-    await this._logActivity(projectId, 'response_updated', { section_id: sectionId, question_key: questionKey });
+    // Update section status + log activity in parallel, non-blocking
+    this.supabase.from('project_sections').update({ status: 'in_progress' }).eq('project_id', projectId).eq('section_id', sectionId).eq('status', 'not_started');
+    this._logActivity(projectId, 'response_updated', { section_id: sectionId, question_key: questionKey });
   }
 
   async submitSection(projectId, sectionId) {
@@ -1367,7 +1375,9 @@ class LoyaltyLiftClient {
       .eq('project_id', projectId)
       .eq('section_id', sectionId);
     if (error) { console.error('submitSection:', error); throw error; }
-    await this._logActivity(projectId, 'section_submitted', { section_id: sectionId });
+    this._invalidate('project');
+    this._invalidate('projects');
+    this._logActivity(projectId, 'section_submitted', { section_id: sectionId });
   }
 
   async approveSection(projectId, sectionId) {
@@ -1377,7 +1387,9 @@ class LoyaltyLiftClient {
       .eq('project_id', projectId)
       .eq('section_id', sectionId);
     if (error) { console.error('approveSection:', error); throw error; }
-    await this._logActivity(projectId, 'section_approved', { section_id: sectionId });
+    this._invalidate('project');
+    this._invalidate('projects');
+    this._logActivity(projectId, 'section_approved', { section_id: sectionId });
   }
 
   // --- Comments ---
