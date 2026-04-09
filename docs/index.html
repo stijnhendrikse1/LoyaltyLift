@@ -1978,6 +1978,7 @@ class LLApp {
           </div>
           <div class="ll-flex ll-gap-2 ll-items-center">
             <span class="ll-badge ll-badge-blue">${phaseLabels[project.phase]}</span>
+            ${isLji ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._showManageMembers('${project.id}')">Manage Members</button>` : ''}
             ${isLji && project.phase !== 'launch' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._advancePhase('${project.id}')">Advance Phase</button>` : ''}
             <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
           </div>
@@ -2118,6 +2119,97 @@ class LLApp {
     } catch (err) {
       console.error('Advance phase error:', err);
       llToast.error('Failed to advance phase.');
+    }
+  }
+
+  // --- Manage Members Modal ---
+  async _showManageMembers(projectId) {
+    const project = await window.llClient.getProject(projectId);
+    const allProfiles = await window.llClient.listAllProfiles();
+    const memberUserIds = (project.members || []).map(m => m.user_id);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'll-confirm-overlay';
+    overlay.innerHTML = `
+      <div class="ll-confirm-box" style="max-width:560px; max-height:80vh; overflow-y:auto;">
+        <h3 class="ll-h2" style="margin-bottom:1rem;">Manage Members</h3>
+        <p class="ll-subtitle" style="margin-bottom:1.5rem;">Add or remove users from <strong>${this._esc(project.program_name)}</strong></p>
+
+        <div style="margin-bottom:1.5rem;">
+          <label class="ll-label">Add Member</label>
+          <div class="ll-flex ll-gap-2">
+            <select id="ll-mm-user" class="ll-input" style="flex:1;">
+              <option value="">Select a user...</option>
+              ${allProfiles.filter(p => !memberUserIds.includes(p.id)).map(p =>
+                `<option value="${p.id}">${this._esc(p.full_name || p.email)} (${p.email})</option>`
+              ).join('')}
+            </select>
+            <select id="ll-mm-role" class="ll-input" style="width:160px;">
+              <option value="client_member">Client Member</option>
+              <option value="client_admin">Client Admin</option>
+              <option value="lji_member">LJI Member</option>
+              <option value="lji_admin">LJI Admin</option>
+            </select>
+            <button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-mm-add-btn" onclick="llApp._addMember('${projectId}')">Add</button>
+          </div>
+        </div>
+
+        <label class="ll-label">Current Members</label>
+        <div id="ll-mm-list">
+          ${(project.members || []).map(m => {
+            const profile = allProfiles.find(p => p.id === m.user_id);
+            return `<div class="ll-flex ll-justify-between ll-items-center" style="padding:0.75rem 0; border-bottom:1px solid rgba(197,198,204,0.15);">
+              <div>
+                <span class="ll-text-sm" style="font-weight:500;">${this._esc(profile?.full_name || profile?.email || m.user_id)}</span>
+                <span class="ll-text-xs ll-text-muted" style="margin-left:0.5rem;">${this._esc(profile?.email || '')}</span>
+              </div>
+              <div class="ll-flex ll-gap-2 ll-items-center">
+                <span class="ll-badge ll-badge-blue">${m.role}</span>
+                <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error); font-size:0.6875rem;" onclick="llApp._removeMember('${projectId}', '${m.user_id}')">Remove</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <div class="ll-flex ll-justify-between" style="margin-top:1.5rem;">
+          <div></div>
+          <button class="ll-btn ll-btn-secondary" onclick="this.closest('.ll-confirm-overlay').remove()">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  }
+
+  async _addMember(projectId) {
+    const userId = document.getElementById('ll-mm-user').value;
+    const role = document.getElementById('ll-mm-role').value;
+    if (!userId) { llToast.warning('Select a user to add.'); return; }
+    const btn = document.getElementById('ll-mm-add-btn');
+    btn.disabled = true;
+    try {
+      await window.llClient.supabase.from('project_members').insert({ project_id: projectId, user_id: userId, role });
+      window.llClient._invalidate('project');
+      llToast.success('Member added.');
+      document.querySelector('.ll-confirm-overlay')?.remove();
+      this._showManageMembers(projectId);
+    } catch (err) {
+      console.error('Add member error:', err);
+      llToast.error('Failed to add member. ' + err.message);
+    } finally { btn.disabled = false; }
+  }
+
+  async _removeMember(projectId, userId) {
+    if (!await llConfirm('Remove this member from the project?')) return;
+    try {
+      await window.llClient.supabase.from('project_members').delete().eq('project_id', projectId).eq('user_id', userId);
+      window.llClient._invalidate('project');
+      llToast.success('Member removed.');
+      document.querySelector('.ll-confirm-overlay')?.remove();
+      this._showManageMembers(projectId);
+    } catch (err) {
+      console.error('Remove member error:', err);
+      llToast.error('Failed to remove member.');
     }
   }
 
