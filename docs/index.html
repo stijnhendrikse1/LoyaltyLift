@@ -803,7 +803,7 @@ class LoyaltyLiftClient {
       visible: !s.conditional,
     }));
     await Promise.all([
-      this.supabase.from('project_members').insert({ project_id: project.id, user_id: this._user.id, role: 'lji_admin' }),
+      this.supabase.from('project_members').insert({ project_id: project.id, user_id: this._user.id, role: this.isLjiMember ? 'lji_admin' : 'client_admin' }),
       this.supabase.from('project_sections').insert(sectionRows),
     ]);
 
@@ -1815,13 +1815,13 @@ class LLApp {
             <h2 class="ll-h2" style="margin-bottom:0;">Projects</h2>
             <p class="ll-subtitle">${projects.length} project${projects.length !== 1 ? 's' : ''}</p>
           </div>
-          ${isLji ? `<button class="ll-btn ll-btn-primary" onclick="llApp.navigate('new-project')">New Project</button>` : ''}
+          <button class="ll-btn ll-btn-primary" onclick="llApp.navigate('new-project')">New Project</button>
         </div>
 
         ${projects.length === 0 ? `
           <div class="ll-card" style="text-align:center; padding:3rem;">
             <p class="ll-h3" style="margin-bottom:0.5rem;">No projects yet</p>
-            <p class="ll-text-sm ll-text-muted">${isLji ? 'Create your first project to get started.' : 'You have not been invited to any projects yet.'}</p>
+            <p class="ll-text-sm ll-text-muted">Create your first project to get started.</p>
           </div>
         ` : `
           <div class="ll-flex ll-flex-col ll-gap-4">
