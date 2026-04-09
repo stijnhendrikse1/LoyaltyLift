@@ -2188,8 +2188,10 @@ class LLApp {
     const btn = document.getElementById('ll-mm-add-btn');
     btn.disabled = true;
     try {
-      await window.llClient.supabase.from('project_members').insert({ project_id: projectId, user_id: userId, role });
+      const { error } = await window.llClient.supabase.from('project_members').insert({ project_id: projectId, user_id: userId, role });
+      if (error) throw error;
       window.llClient._invalidate('project');
+      window.llClient._invalidate('projects');
       llToast.success('Member added.');
       document.querySelector('.ll-confirm-overlay')?.remove();
       this._showManageMembers(projectId);
