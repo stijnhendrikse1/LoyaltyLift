@@ -1834,7 +1834,7 @@ class LLApp {
           </div>
           <div class="ll-flex ll-items-center ll-gap-3">
             <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
-            ${window.llClient.isLjiAdmin ? '<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate(\'admin\')">Admin</button>' : ''}
+            ${window.llClient.isLjiMember ? '<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate(\'admin\')">Admin</button>' : ''}
             <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._signOut()">Sign Out</button>
             <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
           </div>
@@ -2010,7 +2010,7 @@ class LLApp {
           <div class="ll-flex ll-gap-2 ll-items-center">
             <span class="ll-badge ll-badge-blue">${phaseLabels[project.phase]}</span>
             ${window.llClient.isLjiAdmin ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._showManageMembers('${project.id}')">Manage Members</button>` : ''}
-            ${window.llClient.isLjiAdmin && project.phase !== 'launch' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._advancePhase('${project.id}')">Advance Phase</button>` : ''}
+            ${window.llClient.isLjiMember && project.phase !== 'launch' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._advancePhase('${project.id}')">Advance Phase</button>` : ''}
             <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
           </div>
         </div>
@@ -2044,7 +2044,7 @@ class LLApp {
                         <span class="ll-text-sm" style="font-weight:500;">${this._esc(name)}</span>
                         <div class="ll-flex ll-gap-2 ll-items-center">
                           <span class="ll-badge ${si.badge}">${si.label}</span>
-                          ${window.llClient.isLjiAdmin && s.status === 'in_review' ? `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="event.stopPropagation(); llApp._approveSection('${project.id}', '${s.section_id}')">Approve</button>` : ''}
+                          ${window.llClient.isLjiMember && s.status === 'in_review' ? `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="event.stopPropagation(); llApp._approveSection('${project.id}', '${s.section_id}')">Approve</button>` : ''}
                         </div>
                       </div>
                     </div>
@@ -2308,8 +2308,8 @@ class LLApp {
   // --- Admin Panel ---
   async _showAdmin() {
     this.currentPage = 'admin';
-    if (!window.llClient.isLjiAdmin) {
-      llToast.error('Access denied. Admin privileges required.');
+    if (!window.llClient.isLjiMember) {
+      llToast.error('Access denied. LJI staff privileges required.');
       this.navigate('dashboard');
       return;
     }
@@ -2783,11 +2783,11 @@ class LLApp {
                 <tr><td>Submit sections for review</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
                 <tr><td>Create projects</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
                 <tr><td>Manage project members</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}*</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Approve/reject sections</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Approve/reject sections</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Delete projects</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Advance project phases</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Customize survey templates</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Access admin panel</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Advance project phases</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Customize survey templates</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Access admin panel</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Manage user roles</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>View PII-encrypted data</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td></tr>
               </tbody>
