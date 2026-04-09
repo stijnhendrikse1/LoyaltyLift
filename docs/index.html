@@ -234,6 +234,52 @@
   box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 }
 
+/* Toast notifications */
+.ll-toast-container {
+  position: fixed; top: 1.5rem; right: 1.5rem; z-index: 200;
+  display: flex; flex-direction: column; gap: 0.5rem;
+  pointer-events: none;
+}
+.ll-toast {
+  padding: 0.75rem 1.25rem; border-radius: 0.5rem;
+  font-size: 0.875rem; font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  pointer-events: auto; max-width: 400px;
+  animation: ll-toast-in 0.25s ease;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.ll-toast-success { background: var(--ll-green-700); color: white; }
+.ll-toast-error { background: var(--ll-brand); color: white; }
+.ll-toast-info { background: var(--ll-gray-800); color: white; }
+.ll-toast-warning { background: var(--ll-yellow-700); color: white; }
+.ll-toast-close {
+  background: none; border: none; color: inherit; cursor: pointer;
+  font-size: 1.125rem; opacity: 0.7; padding: 0; line-height: 1;
+}
+.ll-toast-close:hover { opacity: 1; }
+@keyframes ll-toast-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.ll-toast-out { animation: ll-toast-out 0.2s ease forwards; }
+@keyframes ll-toast-out {
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Confirm dialog */
+.ll-confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+  animation: ll-fade-in 0.15s ease;
+}
+@keyframes ll-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.ll-confirm-box {
+  background: white; border-radius: var(--ll-radius); padding: 1.5rem;
+  max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.ll-confirm-msg { font-size: 0.9375rem; color: var(--ll-gray-800); margin-bottom: 1.25rem; line-height: 1.5; }
+.ll-confirm-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+
 /* Accordion */
 .ll-accordion-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -367,8 +413,13 @@ window.llSectionTemplates = {
       },
       {
         key: 'what_is_the_preferred_date_format',
-        label: 'What is the preferred Date format to be followed for the entire program? 1. DD/MM/YYYY 2. MM/DD/YYYY',
+        label: 'What is the preferred Date format to be followed for the entire program?',
         inputType: 'select',
+        options: [
+          { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
+          { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
+          { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
+        ],
         required: true,
         pii: false,
         placeholder: 'DD/MM/YYYY',
@@ -796,8 +847,13 @@ window.llSectionTemplates = {
       },
       {
         key: 'at_what_level_do_you_intend',
-        label: 'At what level do you intend to analyse Program Data? 1. Brand (Partner) Level globally 2. Brand (Partner) Level by Geo 3. Brand (Partner) Location Level',
+        label: 'At what level do you intend to analyse Program Data?',
         inputType: 'select',
+        options: [
+          { value: 'brand_global', label: 'Brand (Partner) Level globally' },
+          { value: 'brand_geo', label: 'Brand (Partner) Level by Geo' },
+          { value: 'brand_location', label: 'Brand (Partner) Location Level' },
+        ],
         required: true,
         pii: false,
         placeholder: 'Partner Level and Partner Location Level',
@@ -1835,7 +1891,7 @@ class LLFormEngine {
 
   async onSubmit() {
     if (!this.validateAll()) {
-      alert('Please fill in all required fields before submitting.');
+      llToast.warning('Please fill in all required fields before submitting.');
       return;
     }
     const btn = document.getElementById('ll-submit-btn');
@@ -1843,11 +1899,11 @@ class LLFormEngine {
     btn.textContent = 'Submitting...';
     try {
       await window.llClient.submitSection(this.projectId, this.sectionId);
-      alert('Section submitted for review!');
+      llToast.success('Section submitted for review!');
       this.onBack();
     } catch (err) {
       console.error('Submit failed:', err);
-      alert('Failed to submit section. Please try again.');
+      llToast.error('Failed to submit section. Please try again.');
     } finally {
       btn.disabled = false;
       btn.textContent = 'Submit for Review';
@@ -1885,6 +1941,57 @@ window.llFormEngine = null; // instance set when section loads
 
   <!-- Main Application -->
   <script>
+/**
+ * LoyaltyLift — Toast & Confirm utilities
+ */
+
+const llToast = {
+  _container: null,
+  _ensure() {
+    if (!this._container) {
+      this._container = document.createElement('div');
+      this._container.className = 'll-toast-container';
+      document.body.appendChild(this._container);
+    }
+  },
+  show(message, type = 'info', duration = 4000) {
+    this._ensure();
+    const el = document.createElement('div');
+    el.className = `ll-toast ll-toast-${type}`;
+    el.innerHTML = `<span>${message}</span><button class="ll-toast-close" onclick="this.parentElement.classList.add('ll-toast-out'); setTimeout(() => this.parentElement.remove(), 200)">&times;</button>`;
+    this._container.appendChild(el);
+    if (duration > 0) {
+      setTimeout(() => { el.classList.add('ll-toast-out'); setTimeout(() => el.remove(), 200); }, duration);
+    }
+  },
+  success(msg) { this.show(msg, 'success'); },
+  error(msg) { this.show(msg, 'error', 6000); },
+  info(msg) { this.show(msg, 'info'); },
+  warning(msg) { this.show(msg, 'warning'); },
+};
+window.llToast = llToast;
+
+function llConfirm(message) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'll-confirm-overlay';
+    overlay.innerHTML = `
+      <div class="ll-confirm-box">
+        <div class="ll-confirm-msg">${message}</div>
+        <div class="ll-confirm-actions">
+          <button class="ll-btn ll-btn-secondary" id="ll-confirm-no">Cancel</button>
+          <button class="ll-btn ll-btn-primary" id="ll-confirm-yes">Confirm</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#ll-confirm-yes').onclick = () => { overlay.remove(); resolve(true); };
+    overlay.querySelector('#ll-confirm-no').onclick = () => { overlay.remove(); resolve(false); };
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); resolve(false); } });
+  });
+}
+window.llConfirm = llConfirm;
+
 /**
  * LoyaltyLift — Main Application
  * Handles routing, page rendering, navigation
@@ -1996,7 +2103,7 @@ class LLApp {
       document.getElementById('ll-login-sent').style.display = 'block';
     } catch (err) {
       console.error('Login error:', err);
-      alert('Failed to send magic link. Please try again.');
+      llToast.error('Failed to send magic link. Please try again.');
       btn.disabled = false;
       btn.textContent = 'Send Magic Link';
     }
@@ -2127,7 +2234,7 @@ class LLApp {
     const programName = document.getElementById('ll-np-program').value.trim();
 
     if (!orgName || !programName) {
-      alert('Organization name and program name are required.');
+      llToast.warning('Organization name and program name are required.');
       return;
     }
 
@@ -2139,7 +2246,7 @@ class LLApp {
       this.navigate('project', { projectId: project.id });
     } catch (err) {
       console.error('Create project error:', err);
-      alert('Failed to create project. ' + err.message);
+      llToast.error('Failed to create project. ' + err.message);
       btn.disabled = false;
       btn.textContent = 'Create Project';
     }
@@ -2284,24 +2391,24 @@ class LLApp {
   }
 
   async _approveSection(projectId, sectionId) {
-    if (!confirm('Approve this section?')) return;
+    if (!await llConfirm('Approve this section?')) return;
     try {
       await window.llClient.approveSection(projectId, sectionId);
       this._showProject(projectId);
     } catch (err) {
       console.error('Approve error:', err);
-      alert('Failed to approve section.');
+      llToast.error('Failed to approve section.');
     }
   }
 
   async _advancePhase(projectId) {
-    if (!confirm('Advance to the next phase? This will unlock new sections.')) return;
+    if (!await llConfirm('Advance to the next phase? This will unlock new sections.')) return;
     try {
       await window.llClient.advancePhase(projectId);
       this._showProject(projectId);
     } catch (err) {
       console.error('Advance phase error:', err);
-      alert('Failed to advance phase.');
+      llToast.error('Failed to advance phase.');
     }
   }
 
