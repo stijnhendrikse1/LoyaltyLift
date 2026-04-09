@@ -1,0 +1,21 @@
+<!--
+  LoyaltyLift HubSpot CMS Module
+  Embed this module on a HubSpot page to render the full LoyaltyLift portal.
+  The module loads Supabase JS, the LoyaltyLift client, form engine, and main app.
+-->
+
+<div id="ll-app" class="ll-app">
+  <div class="ll-loading-page">
+    <div class="ll-spinner"></div>
+  </div>
+</div>
+
+{{ require_css("../css/loyaltylift.css") }}
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+{% require_js %}
+  <script src="{{ get_asset_url('../js/supabase-client.js') }}"></script>
+  <script src="{{ get_asset_url('../js/form-engine.js') }}"></script>
+  <script src="{{ get_asset_url('../js/app.js') }}"></script>
+{% end_require_js %}

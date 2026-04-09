@@ -1,0 +1,69 @@
+
+=== Generating LoyaltyLift Template Files ===
+
+Phase 1: Discovery
+  wrote sections/tenancy.ts (5 questions)
+  wrote sections/program.ts (12 questions)
+  wrote sections/loyalty-accounts.ts (12 questions)
+  wrote sections/policies.ts (27 questions)
+  wrote sections/sponsor-mgmt.ts (18 questions)
+  wrote sections/member-enrollment.ts (35 questions)
+  wrote sections/data-model-questions.ts (11 questions)
+  wrote sections/tier-mgmt.ts (21 questions)
+  wrote sections/accrual-redemption.ts (7 questions)
+  wrote sections/offers-overview.ts (110 questions)
+  wrote sections/data-migration.ts (11 questions)
+  wrote sections/marketing-connect.ts (22 questions)
+
+Phase 2: Design
+  wrote sections/member-data-model.ts (83 questions)
+  wrote sections/sponsor-data-model.ts (31 questions)
+  wrote sections/sponsor-details.ts (32 questions)
+  wrote sections/location-data-model.ts (21 questions)
+  wrote sections/location-details.ts (18 questions)
+  wrote sections/product-data-model.ts (18 questions)
+  wrote sections/product-details.ts (11 questions)
+  wrote sections/bit-data-model.ts (139 questions)
+  wrote sections/payment-data-model.ts (4 questions)
+  wrote sections/offer-data-model.ts (49 questions)
+  wrote sections/offer-kpi.ts (9 questions)
+  wrote sections/custom-attributes.ts (13 questions)
+  wrote sections/batches.ts (59 questions)
+  wrote sections/role-mgmt.ts (79 questions)
+  wrote sections/user-mgmt.ts (14 questions)
+  wrote sections/member-services.ts (153 questions)
+  wrote sections/marketing-use-cases.ts (0 questions)
+  wrote sections/finance.ts (25 questions)
+  wrote sections/dwh.ts (14 questions)
+
+Phase 3: Launch
+  wrote sections/vertical-entities.ts (20 questions)
+  wrote sections/aisense.ts (86 questions)
+  wrote sections/airecommend.ts (11 questions)
+  wrote sections/airetain.ts (5 questions)
+  wrote sections/aitrust.ts (6 questions)
+  wrote sections/airport-entity.ts (24 questions)
+  wrote sections/distance-table.ts (6 questions)
+  wrote sections/cobranded-cards.ts (16 questions)
+  wrote sections/subscription.ts (29 questions)
+  wrote sections/retro-request.ts (27 questions)
+  wrote sections/airline-redemption.ts (12 questions)
+
+Data Models
+  wrote data-models/member-attributes.ts (87 attributes)
+  wrote data-models/sponsor-attributes.ts (37 attributes)
+  wrote data-models/location-attributes.ts (25 attributes)
+  wrote data-models/product-attributes.ts (26 attributes)
+  wrote data-models/bit-attributes.ts (139 attributes)
+  wrote data-models/payment-attributes.ts (7 attributes)
+  wrote data-models/offer-attributes.ts (52 attributes)
+
+Glossary
+  wrote glossary.ts
+
+Index
+  wrote index.ts
+
+=== Generation Complete ===
+
+Available sheets: Version History, Glossary, Workshop Plan Template, 1.1 - Tenancy setup, 1.2 - Tenancy Setup - Program A, 2 - Program Details, 3 - Loyalty Account, 4 - Policy Setup & Currency Con, 5 - Offer KPI Setup, 6 - Data Model Related Question, 7.1 - Member Enrolment & Opt-Ou, 7.2 - Member Data Model, 8.1 - Sponsor Management, 8.2 - Sponsor Data Model, 8.3 - Sponsor Details Template, 8.4 - Sponsor Location Data Mod, 8.5 - Sponsor Location Details , 8.6 - Product Data Model, 8.7 - Sponsor Reward Products T, 9 - Tier Management, 10.1 - AccrualRedemption, 10.2 - BIT Data Model, 10.3 - Payment Data Model, 11.1 - Offers, 11.2 - Offer Data Model, 12 - Custom Attributes, 13 - Batches, 14 - Role Management, 15.1 - User Management, 15.2 - User Details, 16 - Member Services, 16.1 Points Adjustment Service, 16.2 BIT Creation Template, 16.3 BIT Cancellation, 16.4 Profile Update, 16.5 Tier Change, 16.6 Member Merge, 16.7 Membership Stage Change, 16.8 Member Deletion, 16.9 Membership Cancellation, 16.10 Award Redemption, 16.11 Privilege Issuance, 16.12 Privilege Extension, 16.13 Privilege Consumption, 16.14 Reinstate Used Privilege, 16.15 Privilege Cancellation, 16.16 Privilege Choice and Swap, 16.17 Privilege Transfer, 16.18 Points Transfer Service, 16.19 Offer Acceptance Service, 16.20 Points Expiry Extension S, 17.1 - Marketing Connect, 17.2  Marketing Communication U, 18 - Data Migration, 19.1 - DWH Integration, 19.2 - DWH - Tables to be Synce, 20 - Finance Connect, 21 - Vertical Entities (Optiona, 22 - AiSense, 23 - AiRecommend, 24- AiRetain, 25 - AiTrust, 26- Airport Entity, 27- Distance Table, 28 - Co-branded Cards, 29 - Subscription Module, 30 - Retro Request Setup, 31 - Airline Redemption Setup, "Read me" Draft

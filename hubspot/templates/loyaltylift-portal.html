@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoyaltyLift — Client Onboarding Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/loyaltylift/css/loyaltylift.css" />
+</head>
+<body>
+  <div id="ll-app" class="ll-app">
+    <div class="ll-loading-page">
+      <div class="ll-spinner"></div>
+    </div>
+  </div>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <!-- LoyaltyLift Application -->
+  <script src="/loyaltylift/js/supabase-client.js"></script>
+  <script src="/loyaltylift/js/form-engine.js"></script>
+  <script src="/loyaltylift/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+bit-attributes.ts
+location-attributes.ts
+member-attributes.ts
+offer-attributes.ts
+payment-attributes.ts
+product-attributes.ts
+sponsor-attributes.ts

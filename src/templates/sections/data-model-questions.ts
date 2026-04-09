@@ -1,0 +1,87 @@
+import type { Section } from '../types';
+
+export const dataModelQuestionsSection: Section = {
+  id: 'data-model-questions',
+  name: 'Data Model Related Questions',
+  description: 'Questions about existing data models for locations, products, and payments',
+  phase: 'discovery',
+  questions: [
+    {
+      key: 'do_you_currently_have_a_data',
+      label: 'Do you currently have a data model for managing location-related information? ',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'does_your_current_data_model_capture',
+      label: 'Does your current data model capture latitude and longitude values for precise location information?',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'are_the_locations_categorised_based_on',
+      label: 'Are the locations categorised based on industry?',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'are_there_dynamic_custom_attributes_for',
+      label: 'Are there dynamic/custom attributes for locations that change over time?',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'is_there_a_product_master_in',
+      label: 'Is there a product master in the program, and if so, could you provide a description of the key attributes and information stored within it?',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'please_provide_details_on_the_format',
+      label: 'Please provide details on the format of SKU IDs used within the rewards program?',
+      inputType: 'textarea',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'are_products_in_the_rewards_program',
+      label: 'Are products in the rewards program categorized, and if they are, what are the primary categories?',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'is_there_comprehensive_documentation_available_for',
+      label: 'Is there comprehensive documentation available for the product-related data within the rewards program?',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'what_are_the_key_attributes_tracked',
+      label: 'What are the key attributes tracked for individual payment transactions in the data model?',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'how_does_the_data_model_represent',
+      label: 'How does the data model represent and differentiate between various payment methods (e.g., credit card, bank transfer, digital wallets)?',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'are_there_specific_attributes_for_currency',
+      label: 'Are there specific attributes for currency conversion rates or currency-related details?',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+  ],
+};

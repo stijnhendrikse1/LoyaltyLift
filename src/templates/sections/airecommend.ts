@@ -1,0 +1,92 @@
+import type { Section } from '../types';
+
+export const airecommendSection: Section = {
+  id: 'airecommend',
+  name: 'AiRecommend',
+  description: 'AiRecommend module configuration for personalized recommendations',
+  phase: 'launch',
+  visibleIf: {
+    questionKey: 'modules_purchased',
+    operator: 'contains',
+    value: 'AiRecommend',
+  },
+  questions: [
+    {
+      key: 'does_the_client_have_a_member',
+      label: 'Does the client have a member facing portal where they want to show the recommended offers to the member?',
+      inputType: 'text',
+      required: true,
+      pii: false,
+    },
+    {
+      key: 'are_the_offers_targeted_to_members',
+      label: 'Are the offers targeted to members?',
+      inputType: 'text',
+      required: true,
+      pii: false,
+    },
+    {
+      key: 'are_there_any_member_attributes_that',
+      label: 'Are there any member attributes that record the member\'s interests?',
+      inputType: 'text',
+      required: true,
+      pii: false,
+    },
+    {
+      key: 'are_there_any_specific_attributes_member',
+      label: 'Are there any specific attributes (Member, BIT, Sponsor Attributes, etc.,) that should be taken into consideration for recommendation of offers?',
+      inputType: 'text',
+      required: true,
+      pii: false,
+    },
+    {
+      key: 'are_there_any_offers_besides_the',
+      label: 'Are there any offers besides the Base offer in the program?',
+      inputType: 'text',
+      required: true,
+      pii: false,
+    },
+    {
+      key: 'does_the_program_have_at_least',
+      label: 'Does the program have at least 6 offers that are not Base offers?',
+      inputType: 'text',
+      required: true,
+      pii: false,
+    },
+    {
+      key: 'are_there_any_industry_or_domain',
+      label: 'Are there any industry or domain specific factors that we should consider when selecting features?',
+      inputType: 'text',
+      required: true,
+      pii: false,
+    },
+    {
+      key: 'are_there_any_specific_preprocessing_requirements',
+      label: 'Are there any specific preprocessing requirements or considerations? For example, should new custom attributes be considered?',
+      inputType: 'text',
+      required: true,
+      pii: false,
+    },
+    {
+      key: 'are_there_any_specific_performance_matrices',
+      label: 'Are there any specific performance matrices that are particularly important to you?  Example: Average Order Value, Conversion rate, Average Revenue Per Member, etc.,',
+      inputType: 'text',
+      required: false,
+      pii: false,
+    },
+    {
+      key: 'does_the_program_have_at_least',
+      label: 'Does the program have at least 1000 Accrual BITs (Transactions)? ',
+      inputType: 'text',
+      required: true,
+      pii: false,
+    },
+    {
+      key: 'do_a_minimum_of_25_members',
+      label: 'Do a minimum of 25 members have at least 3 Spend BITs or Spend-equivalent Accrual BITs?',
+      inputType: 'text',
+      required: true,
+      pii: false,
+    },
+  ],
+};

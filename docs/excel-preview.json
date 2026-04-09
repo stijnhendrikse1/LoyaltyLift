@@ -1,0 +1,2237 @@
+{
+  "sheetNames": [
+    "Version History",
+    "Glossary",
+    "Workshop Plan Template",
+    "1.1 - Tenancy setup",
+    "1.2 - Tenancy Setup - Program A",
+    "2 - Program Details",
+    "3 - Loyalty Account",
+    "4 - Policy Setup & Currency Con",
+    "5 - Offer KPI Setup",
+    "6 - Data Model Related Question",
+    "7.1 - Member Enrolment & Opt-Ou",
+    "7.2 - Member Data Model",
+    "8.1 - Sponsor Management",
+    "8.2 - Sponsor Data Model",
+    "8.3 - Sponsor Details Template",
+    "8.4 - Sponsor Location Data Mod",
+    "8.5 - Sponsor Location Details ",
+    "8.6 - Product Data Model",
+    "8.7 - Sponsor Reward Products T",
+    "9 - Tier Management",
+    "10.1 - AccrualRedemption",
+    "10.2 - BIT Data Model",
+    "10.3 - Payment Data Model",
+    "11.1 - Offers",
+    "11.2 - Offer Data Model",
+    "12 - Custom Attributes",
+    "13 - Batches",
+    "14 - Role Management",
+    "15.1 - User Management",
+    "15.2 - User Details",
+    "16 - Member Services",
+    "16.1 Points Adjustment Service",
+    "16.2 BIT Creation Template",
+    "16.3 BIT Cancellation",
+    "16.4 Profile Update",
+    "16.5 Tier Change",
+    "16.6 Member Merge",
+    "16.7 Membership Stage Change",
+    "16.8 Member Deletion",
+    "16.9 Membership Cancellation",
+    "16.10 Award Redemption",
+    "16.11 Privilege Issuance",
+    "16.12 Privilege Extension",
+    "16.13 Privilege Consumption",
+    "16.14 Reinstate Used Privilege",
+    "16.15 Privilege Cancellation",
+    "16.16 Privilege Choice and Swap",
+    "16.17 Privilege Transfer",
+    "16.18 Points Transfer Service",
+    "16.19 Offer Acceptance Service",
+    "16.20 Points Expiry Extension S",
+    "17.1 - Marketing Connect",
+    "17.2  Marketing Communication U",
+    "18 - Data Migration",
+    "19.1 - DWH Integration",
+    "19.2 - DWH - Tables to be Synce",
+    "20 - Finance Connect",
+    "21 - Vertical Entities (Optiona",
+    "22 - AiSense",
+    "23 - AiRecommend",
+    "24- AiRetain",
+    "25 - AiTrust",
+    "26- Airport Entity",
+    "27- Distance Table",
+    "28 - Co-branded Cards",
+    "29 - Subscription Module",
+    "30 - Retro Request Setup",
+    "31 - Airline Redemption Setup",
+    "\"Read me\" Draft"
+  ],
+  "sheetCount": 69,
+  "Version History": {
+    "rowCount": 105,
+    "headers": [
+      [
+        "Version",
+        "Created/Modified Date",
+        "Author",
+        "Details of the Change",
+        "Reviewer",
+        "Date of Review"
+      ],
+      [
+        1,
+        45328,
+        "LJI Customer Success Team",
+        "Initial Version",
+        "Praneeth Chiravuri, Customer Success Lead",
+        45328
+      ],
+      [
+        2,
+        45334,
+        "AI Team - AiRetain, AiRecommend, AiTrust",
+        "Added AiRetain, AiRecommend, & AiTrust",
+        "Azeem Mohammed, Director of Engineering",
+        45334
+      ]
+    ]
+  },
+  "Glossary": {
+    "rowCount": 1002,
+    "headers": [
+      [
+        "S. No.",
+        "Term",
+        "Definition",
+        "Example"
+      ],
+      [
+        1,
+        "Lookup Codes",
+        "Lookup codes are the list of values for a Lookup Data Type (dropdown) attribute in GRAVTY.",
+        "Lookup Code values for Offer Category - Travel, Dining, Entertainment, etc.,"
+      ],
+      [
+        "",
+        "Sponsor Concept",
+        "",
+        ""
+      ]
+    ]
+  },
+  "Workshop Plan Template": {
+    "rowCount": 1013,
+    "headers": [
+      [
+        "Category",
+        "Objectives of the Workshop",
+        "Details",
+        "Outcome of the Workshop",
+        "Week for the Workshop",
+        "Duration (min)",
+        ""
+      ],
+      [
+        "Day 1: Discovery Questionnaire Walkthrough",
+        "Objective: To provide a comprehensive overview of the Glossary and a step-by-step walkthrough of the discovery questionnaire for GRAVTY Configuration.",
+        "Agenda:\n1. Glossary\n2. Overview of the Workshop Plan\n3. Walkthrough of the Discovery Questionnaire",
+        "1. Gain familiarity with GRAVTY and LJI-specific terminology.\n2. Develop a thorough understanding of the questionnaire's questions and underlying objectives.",
+        "W1",
+        30,
+        "Client Business Team, LJI Project Manager, Business Analyst"
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "1.1 - Tenancy setup": {
+    "rowCount": 3,
+    "headers": [
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory (Y/N)",
+        "Industry Relevance"
+      ],
+      [
+        1,
+        "Please provide the logo of your program or your company's logo in case your program doesn't have one yet.",
+        "Please add the cloud drive link for the file here.",
+        "Yes",
+        "All"
+      ],
+      [
+        2,
+        "Please provide the email addresses (at least one) of the Program Administrators you would like us to invite for GRAVTY loyalty system access.",
+        "Please fill in the details here.",
+        "Yes",
+        "All"
+      ]
+    ]
+  },
+  "1.2 - Tenancy Setup - Program A": {
+    "rowCount": 998,
+    "headers": [
+      [
+        "S. No",
+        "First Name",
+        "Last Name ",
+        "Email"
+      ],
+      [
+        1,
+        "John",
+        "Doe",
+        "john.doe@gmail.com"
+      ],
+      [
+        2,
+        "Jane",
+        "Doe",
+        "jane.doe@gmail.com"
+      ]
+    ]
+  },
+  "2 - Program Details": {
+    "rowCount": 13,
+    "headers": [
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory (Yes/No)",
+        "Industry Relevance"
+      ],
+      [
+        1,
+        "Please provide the name of your Loyalty Program.",
+        "Skywards Everyday",
+        "Yes",
+        "All"
+      ],
+      [
+        2,
+        "Please provide the name of the company that owns the Program.",
+        "Emirates",
+        "Yes",
+        "All"
+      ]
+    ]
+  },
+  "3 - Loyalty Account": {
+    "rowCount": 999,
+    "headers": [
+      [
+        "Currency Name",
+        "Description",
+        "Currency Type \n- For Rewarding Members (Redemption Type)\n- For Recognizing Members via Tiers, Gamification Badges, etc. (Recognition Type)\n- Partner Program Currency (e.g. AAdvantageMiles in Hilton Honors Program)",
+        "Currency Logo",
+        "Internal Cost (for Liability Calculation)\n(Applicable only for Redemption Type loyalty account)",
+        "Selling Price [Base Price for selling Currency to Partners]\n(Applicable only for Redemption Type loyalty account)",
+        "Describe your Expiration Policy\n(Applicable only for Redemption Type loyalty account)",
+        "Do you want balance in this Currency to be visible to Members? (Yes/No)",
+        "Do you want to have a withholding period for the redemption of earned points? (Yes/No)?",
+        "Define the withholding period for redemption of earned points? (In Number of Days)",
+        "Do you want to micro-track points earned by members using tags? If yes, please provide details.\n(Applicable only for Redemption Type loyalty account)",
+        "Do you want to expire points at a tag level? If yes, please provide details.\n(Applicable only for Redemption Type loyalty account)"
+      ],
+      [
+        "Points",
+        "Currency to Reward Loyalty Program Members (Member Type Individuals)",
+        "Redemption Type",
+        "Please add the cloud drive link for the file here.",
+        0.01,
+        0.02,
+        "Points expire 2 years after the last Member Accrual Transaction, on the Member's Anniversary Date.",
+        "Yes",
+        "No",
+        "NA",
+        "Base, Bonus, Happy Hours etc.",
+        "- Bonus Points expire in 2 months.\n- Happy Hours Points expire in 1 day.\n- New Year Points expire on 31st Dec."
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "4 - Policy Setup & Currency Con": {
+    "rowCount": 65,
+    "headers": [
+      [
+        "S. No.",
+        "Questions",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Inputs",
+        "Mandatory Now (Y/N)",
+        "Industry Relevance"
+      ],
+      [
+        1,
+        "Reward (Accrual) Policies & Currency Conversion",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        1.1,
+        "Do you expect to receive member transactions in multiple currencies? (Y/N).",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Yes",
+        "Yes",
+        "All"
+      ]
+    ]
+  },
+  "5 - Offer KPI Setup": {
+    "rowCount": 12,
+    "headers": [
+      [
+        "S. No",
+        "Offer KPI",
+        "Offer KPI Description",
+        "Enable"
+      ],
+      [
+        1,
+        "Total Sales Influenced by the Offer",
+        "The total amount of sales that were influenced by the offer.",
+        ""
+      ],
+      [
+        2,
+        "Total Cost Incurred",
+        "The total cost of running the offer.",
+        ""
+      ]
+    ]
+  },
+  "6 - Data Model Related Question": {
+    "rowCount": 20,
+    "headers": [
+      [
+        "",
+        "Sponsor Location Data Model",
+        "",
+        ""
+      ],
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory"
+      ],
+      [
+        1,
+        "Do you currently have a data model for managing location-related information? ",
+        "",
+        "No"
+      ]
+    ]
+  },
+  "7.1 - Member Enrolment & Opt-Ou": {
+    "rowCount": 36,
+    "headers": [
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory (Yes/No)"
+      ],
+      [
+        "",
+        "Member Enrolment",
+        "",
+        ""
+      ],
+      [
+        1,
+        "Which touchpoints/channels will be used for enrolment? Provide an exhaustive list of all the channels through which a member can enroll in your program, e.g., POS, App, Website.",
+        "POS, App",
+        "Yes"
+      ]
+    ]
+  },
+  "7.2 - Member Data Model": {
+    "rowCount": 91,
+    "headers": [
+      [
+        "Business Name",
+        "Attribute Name",
+        "Attribute Description",
+        "Sample value",
+        "Data Type",
+        "Lookup Type",
+        "LOV Type",
+        "Allow Multiple",
+        "PII",
+        "Unique",
+        "Length",
+        "Group",
+        "Updatable",
+        "Mandatory",
+        "Attribute Type",
+        "Instructions/Notes",
+        "Industry Relevance",
+        "Attribute Required? "
+      ],
+      [
+        "Address Line 1",
+        "address_line1",
+        "Member's address line 1.",
+        "831 Spring Haven Trail",
+        "TEXT",
+        "",
+        "",
+        false,
+        true,
+        false,
+        100,
+        "Contact Information",
+        true,
+        false,
+        "USER_GIVEN",
+        "",
+        "All",
+        "No"
+      ],
+      [
+        "Address Line 2",
+        "address_line2",
+        "Member's address line 2.",
+        "Netcong",
+        "TEXT",
+        "",
+        "",
+        false,
+        true,
+        false,
+        100,
+        "Contact Information",
+        true,
+        false,
+        "USER_GIVEN",
+        "",
+        "All",
+        ""
+      ]
+    ]
+  },
+  "8.1 - Sponsor Management": {
+    "rowCount": 20,
+    "headers": [
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory (Yes/No)",
+        "Industry Relevance"
+      ],
+      [
+        1,
+        "What will be the name of the company hosting the Loyalty Program?",
+        "FAS Rewards LLC",
+        "Yes",
+        "All"
+      ],
+      [
+        2,
+        "Multi-National Loyalty Program Sponsor Management Related Questions",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "8.2 - Sponsor Data Model": {
+    "rowCount": 40,
+    "headers": [
+      [
+        "Business Name",
+        "Attribute Name",
+        "Attribute Description",
+        "Sample Value",
+        "Data Type",
+        "Lookup Type",
+        "LOV Type",
+        "Length",
+        "Updatable",
+        "Mandatory",
+        "Industry Relevance",
+        "Attribute Required? "
+      ],
+      [
+        "Additional Emails",
+        "additional_emails",
+        "Refers to Sponsor's additional email address. This would be cc'ed in all of the communication emails to the primary email. This is not visible on the UI and is usually added through merchant portals",
+        "John123@gmail.com",
+        "LIST",
+        "",
+        "",
+        500,
+        true,
+        false,
+        "All",
+        "No"
+      ],
+      [
+        "Address",
+        "address",
+        "Sponsor's mailing address",
+        "Jumeirah - Dubai - United Arab Emirates",
+        "TEXT",
+        "",
+        "",
+        2000,
+        true,
+        true,
+        "All",
+        ""
+      ]
+    ]
+  },
+  "8.3 - Sponsor Details Template": {
+    "rowCount": 994,
+    "headers": [
+      [
+        "Attribute Name",
+        "Sponsor Name",
+        "Visible Name",
+        "Group",
+        "Registered ID",
+        "Sponsor Enrollment Form URL",
+        "Sponsor Short Name",
+        "Sponsor Industry",
+        "Sponsor Description",
+        "Sponsor Logo",
+        "Sponsor Banner",
+        "Sponsor Facets",
+        "Sponsorship Validity: Start Date",
+        "Sponsorship Validity: End Date",
+        "Annual Revenue",
+        "Employee Count",
+        "Contact Person: Name",
+        "Contact Person: Email",
+        "Contact Person: Number",
+        "Business Contact Details\n: Business Website",
+        "Business Contact Details\n: Business Unit",
+        "Business Contact Details\n: Business Division",
+        "Business Contact Details: Latitude of the Business Address",
+        "Business Contact Details: Longitude of the Business Address",
+        "Sponsor Opening Hours: Opens at (HH:MM)",
+        "Sponsor Opening Hours: Closes at (HH:MM)",
+        "Base Rate: Currency ",
+        "Base Rate: Loyalty Account ",
+        "Base Rate: Value ",
+        "Base Rate Validity: Start Date",
+        "Base Rate Validity: End Date",
+        "Redemption Threshold: Loyalty Account",
+        "Redemption Threshold: Value"
+      ],
+      [
+        "Attribute Description",
+        "This will be the Sponsor's name used to identify the Sponsor in GRAVTY.",
+        "The visible name attribute can be used to display the Sponsor's brand name on member-facing channels (Mobile, Web, etc.). For example, if you have a Sponsor in multiple countries, in that case, the Sponsor's name can be Burger King Poland and Burger King Austria, but the visible name of the Sponsor can be \"Burger King.\"",
+        "Name of the Holding/Parent Company of the Sponsor.",
+        "Sponsor's legal ID or identification.",
+        "Sponsor specific URL used to enroll members into the program. Additionally, it can be utilized to track the number of members getting enrolled through the Sponsor.",
+        "Short Name of the Sponsor. The Sponsor's short name should be unique (No two sponsors in the tenant can have the same Short name) in the program across all the Sponsors.\n",
+        "Industry of the Sponsor.",
+        "Description of the Sponsor.",
+        "The Logo of the Sponsor. \n[Files must be 200x200px minimum, and not exceed 2MB, accepted formats PNG, JPG and GIF.]\n",
+        "Header/Banner image of the Sponsor.\n[Files must be 200x200px minimum and not exceed 2MB, accepted formats PNG, JPG, and GIF.]\n",
+        "Sponsor facets can be used for optimizing the Sponsor's search and recommendations.",
+        "The start date of the Sponsor's validity is the date from which BITs (transactions) are sent to GRAVTY by this sponsor. If past-dated BITs (transactions) are sent from a sponsor, the start date should be determined by the oldest past-dated BIT that would be sent to GRAVTY.",
+        "End date of the Sponsor's validity.",
+        "Sponsor's Annual Revenue",
+        "Number of Employees in Sponsor's Company/Organization.",
+        "Name of the primary sponsor representative. This field is Mandatory only when sponsor verification is needed.",
+        "Email of the primary sponsor representative. This field is Mandatory only when sponsor verification is needed.",
+        "Phone number of the primary sponsor representative. This field is Mandatory only when sponsor verification is needed.",
+        "Business Website of the Sponsor.",
+        "Business Unit of the Sponsor.",
+        "Business Division of the Sponsor.",
+        "Latitude of the Sponsor's Headquarters Address.",
+        "Longitude of the Sponsor's Headquarters Address.",
+        "The operation timings of the sponsor. You can set different open times for different days of the week.",
+        "The operation timings of the sponsor. You can set different closing times for different days of the week.",
+        "\nThe \"Base Rate: Currency\" attribute refers to the specific currency against which a base rate is configured.",
+        "\nThe \"Base Rate: Loyalty Account\" attribute refers to the specific loyalty account against which a base rate is configured.",
+        "\nThe \"Base Rate: Value\" attribute refers to the number of points to be rewarded in the respective loyalty account on 1 unit of currency spent.",
+        "\"Base Rate Validity: Start Date\" refers to the commencement date from which the specified base rate becomes applicable.",
+        "\"Base Rate Validity: End Date\" refers to the conclusion date, indicating until when the specified base rate remains valid. Once the end date is reached, the base rate will no longer be applicable.",
+        "The \"Redemption Threshold: Loyalty Account\" attribute refers to the specific loyalty account for which the Redemption Threshold is configured.",
+        "The \"Redemption Threshold: Value\" attribute refers to the maximum number of points that all members can redeem from the respective loyalty account."
+      ],
+      [
+        "Data Type",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Lookup",
+        "Text",
+        "Text",
+        "Text",
+        "Lookup",
+        "Date",
+        "Date",
+        "Lookup",
+        "Lookup",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Lookup",
+        "Lookup",
+        "Number",
+        "Number",
+        "Number",
+        "Number",
+        "Lookup",
+        "Lookup",
+        "Number",
+        "Date",
+        "Date",
+        "Lookup",
+        "Number"
+      ]
+    ]
+  },
+  "8.4 - Sponsor Location Data Mod": {
+    "rowCount": 28,
+    "headers": [
+      [
+        "Business Name",
+        "Attribute Name",
+        "Attribute Description",
+        "Sample Value",
+        "Data Type",
+        "Lookup Type",
+        "LOV Type",
+        "Length",
+        "Updatable",
+        "Mandatory",
+        "Industry Relevance",
+        "Attribute Required? "
+      ],
+      [
+        "Active",
+        "active",
+        "Describes Sponsor Location's status, only active locations transactions would be valid",
+        "True/False",
+        "BOOLEAN",
+        "",
+        "",
+        8,
+        true,
+        false,
+        "All",
+        "Yes"
+      ],
+      [
+        "Address",
+        "address",
+        "Refers to Sponsor Location's address",
+        "Burj Al Arab",
+        "TEXT",
+        "",
+        "",
+        2000,
+        true,
+        false,
+        "All",
+        ""
+      ]
+    ]
+  },
+  "8.5 - Sponsor Location Details ": {
+    "rowCount": 987,
+    "headers": [
+      [
+        "Attribute Name",
+        "Sponsor Name",
+        "Location Name",
+        "Location Type",
+        "Location Code",
+        "Location Phone Number",
+        "Sponsor Location Enrollment Form URL",
+        "Location Facets",
+        "Contact: Contact Email",
+        "Contact: Contact Name",
+        "Contact: Contact Number",
+        "Location Category",
+        "Location Address: Latitude",
+        "Location Address: Longitude",
+        "Online URL",
+        "Destination",
+        "Location Image",
+        "Location Opening Hours: Opens at (HH:MM)",
+        "Location Opening Hours: Closes at (HH:MM)"
+      ],
+      [
+        "Column Definition",
+        "Please provide the name of the Sponsor to which the location belongs.",
+        "The location name attribute can be used to show the location's name on member-facing channels such as Mobile, Web, etc.",
+        "The type of location, whether it is a store, restaurant, etc.",
+        "Please provide the unique code you wish to use for identifying a location in GRAVTY. This location code is sent as part of the BIT (transaction) to GRAVTY. It's important to note that the location code cannot be updated once a location is created.",
+        "The phone number for the location that will be visible to members on member-facing channels, such as the app and website.",
+        "Sponsor-specific location URL used to enroll members into the program. Additionally, it can be utilized to track the number of members getting enrolled through the location.",
+        "Location facets can be used for optimizing location search and recommendations.",
+        "Email address of the contact person for location. This person will be registered as a GRAVTY user with the role of Sponsor Location Representative and granted access to this specific location.",
+        "Name of the location's contact person. The contact name is mandatory if an email is provided.",
+        "Contact number of the contact person.",
+        "Indicate whether the location is offline or online. If it is an online location, the domain URL is mandatory; for offline locations, the address is mandatory.",
+        "Latitude of the location. This field is mandatory for offline locations.",
+        "Longitude of the location. This field is mandatory for offline locations.",
+        "The domain URL of the online location. This field is mandatory for online locations.",
+        "Refers to the location's destination, for example, the name of the shopping mall, hotel, etc.",
+        "Location image of the Sponsor.\n[Files must be 200x200px minimum and not exceed 2MB, accepted formats PNG, JPG, and GIF.].",
+        "The operation timings of the location. You can set different open times for different days of the week.",
+        "The operation timings of the location. You can set different closing times for different days of the week."
+      ],
+      [
+        "Data Type",
+        "Text",
+        "Text",
+        "Lookup",
+        "Text",
+        "Text",
+        "Text",
+        "Lookup",
+        "Text",
+        "Text",
+        "Text",
+        "Lookup",
+        "Number",
+        "Number",
+        "Text",
+        "Lookup",
+        "Text ",
+        "Number",
+        "Number"
+      ]
+    ]
+  },
+  "8.6 - Product Data Model": {
+    "rowCount": 29,
+    "headers": [
+      [
+        "Business Name",
+        "Attribute Name",
+        "Attribute Description",
+        "Sample Value",
+        "Data Type",
+        "Lookup Type",
+        "LOV Type",
+        "Length",
+        "Updatable",
+        "Mandatory",
+        "Industry Relevance",
+        "Attribute Required? "
+      ],
+      [
+        "Sponsor",
+        "sponsor",
+        "Sponsor to which the Product belongs to",
+        "Jumeirah Hotel",
+        "LOV",
+        "",
+        "SPONSOR_LIST",
+        32,
+        true,
+        true,
+        "All",
+        "Yes"
+      ],
+      [
+        "Product Name",
+        "name",
+        "Product's Name, visible in GRAVTY and also on the member facing portals",
+        "Casual Dining",
+        "TEXT",
+        "",
+        "",
+        100,
+        true,
+        true,
+        "All",
+        "Yes"
+      ]
+    ]
+  },
+  "8.7 - Sponsor Reward Products T": {
+    "rowCount": 16,
+    "headers": [
+      [
+        "Attribute Name",
+        "Product Name",
+        "Product Description",
+        "Product Category",
+        "Product Line",
+        "Product Cost",
+        "Product Validity: Start Date",
+        "Product Validity: End Date",
+        "Base Reward In",
+        "Base Reward",
+        "Product External ID",
+        "Product Facets"
+      ],
+      [
+        "Attribute Description",
+        "The name of the product that will be displayed in GRAVTY and on member-facing portals such as Mobile App, Website, etc.,",
+        "Description of the Product.",
+        "Please specify the product's category, such as Electronics, Apparel, Automotive, etc.",
+        "Please specify the product's line, such as BMW 3 Series, Samsung Galaxy Series, Coca-Cola Beverages, etc.,",
+        "The cost of the product incurred by the sponsor in the program currency (USD, EUR, MXN, etc.).",
+        "The start date of the Product's validity.",
+        "The End date of the Product's validity.",
+        "The \"Base Reward In\" attribute refers to the specific loyalty account against which the base reward value will be configured.",
+        "The \"Base Reward\" attribute refers to the number of points to be rewarded in the respective loyalty account for the purchase of 1 unit of SKU.",
+        "The Product External ID is a unique identifier for the product or Stock-keeping unit (SKU) that the source system can pass in the BIT (Transaction) when a member purchases SKU(s).",
+        "Product facets can be used for optimizing the Product's search and recommendations."
+      ],
+      [
+        "Data Type",
+        "Text",
+        "Text",
+        "Lookup",
+        "Lookup",
+        "Number",
+        "Date",
+        "Date",
+        "Lookup",
+        "Number",
+        "Text",
+        "Lookup"
+      ]
+    ]
+  },
+  "9 - Tier Management": {
+    "rowCount": 22,
+    "headers": [
+      [
+        "S.No",
+        "Questions",
+        "Inputs",
+        "Mandatory"
+      ],
+      [
+        "",
+        "Tier Class & Tiers Setup",
+        "",
+        ""
+      ],
+      [
+        1,
+        "Does your Program have a Tier structure? If Yes, kindly provide Tier related details.",
+        "Yes and Starbucks Rewards program has 3 Tiers.",
+        "Yes"
+      ]
+    ]
+  },
+  "10.1 - AccrualRedemption": {
+    "rowCount": 12,
+    "headers": [
+      [
+        "",
+        "Area",
+        "Questions",
+        "Inputs",
+        "Mandatory",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        1,
+        "Earning Criteria",
+        "Does a member earn based on the total amount spent, or is it calculated on a line level (each SKU or specific transaction level)? For instance, does the total bill amount determine it, or is it assessed more granularly, such as each line item for Retail, Room Stay, or F&B spent for Hospitality, or each ancillary for airlines?",
+        "Header Level",
+        "Yes",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        2,
+        "Qualifying Criteria to earn points",
+        "Is there a minimum criteria within the program that members must meet to earn points? For example, does the bill amount need to exceed $100?",
+        "No, bill amount does not need to exceed any minimum amount",
+        "No",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "10.2 - BIT Data Model": {
+    "rowCount": 999,
+    "headers": [
+      [
+        "Business Name",
+        "Attribute Name",
+        "Attribute description",
+        "Sample Value",
+        "Data Type",
+        "Lookup Type",
+        "LOV Type",
+        "Allow Multiple",
+        "Unique",
+        "Length",
+        "Line Level",
+        "Group",
+        "Updatable",
+        "Mandatory",
+        "Instructions",
+        "Industry Relevance",
+        "Attribute Required? "
+      ],
+      [
+        "Cancel BIT ID",
+        "cancel_bit_id",
+        "Refers to the ID of BIT which is to be cancelled",
+        "WRUIT3435K",
+        "TEXT",
+        "",
+        "",
+        false,
+        false,
+        50,
+        false,
+        "Cross Industry",
+        true,
+        false,
+        "",
+        "All",
+        "Yes"
+      ],
+      [
+        "Activity Referred by Member",
+        "h_activity_referred_by_member",
+        "Name of the Member who referred this activity to another member.",
+        "John",
+        "TEXT",
+        "",
+        "",
+        false,
+        false,
+        100,
+        false,
+        "Cross Industry",
+        true,
+        false,
+        "",
+        "All",
+        "No"
+      ]
+    ]
+  },
+  "10.3 - Payment Data Model": {
+    "rowCount": 10,
+    "headers": [
+      [
+        "Business Name",
+        "Attribute Name",
+        "Attribute Description",
+        "Sample value",
+        "Data Type",
+        "LookUp Type",
+        "Length",
+        "Industry Relevance",
+        "Attribute Required? "
+      ],
+      [
+        "Active",
+        "active",
+        "Status of the Card.",
+        "YES",
+        "BOOLEAN",
+        "",
+        100,
+        "All",
+        "Yes"
+      ],
+      [
+        "Bank Code",
+        "bank_code",
+        "Code of the bank used for transaction.",
+        "BARB0JASAMR",
+        "LOOKUP",
+        "BANK_CODE",
+        100,
+        "All",
+        "No"
+      ]
+    ]
+  },
+  "11.1 - Offers": {
+    "rowCount": 907,
+    "headers": [
+      [
+        "S.No",
+        "Type of Offers",
+        "Example",
+        "Comments"
+      ],
+      [
+        1,
+        "Reward Offers",
+        "Shop for $300 and receive 150 Points",
+        "Reward offers involve the issuance of loyalty points and privileges when a member fulfills a specific call to action."
+      ],
+      [
+        2,
+        "Award Offers",
+        "Upgrade your airline seat for 1000 loyalty points",
+        "Award offers allow members to redeem points for a product or service. Members use points to pay for specific services or products."
+      ]
+    ]
+  },
+  "11.2 - Offer Data Model": {
+    "rowCount": 55,
+    "headers": [
+      [
+        "Business Name",
+        "Attribute Name",
+        "Attribute Description",
+        "Data Type",
+        "Lookup Type",
+        "Sample value",
+        "Length",
+        "Industry Relevance",
+        "Attribute Required? "
+      ],
+      [
+        "Allow Sponsor Followers",
+        "allow_sponsorfollowers",
+        "Member would be able to follow these sponsors through member facing portals and offer would be targetted to these followers",
+        "BOOLEAN",
+        "",
+        "True/False",
+        8,
+        "All",
+        "Yes"
+      ],
+      [
+        "Availed Total",
+        "availed_total",
+        "Number of times an offer has been applied for the transactions done by the members",
+        "NUMBER",
+        "",
+        140,
+        10,
+        "All",
+        "Yes"
+      ]
+    ]
+  },
+  "12 - Custom Attributes": {
+    "rowCount": 59,
+    "headers": [
+      [
+        "",
+        "Custom Member Attributes",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "S.No",
+        "Attribute Backend Name",
+        "Attribute Visible Name",
+        "Attribute Description",
+        "Data Type",
+        "Lookup Type",
+        "Allow Multiples",
+        "Use in Rules",
+        "",
+        ""
+      ],
+      [
+        1,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "13 - Batches": {
+    "rowCount": 63,
+    "headers": [
+      [
+        "",
+        "Member Enrolment Batch",
+        "",
+        ""
+      ],
+      [
+        "S.No",
+        "Questions",
+        "Inputs",
+        "Mandatory"
+      ],
+      [
+        1,
+        "Mention the sponsor under which the members will get enrolled.",
+        "NA",
+        "No"
+      ]
+    ]
+  },
+  "14 - Role Management": {
+    "rowCount": 1026,
+    "headers": [
+      [
+        "User Roles & Responsibilities",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Provide a list of user's roles who are going to access GRAVTY in the below table.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "15.1 - User Management": {
+    "rowCount": 13,
+    "headers": [
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory"
+      ],
+      [
+        1,
+        "Password Policy",
+        "",
+        ""
+      ],
+      [
+        1.1,
+        "Password Expiry Policy: Specify the password expiration period for GRAVTY users (this doesn't apply to loyalty program members). The default setting for this value is 90 days and it should be within the range of 7 to 90 days.",
+        "90 days",
+        "Yes"
+      ]
+    ]
+  },
+  "15.2 - User Details": {
+    "rowCount": 11,
+    "headers": [
+      [
+        "Attribute Name",
+        "First Name",
+        "Last Name ",
+        "Email",
+        "Phone Number",
+        "Access Limit",
+        "Valid Until/For",
+        "Role ",
+        "Sponsor Name(s)",
+        "Sponsor Location Name(s)",
+        "User Photo"
+      ],
+      [
+        "Attribute Description",
+        "First name of the user.",
+        "Last name of the user.",
+        "Email address of the user.",
+        "Phone number of the user.",
+        "Specify whether the user should have unlimited access or limited access with options such as Hourly limit, Daily limit, or Fixed Date.",
+        "This field is mandatory only in the case of limited access for users. Provide the value for \"Valid Until/For\" based on the access limit type:\n- Hourly Limit: Specify the number of hours.\n- Daily Limit: Specify the number of days.\n- Fixed Date: Provide the end date and time for access.",
+        "Specify the relevant GRAVTY role that the user should be assigned.",
+        "This field is mandatory only for Sponsor Level users. Please select the sponsor for whom users will require access. In the case of multi-sponsor users, specify the names of multiple sponsors.",
+        "This field is mandatory only for Sponsor Location Level users. Please select the sponsor location for whom users will require access. In the case of multi-sponsor location users, specify the names of multiple sponsor locations.",
+        "User profile photo. Users can also upload their photo after logging in."
+      ],
+      [
+        "Data Type",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Lookup",
+        "DateTime/Number",
+        "Lookup",
+        "Lookup",
+        "Lookup",
+        "Text"
+      ]
+    ]
+  },
+  "16 - Member Services": {
+    "rowCount": 21,
+    "headers": [
+      [
+        "S. No",
+        "Member Service",
+        "Service Description",
+        "Enable"
+      ],
+      [
+        1,
+        "Points Adjustment",
+        "To manually adjust the points for the member.",
+        "Yes"
+      ],
+      [
+        2,
+        "BIT Creation",
+        "Select the BIT creation template for your BIT type.",
+        "No"
+      ]
+    ]
+  },
+  "16.1 Points Adjustment Service": {
+    "rowCount": 13,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for this service?",
+        "Text (e.g., \"Points Adjustment\")",
+        "No"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"Points Adjustment Service can be used to Redeem or Reward points to members\")",
+        "No"
+      ]
+    ]
+  },
+  "16.2 BIT Creation Template": {
+    "rowCount": 10,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Template Identity",
+        "What is the unique Name for this BIT Creation Template?",
+        "Text",
+        "Yes"
+      ],
+      [
+        "",
+        "Which BIT Type (e.g., Spend, Purchase) should this be associated with?",
+        "Dropdown based on Lookup BIT Type",
+        "Yes"
+      ]
+    ]
+  },
+  "16.3 BIT Cancellation": {
+    "rowCount": 10,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for the cancellation service ?",
+        "Text (e.g., \"BIT Cancellation\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"Select the BIT which needs to be canceled...\")",
+        "Yes"
+      ]
+    ]
+  },
+  "16.4 Profile Update": {
+    "rowCount": 3,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for the profile update service ?",
+        "Text (e.g., \"Member profile Update\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., Search for the member attribute that needs to be updated. If you are unsure of the exact attribute name, just input the keyword to populate all the relevant attributes.)",
+        "Yes"
+      ]
+    ]
+  },
+  "16.5 Tier Change": {
+    "rowCount": 10,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for the tier change service ?",
+        "Text (e.g., \"Tier Status Override\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"To change the member's tier status manually.\")",
+        "Yes"
+      ]
+    ]
+  },
+  "16.6 Member Merge": {
+    "rowCount": 5,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for the member merge service",
+        "Text (e.g., \"Merge Member\")",
+        "No"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"Defining Surviving vs. Merged Member roles...\")",
+        "No"
+      ]
+    ]
+  },
+  "16.7 Membership Stage Change": {
+    "rowCount": 7,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for this service ?",
+        "Text (e.g., \"Membership Lifecycle Management\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"Manually update the member's current stage.\")",
+        "Yes"
+      ]
+    ]
+  },
+  "16.8 Member Deletion": {
+    "rowCount": 6,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What should the Visible Name for the service (e.g., \"Membership Deletion\" or \"Account Closure\").",
+        "Text (e.g., \"Membership Deletion\")",
+        "No"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"To delete the member from the loyalty program aligning with GDPR rules.\")",
+        "No"
+      ]
+    ]
+  },
+  "16.9 Membership Cancellation": {
+    "rowCount": 6,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for the cancellation service ?",
+        "Text (e.g., \"Cancel Membership\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"Permanent cancellation of member record.\")",
+        "Yes"
+      ]
+    ]
+  },
+  "16.10 Award Redemption": {
+    "rowCount": 4,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What should the Visible Name for the service?",
+        "Text (e.g., \"Award Redemption\")",
+        "No"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"Allows members to redeem accumulated loyalty points on the Gravity platform to obtain  products)",
+        "No"
+      ]
+    ]
+  },
+  "16.11 Privilege Issuance": {
+    "rowCount": 8,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What should the Visible Name for the service?",
+        "Text (e.g., \"Privilege Issuance\" ,\" Voucher Issuance \",)",
+        "No"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"To issue privileges to the member if the member is eligible.\")",
+        "No"
+      ]
+    ]
+  },
+  "16.12 Privilege Extension": {
+    "rowCount": 8,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What should the Visible Name for the service?",
+        "Text (e.g., \"Privilege Validity Extension\" ,\" Privilege Extension \", \"Voucher Validity Extension)",
+        "No"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"To extend the assigned privilege validity.\")",
+        "No"
+      ]
+    ]
+  },
+  "16.13 Privilege Consumption": {
+    "rowCount": 7,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for this service ?",
+        "Text (e.g., \"Redeem Benefit\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to help the operator?",
+        "Text (e.g., \"Consume a member privilege...\")",
+        "Yes"
+      ]
+    ]
+  },
+  "16.14 Reinstate Used Privilege": {
+    "rowCount": 6,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for this service ?",
+        "Text (e.g., \"Reinstate Privilege\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"To reinstate a previously used privilege...\")",
+        "Yes"
+      ]
+    ]
+  },
+  "16.15 Privilege Cancellation": {
+    "rowCount": 6,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for this service ?",
+        "Text (e.g., \"Privilege Cancellation\")",
+        "No"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"To cancel the available privilege on the member\")",
+        "No"
+      ]
+    ]
+  },
+  "16.16 Privilege Choice and Swap": {
+    "rowCount": 3,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for this service ?",
+        "Text (e.g., \"Benefit Selection & Swap\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"Select or swap privileges within a bundle...\")",
+        "Yes"
+      ]
+    ]
+  },
+  "16.17 Privilege Transfer": {
+    "rowCount": 6,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for the privilege transfer service?",
+        "Text (e.g., \"Transfer Benefit\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"Transfer a privilege to another member.\")",
+        "Yes"
+      ]
+    ]
+  },
+  "16.18 Points Transfer Service": {
+    "rowCount": 17,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Membership Eligibility",
+        "Do you want to restrict point transfers based on the member's stage?",
+        "Yes",
+        "Yes"
+      ],
+      [
+        "",
+        "Which membership stages are eligible to send (Transferor) points?",
+        "List of specific Stages (e.g., Active, Pre verification)",
+        "Yes"
+      ]
+    ]
+  },
+  "16.19 Offer Acceptance Service": {
+    "rowCount": 7,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for the offer acceptance service?",
+        "Text (e.g., \"Promotion Enrollment\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to help operators understand the service?",
+        "Text (e.g., \"To accept an offer on behalf of a member.\")",
+        "Yes"
+      ]
+    ]
+  },
+  "16.20 Points Expiry Extension S": {
+    "rowCount": 11,
+    "headers": [
+      [
+        "Section",
+        "Questions",
+        "Expected Inputs",
+        "Mandatory"
+      ],
+      [
+        "Service Identity",
+        "What is the preferred Visible Name for the expiry extension service?",
+        "Text (e.g., \"Points Expiry Extension\")",
+        "Yes"
+      ],
+      [
+        "",
+        "What Service Description should be displayed to the operator?",
+        "Text (e.g., \"To extend the expiry of points...\")",
+        "Yes"
+      ]
+    ]
+  },
+  "17.1 - Marketing Connect": {
+    "rowCount": 24,
+    "headers": [
+      [
+        "S.No",
+        "Question",
+        "Inputs",
+        "Mandatory"
+      ],
+      [
+        1,
+        "What channels would you like to use for communication with members?\nEx - SMS, Email, Push, Web Push, WhatsApp, etc.,",
+        "",
+        "Yes"
+      ],
+      [
+        2,
+        "What will be the Marketing platforms for each of the channels that will be used to communicate with members?\nExample: \n- Email - Braze\n- SMS - Twilio",
+        "",
+        "Yes"
+      ]
+    ]
+  },
+  "17.2  Marketing Communication U": {
+    "rowCount": 1000,
+    "headers": [
+      [
+        "S.No",
+        "Notification Use Case",
+        "Summary of the Notification Use Case",
+        "Notification Type",
+        "Notification Trigger",
+        "Notification Template",
+        "Notification Template Attributes"
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "18 - Data Migration": {
+    "rowCount": 12,
+    "headers": [
+      [
+        "S. No",
+        "Questions",
+        "Inputs",
+        "Mandatory (Y/N)"
+      ],
+      [
+        1,
+        "Source Systems: What are the source systems from which data will be extracted and migrated into GRAVTY®? Will it be one system or multiple systems? If multiple, then please specify the type of data coming from each source system.\n \nE.g., One System from where all the data has to be migrated to GRAVTY (or) Different systems from which data has to be migrated into GRAVTY®.\n1. X-System: Member Profile data will be shared from this primary system.\n2. EComm System: Online member data , including transactions,will be shared from Ecomm system.\n3. POS System: POS Transactions will be shared from the POS system.",
+        "Snow flake",
+        "Yes"
+      ],
+      [
+        2.1,
+        "Entities List: What are the entities that need to be migrated into GRAVTY®?\n1. Member Profile data\n2. Member Cards data \n3. Member Transaction data\n4. Member Point Balance\n5. Member Privileges & Expiry data\n6. Retro Transaction data\n7. SKU Level data\n8. Any other entities\n",
+        "- Member Profile Data\n- Member Point Balance\n- SKUs Catalogs\n- Promotions Catalogs\n- Member Transaction Data",
+        "Yes"
+      ]
+    ]
+  },
+  "19.1 - DWH Integration": {
+    "rowCount": 12,
+    "headers": [
+      [
+        "S.No",
+        "Questions",
+        "Inputs"
+      ],
+      [
+        1,
+        "Target Systems: What are the DWH systems to which data will be exported from GRAVTY®?",
+        ""
+      ],
+      [
+        2,
+        "Entities List: What are the entities that need to be exported from GRAVTY®?\n 1. Member Profile data\n 2. Member Transaction data\n 3. Member Point Balances\n 4. Member Privileges & Expiry data\n 5. Program Offers\n 6. Sponsor Products\n 7. Any other entities",
+        ""
+      ]
+    ]
+  },
+  "19.2 - DWH - Tables to be Synce": {
+    "rowCount": 6,
+    "headers": [
+      [
+        "S.No",
+        "Entity",
+        "Table Name",
+        "File Naming Convention",
+        "Metadata File Naming Convention",
+        "Frequency",
+        "File Format"
+      ],
+      [
+        1,
+        "Member",
+        "",
+        "",
+        "",
+        "",
+        "CSV"
+      ],
+      [
+        2,
+        "Offers",
+        "",
+        "",
+        "",
+        "",
+        "CSV"
+      ]
+    ]
+  },
+  "20 - Finance Connect": {
+    "rowCount": 26,
+    "headers": [
+      [
+        "S. No.",
+        "Module",
+        "Questions",
+        "Inputs",
+        "Mandatory (Y/N)",
+        "Comments"
+      ],
+      [
+        1,
+        "Prepaid Setup",
+        "What is the prepaid reserved balance amount to be set up for the Program?",
+        "USD 1000",
+        "Yes",
+        "Prepaid Reserved Balance acts as a escrow balance which will be used once the entire available prepaid balance is completed."
+      ],
+      [
+        2,
+        "",
+        "Does the program require to charge additional admin fee on top of the billing rates? If Yes than what is the amount?",
+        "USD 0.003",
+        "Non Mandatory if the toggle is Off. Mandatory If the toggle is On.",
+        ""
+      ]
+    ]
+  },
+  "21 - Vertical Entities (Optiona": {
+    "rowCount": 21,
+    "headers": [
+      [
+        "S. No.",
+        "General Questions",
+        "Inputs",
+        "Industry Relevance"
+      ],
+      [
+        1,
+        "How important is it for you to have a system that can store and evaluate membership related details like membership ID, membership name, sponsor associated to the membership, etc. efficiently?",
+        "",
+        "Hospitality"
+      ],
+      [
+        2,
+        "How would you envision using the data stored for member details and FFP members to enhance your business operations?",
+        "",
+        "Hospitality"
+      ]
+    ]
+  },
+  "22 - AiSense": {
+    "rowCount": 87,
+    "headers": [
+      [
+        "Alert Category",
+        "Alert Type",
+        "Detection Method",
+        "Metric Name",
+        "Level",
+        "BIT Filter",
+        "Threshold",
+        "Evaluated Over",
+        "Frequency",
+        "Re-Trigger Setup",
+        "Alert Name",
+        "Alert Description",
+        "Alert Recipients"
+      ],
+      [
+        "Mandatory/Optional",
+        "Mandatory",
+        "Mandatory",
+        "Mandatory",
+        "Mandatory",
+        "Mandatory/Optional",
+        "Mandatory",
+        "Mandatory",
+        "Mandatory",
+        "Optional",
+        "Mandatory",
+        "Mandatory",
+        "Optional"
+      ],
+      [
+        "API",
+        "Generic Across APIs",
+        "Threshold Alerts",
+        "# of Invalid Tokens",
+        "Program",
+        "Not Applicable",
+        ">50",
+        "20 Min",
+        "10 Min",
+        "20 Min",
+        "High rate of API failures owing to Invalid Tokens at Program Level",
+        "",
+        ""
+      ]
+    ]
+  },
+  "23 - AiRecommend": {
+    "rowCount": 12,
+    "headers": [
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory"
+      ],
+      [
+        1,
+        "Does the client have a member facing portal where they want to show the recommended offers to the member?",
+        "",
+        "Yes"
+      ],
+      [
+        2,
+        "Are the offers targeted to members?",
+        "",
+        "Yes"
+      ]
+    ]
+  },
+  "24- AiRetain": {
+    "rowCount": 6,
+    "headers": [
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory"
+      ],
+      [
+        1,
+        "Does the program have at least 1000 members?",
+        "",
+        "Yes"
+      ],
+      [
+        2,
+        "Do members accrue (earn) points only through \"Spend\" transactions (BIT type \"Spend\")? If not, what are the various BIT types that reward points to the members?",
+        "",
+        "Yes"
+      ]
+    ]
+  },
+  "25 - AiTrust": {
+    "rowCount": 7,
+    "headers": [
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory"
+      ],
+      [
+        1,
+        "Do you have enough and varying data for model training?",
+        "",
+        "Yes"
+      ],
+      [
+        2,
+        "Do you have labelled fraud data for your program?",
+        "",
+        "No"
+      ]
+    ]
+  },
+  "26- Airport Entity": {
+    "rowCount": 961,
+    "headers": [
+      [
+        "Attribute Name",
+        "Description",
+        "Mandatory",
+        "Unique",
+        "Data Type",
+        "Example Value"
+      ],
+      [
+        "IATA Code",
+        "Standard 3-letter airport code assigned by IATA.",
+        "Yes",
+        "Yes",
+        "LOV",
+        "DEL"
+      ],
+      [
+        "Airport Name",
+        "Official full name of the airport.",
+        "Yes",
+        "Yes",
+        "LOV",
+        "Indira Gandhi International Airport"
+      ]
+    ]
+  },
+  "27- Distance Table": {
+    "rowCount": 7,
+    "headers": [
+      [
+        "S. No.",
+        "General Questions",
+        "Inputs",
+        "Mandatory",
+        "Industry Relevance"
+      ],
+      [
+        1,
+        "Please provide the Origin Airport for each distance record (e.g., DEL, LHR, JFK).",
+        "Use the same IATA code format that you have defined in your Airport master.",
+        "Yes",
+        "Airline"
+      ],
+      [
+        2,
+        "Please provide the Destination Airport for each distance record (e.g., BOM, CDG, DXB).",
+        "Use the same IATA code format that you have defined in your Airport master.",
+        "Yes",
+        "Airline"
+      ]
+    ]
+  },
+  "28 - Co-branded Cards": {
+    "rowCount": 19,
+    "headers": [
+      [
+        "Attribute Name",
+        "Description",
+        "",
+        ""
+      ],
+      [
+        "Card Portfolio Title",
+        "the name of the co-brand program.",
+        "",
+        ""
+      ],
+      [
+        "Issuing Entity",
+        "the issuing entity/ credit card company name",
+        "",
+        ""
+      ]
+    ]
+  },
+  "29 - Subscription Module": {
+    "rowCount": 35,
+    "headers": [
+      [
+        "Subscription Package Setup",
+        "",
+        "",
+        ""
+      ],
+      [
+        "S. No.",
+        "General Questions",
+        "Inputs",
+        "Mandatory"
+      ],
+      [
+        1,
+        "Subscription Package",
+        "Name of the Subscription Package",
+        "Yes"
+      ]
+    ]
+  },
+  "30 - Retro Request Setup": {
+    "rowCount": 42,
+    "headers": [
+      [
+        "Retro Request Setup",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Retro Request Setup enables users to store and manage retro requests as service requests facilitating efficient tracking and automated fulfilment of Retro Requests.",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory",
+        ""
+      ]
+    ]
+  },
+  "31 - Airline Redemption Setup": {
+    "rowCount": 26,
+    "headers": [
+      [
+        "Airline Redemption Setup",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Airline Redemption Setup gives airline program managers a powerful and precise way to setup redemption rates and award values based on different program parameters. It enables the users to support calculation of redemption pricing dynamically based on flight details, such as the origin and destination airports, fare class, flight dates and any other parameters impacting the redemption price.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "S. No.",
+        "Questions",
+        "Inputs",
+        "Mandatory",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "\"Read me\" Draft": {
+    "rowCount": 22,
+    "headers": [
+      [
+        "Client Discovery Questionnaire – Read Me First"
+      ],
+      [
+        ""
+      ],
+      [
+        "Welcome 👋"
+      ]
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+import type { Section } from '../types';
+
+export const accrualRedemptionSection: Section = {
+  id: 'accrual-redemption',
+  name: 'Accrual & Redemption',
+  description: 'Earning criteria, qualifying criteria, exclusions, and base accrual/redemption offers',
+  phase: 'discovery',
+  questions: [
+    {
+      key: 'does_a_member_earn_based_on',
+      label: 'Does a member earn based on the total amount spent, or is it calculated on a line level (each SKU or specific transaction level)? For instance, does the total bill amount determine it, or is it assessed more granularly, such as each line item for Retail, Room Stay, or F&B spent for Hospitality, or e',
+      inputType: 'text',
+      required: true,
+      pii: false,
+      helpText: 'Earning Criteria',
+    },
+    {
+      key: 'is_there_a_minimum_criteria_within',
+      label: 'Is there a minimum criteria within the program that members must meet to earn points? For example, does the bill amount need to exceed $100?',
+      inputType: 'currency',
+      required: false,
+      pii: false,
+      helpText: 'Qualifying Criteria to earn points',
+    },
+    {
+      key: 'does_the_program_have_any_exclusions',
+      label: 'Does the program have any exclusions? (In other words, are there limitations on member earnings based on specific tenders, products, or stores?) These could include: 1. Tender Level - Excluding store credit and coupons. 2. SKU Level - Excluding specific products with codes like XR343F and 444DDF. 3.',
+      inputType: 'select',
+      required: false,
+      pii: false,
+      helpText: 'Exclusions',
+    },
+    {
+      key: 'what_constitutes_the_eligible_amount_for',
+      label: 'What constitutes the eligible amount for earning points? For example, is the eligible amount calculated as the Bill or SKU amount minus (Tax + Exclusions)?',
+      inputType: 'text',
+      required: true,
+      pii: false,
+      helpText: 'Eligible Spend',
+    },
+    {
+      key: 'does_the_program_offer_differential_earnings',
+      label: 'Does the program offer differential earnings? For example, in certain malls or locations, members consistently earn 1% irrespective of their tier, or members in the Platinum tier earn 2x points more compared to the base tier.',
+      inputType: 'text',
+      required: false,
+      pii: false,
+      helpText: 'Differential Earning (Tier Based, Sponsor (Partner) Based, Location Based, etc.,)',
+    },
+    {
+      key: 'the_purpose_of_this_offer_is',
+      label: 'The purpose of this offer is to reward members with points for every eligible transaction they make per the program\'s value proposition.',
+      inputType: 'text',
+      required: false,
+      pii: false,
+      helpText: 'Base Reward Offer',
+    },
+    {
+      key: 'through_this_offer_points_are_deducted',
+      label: 'Through this offer, points are deducted from the member\'s balance when they redeem (burn) their points.',
+      inputType: 'text',
+      required: false,
+      pii: false,
+      helpText: 'Base Redemption Offer',
+    },
+  ],
+};
