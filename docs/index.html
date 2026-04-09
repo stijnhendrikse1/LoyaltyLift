@@ -1602,11 +1602,13 @@ class LoyaltyLiftClient {
   }
 
   async getSurveyOverrides() {
-    const { data, error } = await this.supabase
-      .from('survey_template_overrides')
-      .select('id, section_id, question_key, is_required, default_value, updated_at');
-    if (error) { console.error('getSurveyOverrides:', error); throw error; }
-    return data || [];
+    return this._cached('survey_overrides', async () => {
+      const { data, error } = await this.supabase
+        .from('survey_template_overrides')
+        .select('id, section_id, question_key, is_required, default_value, updated_at');
+      if (error) { console.error('getSurveyOverrides:', error); throw error; }
+      return data || [];
+    });
   }
 
   async saveSurveyOverrides(sectionId, overrides) {
@@ -1622,6 +1624,7 @@ class LoyaltyLiftClient {
       .from('survey_template_overrides')
       .upsert(rows, { onConflict: 'section_id,question_key' });
     if (error) { console.error('saveSurveyOverrides:', error); throw error; }
+    this._invalidate('survey_overrides');
   }
 
   _getSectionTemplate() {
@@ -2519,9 +2522,24 @@ class LLApp {
   }
 
   async _loadSectionConfig(sectionId) {
-    // Section configs will be loaded from the template JS files
     if (window.llSectionTemplates && window.llSectionTemplates[sectionId]) {
-      return window.llSectionTemplates[sectionId];
+      // Deep clone so we don't mutate the original template
+      const config = JSON.parse(JSON.stringify(window.llSectionTemplates[sectionId]));
+      // Merge overrides from database
+      try {
+        const overrides = await window.llClient.getSurveyOverrides();
+        const sectionOverrides = overrides.filter(o => o.section_id === sectionId);
+        sectionOverrides.forEach(o => {
+          const q = config.questions.find(q => q.key === o.question_key);
+          if (q) {
+            if (o.is_required !== null) q.required = o.is_required;
+            if (o.default_value !== null) q.placeholder = String(o.default_value);
+          }
+        });
+      } catch (err) {
+        console.error('Failed to load survey overrides:', err);
+      }
+      return config;
     }
     // Fallback: try to load dynamically
     try {
