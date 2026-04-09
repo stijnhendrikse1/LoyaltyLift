@@ -1553,6 +1553,65 @@ class LoyaltyLiftClient {
     };
   }
 
+  // --- Admin Methods ---
+  async listAllProfiles() {
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .select('id, email, full_name, avatar_url, role, created_at')
+      .order('created_at', { ascending: false });
+    if (error) { console.error('listAllProfiles:', error); throw error; }
+    return data;
+  }
+
+  async updateProfileRole(userId, newRole) {
+    const { error } = await this.supabase
+      .from('profiles')
+      .update({ role: newRole })
+      .eq('id', userId);
+    if (error) { console.error('updateProfileRole:', error); throw error; }
+  }
+
+  async deleteProject(projectId) {
+    // Delete related rows first
+    await this.supabase.from('project_sections').delete().eq('project_id', projectId);
+    await this.supabase.from('project_members').delete().eq('project_id', projectId);
+    await this.supabase.from('responses').delete().eq('project_id', projectId);
+    await this.supabase.from('responses_pii').delete().eq('project_id', projectId);
+    await this.supabase.from('comments').delete().eq('project_id', projectId);
+    await this.supabase.from('activity_log').delete().eq('project_id', projectId);
+    await this.supabase.from('entity_rows').delete().eq('project_id', projectId);
+    await this.supabase.from('data_model_selections').delete().eq('project_id', projectId);
+    await this.supabase.from('file_uploads').delete().eq('project_id', projectId);
+    const { error } = await this.supabase
+      .from('projects')
+      .delete()
+      .eq('id', projectId);
+    if (error) { console.error('deleteProject:', error); throw error; }
+  }
+
+  async getSurveyOverrides() {
+    const { data, error } = await this.supabase
+      .from('survey_template_overrides')
+      .select('id, section_id, question_key, is_required, default_value, updated_at');
+    if (error) { console.error('getSurveyOverrides:', error); throw error; }
+    return data || [];
+  }
+
+  async saveSurveyOverrides(sectionId, overrides) {
+    // overrides is an array of { question_key, is_required, default_value }
+    const rows = overrides.map(o => ({
+      section_id: sectionId,
+      question_key: o.question_key,
+      is_required: o.is_required,
+      default_value: o.default_value != null ? JSON.stringify(o.default_value) : null,
+      updated_at: new Date().toISOString(),
+    }));
+    const { error } = await this.supabase
+      .from('survey_template_overrides')
+      .upsert(rows, { onConflict: 'section_id,question_key' });
+    if (error) { console.error('saveSurveyOverrides:', error); throw error; }
+  }
+
   _getSectionTemplate() {
     return [
       // Phase 1: Discovery
@@ -2121,6 +2180,9 @@ class LLApp {
       case 'new-project':
         this._showNewProject();
         break;
+      case 'admin':
+        this._showAdmin();
+        break;
       default:
         this._showDashboard();
     }
@@ -2212,6 +2274,7 @@ class LLApp {
           <img src="lji-logo.png" alt="LJI" style="height:32px;" />
           <div class="ll-flex ll-items-center ll-gap-3">
             <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
+            ${window.llClient.isLjiAdmin ? '<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate(\'admin\')">Admin</button>' : ''}
             <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._signOut()">Sign Out</button>
           </div>
         </div>
@@ -2483,6 +2546,325 @@ class LLApp {
     } catch (err) {
       console.error('Advance phase error:', err);
       llToast.error('Failed to advance phase.');
+    }
+  }
+
+  // --- Admin Panel ---
+  async _showAdmin() {
+    this.currentPage = 'admin';
+    if (!window.llClient.isLjiAdmin) {
+      llToast.error('Access denied. Admin privileges required.');
+      this.navigate('dashboard');
+      return;
+    }
+    this._showLoading();
+    this._adminTab = this._adminTab || 'users';
+    this._adminOverrides = null;
+
+    this.container.innerHTML = `
+      <div class="ll-header">
+        <div class="ll-flex ll-justify-between ll-items-center">
+          <div class="ll-flex ll-items-center ll-gap-3">
+            <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('dashboard')">Back</button>
+            <h1 class="ll-h1" style="color:var(--ll-brand);">Admin Panel</h1>
+          </div>
+          <div class="ll-flex ll-items-center ll-gap-3">
+            <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
+            <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._signOut()">Sign Out</button>
+          </div>
+        </div>
+      </div>
+      <div class="ll-container">
+        <div class="ll-nav" id="ll-admin-nav">
+          <button class="ll-nav-item ${this._adminTab === 'users' ? 'active' : ''}" onclick="llApp._switchAdminTab('users')">Users</button>
+          <button class="ll-nav-item ${this._adminTab === 'projects' ? 'active' : ''}" onclick="llApp._switchAdminTab('projects')">Projects</button>
+          <button class="ll-nav-item ${this._adminTab === 'templates' ? 'active' : ''}" onclick="llApp._switchAdminTab('templates')">Survey Templates</button>
+        </div>
+        <div id="ll-admin-content" style="margin-top:1.5rem;">
+          <div class="ll-loading-page"><div class="ll-spinner"></div></div>
+        </div>
+      </div>
+    `;
+    await this._renderAdminTab();
+  }
+
+  async _switchAdminTab(tab) {
+    this._adminTab = tab;
+    // Update nav active state
+    document.querySelectorAll('#ll-admin-nav .ll-nav-item').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim().toLowerCase().replace('survey ', '') === tab);
+    });
+    // Fix: match button text to tab name
+    const navItems = document.querySelectorAll('#ll-admin-nav .ll-nav-item');
+    navItems.forEach(btn => btn.classList.remove('active'));
+    if (tab === 'users') navItems[0]?.classList.add('active');
+    else if (tab === 'projects') navItems[1]?.classList.add('active');
+    else if (tab === 'templates') navItems[2]?.classList.add('active');
+
+    const content = document.getElementById('ll-admin-content');
+    content.innerHTML = '<div class="ll-loading-page"><div class="ll-spinner"></div></div>';
+    await this._renderAdminTab();
+  }
+
+  async _renderAdminTab() {
+    const content = document.getElementById('ll-admin-content');
+    try {
+      switch (this._adminTab) {
+        case 'users': await this._renderAdminUsers(content); break;
+        case 'projects': await this._renderAdminProjects(content); break;
+        case 'templates': await this._renderAdminTemplates(content); break;
+      }
+    } catch (err) {
+      console.error('Admin tab error:', err);
+      content.innerHTML = `<div class="ll-card"><p class="ll-text-sm" style="color:var(--ll-brand);">Failed to load: ${err.message}</p></div>`;
+    }
+  }
+
+  async _renderAdminUsers(content) {
+    const profiles = await window.llClient.listAllProfiles();
+    const roles = ['lji_admin', 'lji_member', 'client_admin', 'client_member'];
+    content.innerHTML = `
+      <div class="ll-card" style="overflow-x:auto;">
+        <h2 class="ll-h2">All Users (${profiles.length})</h2>
+        <table class="ll-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${profiles.map(p => `
+              <tr>
+                <td>${this._esc(p.full_name || '--')}</td>
+                <td>${this._esc(p.email || '--')}</td>
+                <td>
+                  <select class="ll-select" style="width:auto; min-width:140px;" onchange="llApp._adminChangeRole('${p.id}', this.value)">
+                    ${roles.map(r => `<option value="${r}" ${p.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+                  </select>
+                </td>
+                <td class="ll-text-xs ll-text-muted">${p.created_at ? new Date(p.created_at).toLocaleDateString() : '--'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  async _adminChangeRole(userId, newRole) {
+    try {
+      await window.llClient.updateProfileRole(userId, newRole);
+      llToast.success('Role updated successfully.');
+    } catch (err) {
+      console.error('Role update error:', err);
+      llToast.error('Failed to update role: ' + err.message);
+    }
+  }
+
+  async _renderAdminProjects(content) {
+    const projects = await window.llClient.listProjects();
+    const phaseLabels = { discovery: 'Discovery', design: 'Solution Design', launch: 'Launch Readiness' };
+    const statusBadges = {
+      active: 'll-badge-green', paused: 'll-badge-yellow',
+      completed: 'll-badge-blue', archived: 'll-badge-gray',
+    };
+    content.innerHTML = `
+      <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1rem;">
+        <h2 class="ll-h2" style="margin-bottom:0;">All Projects (${projects.length})</h2>
+        <button class="ll-btn ll-btn-primary" onclick="llApp.navigate('new-project')">New Project</button>
+      </div>
+      <div class="ll-card" style="overflow-x:auto;">
+        <table class="ll-table">
+          <thead>
+            <tr>
+              <th>Program Name</th>
+              <th>Client Org</th>
+              <th>Industry</th>
+              <th>Phase</th>
+              <th>Status</th>
+              <th>Progress</th>
+              <th>Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${projects.map(p => `
+              <tr style="cursor:pointer;" onclick="llApp.navigate('project', { projectId: '${p.id}' })">
+                <td style="font-weight:500;">${this._esc(p.program_name)}</td>
+                <td>${this._esc(p.client_org?.name || '--')}</td>
+                <td>${this._esc(p.client_org?.industry || '--')}</td>
+                <td><span class="ll-badge ll-badge-purple">${phaseLabels[p.phase] || p.phase}</span></td>
+                <td><span class="ll-badge ${statusBadges[p.status] || 'll-badge-gray'}">${p.status}</span></td>
+                <td>${p.progress.pct}%</td>
+                <td class="ll-text-xs ll-text-muted">${new Date(p.created_at).toLocaleDateString()}</td>
+                <td>
+                  <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-brand);" onclick="event.stopPropagation(); llApp._adminDeleteProject('${p.id}', '${this._esc(p.program_name)}')">Delete</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  async _adminDeleteProject(projectId, projectName) {
+    if (!await llConfirm(`Are you sure you want to delete project "${projectName}"? This cannot be undone.`)) return;
+    try {
+      await window.llClient.deleteProject(projectId);
+      llToast.success('Project deleted.');
+      await this._renderAdminTab();
+    } catch (err) {
+      console.error('Delete project error:', err);
+      llToast.error('Failed to delete project: ' + err.message);
+    }
+  }
+
+  async _renderAdminTemplates(content) {
+    // Load overrides from DB if not cached
+    if (!this._adminOverrides) {
+      const overrides = await window.llClient.getSurveyOverrides();
+      this._adminOverrides = {};
+      overrides.forEach(o => {
+        const key = o.section_id + '::' + o.question_key;
+        this._adminOverrides[key] = o;
+      });
+    }
+
+    const templates = window.llSectionTemplates || {};
+    const sectionIds = Object.keys(templates);
+    const sectionNames = this._getSectionNames();
+
+    content.innerHTML = `
+      <h2 class="ll-h2">Survey Templates (${sectionIds.length} sections)</h2>
+      <div class="ll-flex ll-flex-col ll-gap-3" id="ll-admin-templates">
+        ${sectionIds.map(sid => {
+          const section = templates[sid];
+          const questions = section.questions || [];
+          return `
+            <div>
+              <div class="ll-accordion-header" onclick="llApp._toggleAdminSection('${sid}')">
+                <span>${this._esc(sectionNames[sid] || section.name || sid)}</span>
+                <span class="ll-flex ll-gap-2 ll-items-center">
+                  <span class="ll-badge ll-badge-gray">${questions.length} questions</span>
+                  <span class="ll-badge ll-badge-purple">${section.phase || '--'}</span>
+                  <span id="ll-tmpl-arrow-${sid}" style="transition:transform 0.2s;">&#9654;</span>
+                </span>
+              </div>
+              <div class="ll-accordion-body" id="ll-tmpl-body-${sid}">
+                ${questions.length === 0 ? '<p class="ll-text-sm ll-text-muted">No questions in this section.</p>' : `
+                  <table class="ll-table">
+                    <thead>
+                      <tr>
+                        <th style="width:40%;">Label</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Default Value</th>
+                        <th>PII</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${questions.map(q => {
+                        const oKey = sid + '::' + q.key;
+                        const override = this._adminOverrides[oKey];
+                        const isReq = override?.is_required != null ? override.is_required : (q.required || false);
+                        const defVal = override?.default_value != null ? (typeof override.default_value === 'string' ? override.default_value : JSON.stringify(override.default_value)) : '';
+                        return `
+                          <tr>
+                            <td class="ll-text-sm">${this._esc(q.label)}</td>
+                            <td><span class="ll-badge ll-badge-blue">${q.inputType}</span></td>
+                            <td>
+                              <label class="ll-toggle">
+                                <input type="checkbox" ${isReq ? 'checked' : ''} data-section="${sid}" data-qkey="${q.key}" data-field="required" onchange="llApp._adminTemplateChange(this)" />
+                                <span class="ll-toggle-track"><span class="ll-toggle-thumb"></span></span>
+                              </label>
+                            </td>
+                            <td>
+                              <input type="text" class="ll-input ll-btn-sm" style="padding:0.25rem 0.5rem; font-size:0.75rem;" value="${this._esc(defVal)}" data-section="${sid}" data-qkey="${q.key}" data-field="default" onchange="llApp._adminTemplateChange(this)" placeholder="--" />
+                            </td>
+                            <td>${q.pii ? '<span class="ll-badge ll-badge-red">PII</span>' : '<span class="ll-badge ll-badge-gray">No</span>'}</td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                  <div style="margin-top:1rem; text-align:right;">
+                    <button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._adminSaveSection('${sid}')">Save Changes</button>
+                  </div>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  _toggleAdminSection(sectionId) {
+    const body = document.getElementById('ll-tmpl-body-' + sectionId);
+    const arrow = document.getElementById('ll-tmpl-arrow-' + sectionId);
+    if (body) {
+      body.classList.toggle('open');
+      if (arrow) arrow.style.transform = body.classList.contains('open') ? 'rotate(90deg)' : '';
+    }
+  }
+
+  _adminTemplateChange(el) {
+    const sid = el.dataset.section;
+    const qkey = el.dataset.qkey;
+    const field = el.dataset.field;
+    const oKey = sid + '::' + qkey;
+
+    if (!this._adminOverrides[oKey]) {
+      // Initialize from template
+      const tmpl = window.llSectionTemplates[sid];
+      const q = tmpl?.questions?.find(qq => qq.key === qkey);
+      this._adminOverrides[oKey] = {
+        section_id: sid,
+        question_key: qkey,
+        is_required: q?.required || false,
+        default_value: null,
+      };
+    }
+
+    if (field === 'required') {
+      this._adminOverrides[oKey].is_required = el.checked;
+    } else if (field === 'default') {
+      this._adminOverrides[oKey].default_value = el.value || null;
+    }
+  }
+
+  async _adminSaveSection(sectionId) {
+    const tmpl = window.llSectionTemplates[sectionId];
+    if (!tmpl) return;
+
+    const overrides = [];
+    (tmpl.questions || []).forEach(q => {
+      const oKey = sectionId + '::' + q.key;
+      const o = this._adminOverrides[oKey];
+      if (o) {
+        overrides.push({
+          question_key: q.key,
+          is_required: o.is_required,
+          default_value: o.default_value,
+        });
+      }
+    });
+
+    if (overrides.length === 0) {
+      llToast.info('No changes to save.');
+      return;
+    }
+
+    try {
+      await window.llClient.saveSurveyOverrides(sectionId, overrides);
+      llToast.success('Survey template overrides saved for this section.');
+    } catch (err) {
+      console.error('Save overrides error:', err);
+      llToast.error('Failed to save overrides: ' + err.message);
     }
   }
 
