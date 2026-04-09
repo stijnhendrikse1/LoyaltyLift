@@ -479,11 +479,61 @@
 }
 .ll-feedback-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,42,58,0.3); }
 
+/* Template Editor */
+.ll-tpl-editor { display: flex; gap: 1.5rem; min-height: 60vh; }
+.ll-tpl-sidebar { width: 280px; flex-shrink: 0; background: var(--ll-surface-low); border-radius: var(--ll-radius); padding: 1rem; overflow-y: auto; max-height: 70vh; }
+.ll-tpl-sidebar-item {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem; cursor: pointer; border-radius: var(--ll-radius-sm);
+  transition: background 0.15s; border: none; background: none; width: 100%;
+  text-align: left; font-family: var(--ll-font); color: var(--ll-on-surface-variant);
+}
+.ll-tpl-sidebar-item:hover { background: var(--ll-surface-high); }
+.ll-tpl-sidebar-item.active { background: rgba(59,130,246,0.1); color: var(--ll-secondary); font-weight: 600; }
+.ll-tpl-main { flex: 1; min-width: 0; }
+.ll-tpl-phase-group { margin-bottom: 0.75rem; }
+.ll-tpl-phase-label { font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ll-on-surface-variant); padding: 0.25rem 0.75rem; }
+.ll-tpl-q-card {
+  background: var(--ll-surface-low); border-radius: var(--ll-radius-sm);
+  padding: 1rem; margin-bottom: 0.75rem; position: relative;
+}
+.ll-tpl-q-row { display: flex; gap: 0.75rem; align-items: flex-start; margin-bottom: 0.5rem; flex-wrap: wrap; }
+.ll-tpl-q-row > * { flex: 1; min-width: 120px; }
+.ll-tpl-q-row .ll-tpl-q-label-field { flex: 2; min-width: 200px; }
+.ll-tpl-reorder-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.75rem; height: 1.75rem; border-radius: 0.25rem;
+  background: var(--ll-surface-high); border: none; cursor: pointer;
+  font-size: 0.75rem; color: var(--ll-on-surface-variant); transition: background 0.15s;
+  flex: 0 0 auto; min-width: auto;
+}
+.ll-tpl-reorder-btn:hover { background: var(--ll-secondary); color: white; }
+.ll-tpl-reorder-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.ll-tpl-delete-btn {
+  background: none; border: none; color: var(--ll-error); cursor: pointer;
+  font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem; transition: background 0.15s;
+}
+.ll-tpl-delete-btn:hover { background: rgba(220,38,38,0.08); }
+.ll-tpl-options-editor { margin-top: 0.5rem; padding: 0.75rem; background: var(--ll-surface-lowest); border-radius: var(--ll-radius-sm); }
+.ll-tpl-option-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.375rem; }
+.ll-tpl-option-row input { flex: 1; }
+.ll-tpl-collapsible { margin-top: 0.375rem; }
+.ll-tpl-collapsible-toggle {
+  font-size: 0.6875rem; color: var(--ll-secondary); cursor: pointer;
+  background: none; border: none; font-family: var(--ll-font); padding: 0;
+}
+.ll-tpl-collapsible-content { display: none; margin-top: 0.375rem; }
+.ll-tpl-collapsible-content.open { display: block; }
+.ll-tpl-card-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+
 /* Responsive */
 @media (max-width: 768px) {
   .ll-grid-2, .ll-grid-3 { grid-template-columns: 1fr; }
   .ll-sidebar { display: none; }
   .ll-container { padding: 1rem; }
+  .ll-tpl-editor { flex-direction: column; }
+  .ll-tpl-sidebar { width: 100%; max-height: none; }
 }
   </style>
 </head>
@@ -789,7 +839,7 @@ class LoyaltyLiftClient {
       const { data, error } = await this.supabase
         .from('projects')
         .select(`
-          id, program_name, phase, status, created_at, updated_at,
+          id, program_name, phase, status, template_id, created_at, updated_at,
           client_org:client_organizations(id, name, industry, country, logo_url),
           sections:project_sections(id, section_id, status, phase, visible, owner_id, completed_at),
           members:project_members(user_id, role, joined_at)
@@ -802,7 +852,7 @@ class LoyaltyLiftClient {
     });
   }
 
-  async createProject({ orgName, industry, country, programName }) {
+  async createProject({ orgName, industry, country, programName, templateId }) {
     // Create client org
     const { data: org, error: orgError } = await this.supabase
       .from('client_organizations')
@@ -812,19 +862,39 @@ class LoyaltyLiftClient {
     if (orgError) { console.error('createOrg:', orgError); throw orgError; }
 
     // Create project
+    const projectInsert = {
+      client_org_id: org.id,
+      program_name: programName,
+      lji_lead_id: this._user.id,
+    };
+    if (templateId) projectInsert.template_id = templateId;
     const { data: project, error: projError } = await this.supabase
       .from('projects')
-      .insert({
-        client_org_id: org.id,
-        program_name: programName,
-        lji_lead_id: this._user.id,
-      })
+      .insert(projectInsert)
       .select('id')
       .single();
     if (projError) { console.error('createProject:', projError); throw projError; }
 
+    // Determine sections from custom template or default
+    let sections;
+    if (templateId) {
+      try {
+        const tmpl = await this.getTemplate(templateId);
+        const tmplSections = tmpl.template_data?.sections || {};
+        sections = Object.keys(tmplSections).map(sid => ({
+          id: sid,
+          phase: tmplSections[sid].phase || 'discovery',
+          conditional: false,
+        }));
+      } catch (e) {
+        console.error('Failed to load custom template, using default:', e);
+        sections = this._getSectionTemplate();
+      }
+    } else {
+      sections = this._getSectionTemplate();
+    }
+
     // Add member + create sections in parallel
-    const sections = this._getSectionTemplate();
     const sectionRows = sections.map(s => ({
       project_id: project.id,
       section_id: s.id,
@@ -1152,6 +1222,64 @@ class LoyaltyLiftClient {
       .upsert(rows, { onConflict: 'section_id,question_key' });
     if (error) { console.error('saveSurveyOverrides:', error); throw error; }
     this._invalidate('survey_overrides');
+  }
+
+  // --- Survey Template Management ---
+  async listTemplates() {
+    return this._cached('survey_templates_list', async () => {
+      const { data, error } = await this.supabase
+        .from('survey_templates')
+        .select('id, name, description, template_data, created_at, updated_at')
+        .order('created_at', { ascending: false });
+      if (error) { console.error('listTemplates:', error); throw error; }
+      return data || [];
+    });
+  }
+
+  async getTemplate(id) {
+    return this._cached('survey_template_' + id, async () => {
+      const { data, error } = await this.supabase
+        .from('survey_templates')
+        .select('id, name, description, template_data, created_at, updated_at')
+        .eq('id', id)
+        .single();
+      if (error) { console.error('getTemplate:', error); throw error; }
+      return data;
+    });
+  }
+
+  async createTemplate(name, description) {
+    // Deep-clone the default templates as starting data
+    if (window._loadTemplates) await window._loadTemplates();
+    const templateData = { sections: JSON.parse(JSON.stringify(window.llSectionTemplates || {})) };
+    const { data, error } = await this.supabase
+      .from('survey_templates')
+      .insert({ name, description, template_data: templateData })
+      .select('id')
+      .single();
+    if (error) { console.error('createTemplate:', error); throw error; }
+    this._invalidate('survey_templates');
+    return data;
+  }
+
+  async saveTemplate(id, name, description, templateData) {
+    const { error } = await this.supabase
+      .from('survey_templates')
+      .update({ name, description, template_data: templateData, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) { console.error('saveTemplate:', error); throw error; }
+    this._invalidate('survey_templates');
+    this._invalidate('survey_template_' + id);
+  }
+
+  async deleteTemplate(id) {
+    const { error } = await this.supabase
+      .from('survey_templates')
+      .delete()
+      .eq('id', id);
+    if (error) { console.error('deleteTemplate:', error); throw error; }
+    this._invalidate('survey_templates');
+    this._invalidate('survey_template_' + id);
   }
 
   _getSectionTemplate() {
@@ -1889,8 +2017,11 @@ class LLApp {
   }
 
   // --- New Project ---
-  _showNewProject() {
+  async _showNewProject() {
     this.currentPage = 'new-project';
+    // Load templates for dropdown
+    let templates = [];
+    try { templates = await window.llClient.listTemplates(); } catch (e) { /* ignore */ }
     this.container.innerHTML = `
       <div class="ll-header">
         <div class="ll-flex ll-justify-between ll-items-center">
@@ -1924,9 +2055,16 @@ class LLApp {
             <label class="ll-label">Country</label>
             <input type="text" class="ll-input" id="ll-np-country" placeholder="e.g., United Arab Emirates" />
           </div>
-          <div style="margin-bottom:1.5rem;">
+          <div style="margin-bottom:1rem;">
             <label class="ll-label">Program Name</label>
             <input type="text" class="ll-input" id="ll-np-program" placeholder="e.g., Emirates Skywards Everyday" />
+          </div>
+          <div style="margin-bottom:1.5rem;">
+            <label class="ll-label">Survey Template</label>
+            <select class="ll-select" id="ll-np-template">
+              <option value="">Default Template</option>
+              ${templates.map(t => `<option value="${t.id}">${this._esc(t.name)}</option>`).join('')}
+            </select>
           </div>
           <button class="ll-btn ll-btn-primary" style="width:100%;" id="ll-np-btn" onclick="llApp._createProject()">Create Project</button>
         </div>
@@ -1939,6 +2077,7 @@ class LLApp {
     const industry = document.getElementById('ll-np-industry').value;
     const country = document.getElementById('ll-np-country').value.trim();
     const programName = document.getElementById('ll-np-program').value.trim();
+    const templateId = document.getElementById('ll-np-template')?.value || null;
 
     if (!orgName || !programName) {
       llToast.warning('Organization name and program name are required.');
@@ -1949,7 +2088,7 @@ class LLApp {
     btn.disabled = true;
     btn.textContent = 'Creating...';
     try {
-      const project = await window.llClient.createProject({ orgName, industry, country, programName });
+      const project = await window.llClient.createProject({ orgName, industry, country, programName, templateId });
       this.navigate('project', { projectId: project.id });
     } catch (err) {
       console.error('Create project error:', err);
@@ -1996,7 +2135,19 @@ class LLApp {
       skipped: { badge: 'll-badge-gray', label: 'Skipped' },
     };
     const isLji = window.llClient.isLjiMember;
-    const sectionNames = this._getSectionNames();
+    let sectionNames = this._getSectionNames();
+    // If project uses a custom template, get section names from it
+    if (project.template_id) {
+      try {
+        const tmplCache = window.llClient._cache['survey_template_' + project.template_id];
+        const tmpl = tmplCache ? tmplCache.data : null;
+        if (tmpl?.template_data?.sections) {
+          const customNames = {};
+          Object.entries(tmpl.template_data.sections).forEach(([sid, s]) => { customNames[sid] = s.name || sid; });
+          sectionNames = { ...sectionNames, ...customNames };
+        }
+      } catch (e) { /* use default names */ }
+    }
 
     // Group sections by phase
     const phases = ['discovery', 'design', 'launch'];
@@ -2088,7 +2239,7 @@ class LLApp {
     `;
 
     // Load config (templates are likely already cached)
-    const sectionConfig = await this._loadSectionConfig(sectionId);
+    const sectionConfig = await this._loadSectionConfig(sectionId, projectId);
     if (!sectionConfig) {
       document.getElementById('ll-section-form').innerHTML = `<div class="ll-card"><p>Section template not found: ${this._esc(sectionId)}</p></div>`;
       return;
@@ -2103,7 +2254,23 @@ class LLApp {
     await this.formEngine.load(projectId, sectionId, sectionConfig, readOnly);
   }
 
-  async _loadSectionConfig(sectionId) {
+  async _loadSectionConfig(sectionId, projectId) {
+    // Check if the project uses a custom template
+    if (projectId) {
+      const project = this.currentProject || await window.llClient.getProject(projectId);
+      if (project?.template_id) {
+        try {
+          const tmpl = await window.llClient.getTemplate(project.template_id);
+          const tmplSections = tmpl.template_data?.sections || {};
+          if (tmplSections[sectionId]) {
+            return JSON.parse(JSON.stringify(tmplSections[sectionId]));
+          }
+        } catch (err) {
+          console.error('Failed to load custom template, falling back to default:', err);
+        }
+      }
+    }
+
     // Ensure templates are loaded
     if (window._loadTemplates) await window._loadTemplates();
     if (window.llSectionTemplates && window.llSectionTemplates[sectionId]) {
@@ -2370,6 +2537,7 @@ class LLApp {
           <button class="ll-nav-item ${this._adminTab === 'projects' ? 'active' : ''}" onclick="llApp._switchAdminTab('projects')">Projects</button>
           <button class="ll-nav-item ${this._adminTab === 'templates' ? 'active' : ''}" onclick="llApp._switchAdminTab('templates')">Survey Templates</button>
           <button class="ll-nav-item ${this._adminTab === 'feedback' ? 'active' : ''}" onclick="llApp._switchAdminTab('feedback')">Feedback</button>
+          <button class="ll-nav-item ${this._adminTab === 'template_editor' ? 'active' : ''}" onclick="llApp._switchAdminTab('template_editor')">Template Editor</button>
         </div>
         <div id="ll-admin-content" style="margin-top:1.5rem;">
           <div class="ll-loading-page"><div class="ll-spinner"></div></div>
@@ -2392,6 +2560,7 @@ class LLApp {
     else if (tab === 'projects') navItems[1]?.classList.add('active');
     else if (tab === 'templates') navItems[2]?.classList.add('active');
     else if (tab === 'feedback') navItems[3]?.classList.add('active');
+    else if (tab === 'template_editor') navItems[4]?.classList.add('active');
 
     const content = document.getElementById('ll-admin-content');
     content.innerHTML = '<div class="ll-loading-page"><div class="ll-spinner"></div></div>';
@@ -2406,6 +2575,7 @@ class LLApp {
         case 'projects': await this._renderAdminProjects(content); break;
         case 'templates': await this._renderAdminTemplates(content); break;
         case 'feedback': await this._renderAdminFeedback(content); break;
+        case 'template_editor': await this._renderTemplateEditor(content); break;
       }
     } catch (err) {
       console.error('Admin tab error:', err);
@@ -2669,6 +2839,408 @@ class LLApp {
 
   _showLoading() {
     this.container.innerHTML = '<div class="ll-loading-page"><div class="ll-spinner"></div></div>';
+  }
+
+  // --- Template Editor ---
+  async _renderTemplateEditor(content) {
+    this._tplEditing = this._tplEditing || null;
+    if (this._tplEditing) {
+      this._renderTemplateDetail(content);
+      return;
+    }
+    const templates = await window.llClient.listTemplates();
+    content.innerHTML = `
+      <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1rem;">
+        <h2 class="ll-h2" style="margin-bottom:0;">Custom Templates (${templates.length})</h2>
+        <button class="ll-btn ll-btn-primary" onclick="llApp._tplCreate()">Create New Template</button>
+      </div>
+      ${templates.length === 0 ? '<div class="ll-card" style="text-align:center; padding:2rem;"><p class="ll-text-sm ll-text-muted">No custom templates yet. Create one to get started.</p></div>' : `
+        <div class="ll-tpl-card-list">
+          ${templates.map(t => {
+            const sectionCount = t.template_data?.sections ? Object.keys(t.template_data.sections).length : 0;
+            return `
+              <div class="ll-card" style="padding:1.25rem;">
+                <h3 class="ll-h3" style="margin-bottom:0.25rem; font-size:1rem; color:var(--ll-primary);">${this._esc(t.name)}</h3>
+                <p class="ll-text-xs ll-text-muted" style="margin-bottom:0.75rem;">${this._esc(t.description || 'No description')}</p>
+                <div class="ll-flex ll-gap-2 ll-items-center" style="margin-bottom:0.75rem;">
+                  <span class="ll-badge ll-badge-blue">${sectionCount} sections</span>
+                  <span class="ll-text-xs ll-text-muted">Created ${new Date(t.created_at).toLocaleDateString()}</span>
+                </div>
+                <div class="ll-flex ll-gap-2">
+                  <button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._tplEdit('${t.id}')">Edit</button>
+                  <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error);" onclick="llApp._tplDelete('${t.id}', '${this._esc(t.name)}')">Delete</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `}
+    `;
+  }
+
+  async _tplCreate() {
+    const name = prompt('Template name:');
+    if (!name || !name.trim()) return;
+    try {
+      const result = await window.llClient.createTemplate(name.trim(), '');
+      llToast.success('Template created.');
+      this._tplEditing = result.id;
+      this._tplData = null;
+      await this._renderAdminTab();
+    } catch (err) {
+      console.error('Create template error:', err);
+      llToast.error('Failed to create template: ' + err.message);
+    }
+  }
+
+  async _tplEdit(id) {
+    this._tplEditing = id;
+    this._tplData = null;
+    this._tplActiveSection = null;
+    await this._renderAdminTab();
+  }
+
+  async _tplDelete(id, name) {
+    if (!await llConfirm(`Delete template "${name}"? This cannot be undone.`)) return;
+    try {
+      await window.llClient.deleteTemplate(id);
+      llToast.success('Template deleted.');
+      await this._renderAdminTab();
+    } catch (err) {
+      console.error('Delete template error:', err);
+      llToast.error('Failed to delete template: ' + err.message);
+    }
+  }
+
+  async _renderTemplateDetail(content) {
+    if (!this._tplData) {
+      const template = await window.llClient.getTemplate(this._tplEditing);
+      this._tplData = template;
+      this._tplWorkingData = JSON.parse(JSON.stringify(template.template_data || { sections: {} }));
+      this._tplName = template.name;
+      this._tplDesc = template.description || '';
+    }
+
+    const sections = this._tplWorkingData.sections || {};
+    const sectionIds = Object.keys(sections);
+
+    // Group sections by phase
+    const phaseGroups = { discovery: [], design: [], launch: [] };
+    sectionIds.forEach(sid => {
+      const s = sections[sid];
+      const phase = s.phase || 'discovery';
+      if (!phaseGroups[phase]) phaseGroups[phase] = [];
+      phaseGroups[phase].push(sid);
+    });
+
+    const phaseLabels = { discovery: 'Discovery', design: 'Solution Design', launch: 'Launch Readiness' };
+
+    content.innerHTML = `
+      <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1rem;">
+        <div class="ll-flex ll-gap-3 ll-items-center">
+          <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._tplBackToList()">Back to List</button>
+          <h2 class="ll-h2" style="margin-bottom:0;">Edit Template</h2>
+        </div>
+        <button class="ll-btn ll-btn-primary" onclick="llApp._tplSave()">Save Template</button>
+      </div>
+
+      <div class="ll-card" style="padding:1.25rem; margin-bottom:1.5rem;">
+        <div class="ll-grid-2">
+          <div>
+            <label class="ll-label">Template Name</label>
+            <input type="text" class="ll-input" id="ll-tpl-name" value="${this._esc(this._tplName)}" />
+          </div>
+          <div>
+            <label class="ll-label">Description</label>
+            <input type="text" class="ll-input" id="ll-tpl-desc" value="${this._esc(this._tplDesc)}" />
+          </div>
+        </div>
+      </div>
+
+      <div class="ll-tpl-editor">
+        <div class="ll-tpl-sidebar">
+          <div style="margin-bottom:0.75rem; font-size:0.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--ll-on-surface-variant);">Sections (${sectionIds.length})</div>
+          ${['discovery', 'design', 'launch'].map(phase => {
+            const ids = phaseGroups[phase] || [];
+            if (ids.length === 0) return '';
+            return `
+              <div class="ll-tpl-phase-group">
+                <div class="ll-tpl-phase-label">${phaseLabels[phase]}</div>
+                ${ids.map(sid => `
+                  <button class="ll-tpl-sidebar-item ${this._tplActiveSection === sid ? 'active' : ''}" onclick="llApp._tplSelectSection('${sid}')">
+                    ${this._esc(sections[sid].name || sid)}
+                  </button>
+                `).join('')}
+              </div>
+            `;
+          }).join('')}
+          <button class="ll-btn ll-btn-secondary ll-btn-sm" style="width:100%; margin-top:0.75rem; justify-content:center;" onclick="llApp._tplAddSection()">+ Add Section</button>
+        </div>
+
+        <div class="ll-tpl-main" id="ll-tpl-section-editor">
+          ${this._tplActiveSection ? this._renderTplSectionEditor() : '<div class="ll-card" style="text-align:center; padding:3rem;"><p class="ll-text-sm ll-text-muted">Select a section from the sidebar to edit its questions.</p></div>'}
+        </div>
+      </div>
+    `;
+  }
+
+  _renderTplSectionEditor() {
+    const sid = this._tplActiveSection;
+    const section = this._tplWorkingData.sections[sid];
+    if (!section) return '<div class="ll-card"><p class="ll-text-sm ll-text-muted">Section not found.</p></div>';
+
+    const questions = section.questions || [];
+    const inputTypes = ['text', 'textarea', 'number', 'boolean', 'select', 'multi_select', 'date', 'file', 'currency', 'grid'];
+
+    return `
+      <div class="ll-card" style="padding:1.5rem; margin-bottom:1rem;">
+        <div class="ll-grid-2" style="margin-bottom:1rem;">
+          <div>
+            <label class="ll-label">Section Name</label>
+            <input type="text" class="ll-input" value="${this._esc(section.name || '')}" onblur="llApp._tplUpdateSection('name', this.value)" />
+          </div>
+          <div>
+            <label class="ll-label">Phase</label>
+            <select class="ll-select" onchange="llApp._tplUpdateSection('phase', this.value)">
+              <option value="discovery" ${section.phase === 'discovery' ? 'selected' : ''}>Discovery</option>
+              <option value="design" ${section.phase === 'design' ? 'selected' : ''}>Solution Design</option>
+              <option value="launch" ${section.phase === 'launch' ? 'selected' : ''}>Launch Readiness</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="ll-label">Description</label>
+          <input type="text" class="ll-input" value="${this._esc(section.description || '')}" onblur="llApp._tplUpdateSection('description', this.value)" />
+        </div>
+      </div>
+
+      <div style="margin-bottom:0.75rem;">
+        <span class="ll-label" style="display:inline;">Questions (${questions.length})</span>
+      </div>
+
+      ${questions.map((q, i) => `
+        <div class="ll-tpl-q-card" id="ll-tpl-q-${i}">
+          <div class="ll-flex ll-gap-2 ll-items-center" style="margin-bottom:0.75rem;">
+            <button class="ll-tpl-reorder-btn" title="Move up" ${i === 0 ? 'disabled' : ''} onclick="llApp._tplMoveQuestion(${i}, -1)">&#9650;</button>
+            <button class="ll-tpl-reorder-btn" title="Move down" ${i === questions.length - 1 ? 'disabled' : ''} onclick="llApp._tplMoveQuestion(${i}, 1)">&#9660;</button>
+            <span class="ll-text-xs ll-text-muted" style="flex:1;">Q${i + 1}: ${this._esc(q.key)}</span>
+            <button class="ll-tpl-delete-btn" onclick="llApp._tplDeleteQuestion(${i})">Delete</button>
+          </div>
+
+          <div class="ll-tpl-q-row">
+            <div class="ll-tpl-q-label-field">
+              <label class="ll-label">Label</label>
+              <input type="text" class="ll-input" value="${this._esc(q.label || '')}" onblur="llApp._tplUpdateQuestion(${i}, 'label', this.value)" />
+            </div>
+            <div>
+              <label class="ll-label">Input Type</label>
+              <select class="ll-select" onchange="llApp._tplUpdateQuestion(${i}, 'inputType', this.value)">
+                ${inputTypes.map(t => `<option value="${t}" ${q.inputType === t ? 'selected' : ''}>${t}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="ll-flex ll-gap-4 ll-items-center" style="margin-top:0.5rem; margin-bottom:0.5rem;">
+            <label class="ll-flex ll-items-center ll-gap-2" style="font-size:0.8125rem; cursor:pointer;">
+              <input type="checkbox" ${q.required ? 'checked' : ''} onchange="llApp._tplUpdateQuestion(${i}, 'required', this.checked)" />
+              Required
+            </label>
+            <label class="ll-flex ll-items-center ll-gap-2" style="font-size:0.8125rem; cursor:pointer;">
+              <input type="checkbox" ${q.pii ? 'checked' : ''} onchange="llApp._tplUpdateQuestion(${i}, 'pii', this.checked)" />
+              PII
+            </label>
+          </div>
+
+          <div class="ll-tpl-collapsible">
+            <button class="ll-tpl-collapsible-toggle" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '- Help Text' : '+ Help Text'">+ Help Text</button>
+            <div class="ll-tpl-collapsible-content ${q.helpText ? 'open' : ''}">
+              <input type="text" class="ll-input" value="${this._esc(q.helpText || '')}" placeholder="Help text for this question" onblur="llApp._tplUpdateQuestion(${i}, 'helpText', this.value)" />
+            </div>
+          </div>
+
+          <div class="ll-tpl-collapsible">
+            <button class="ll-tpl-collapsible-toggle" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '- Placeholder' : '+ Placeholder'">+ Placeholder</button>
+            <div class="ll-tpl-collapsible-content ${q.placeholder ? 'open' : ''}">
+              <input type="text" class="ll-input" value="${this._esc(q.placeholder || '')}" placeholder="Placeholder text" onblur="llApp._tplUpdateQuestion(${i}, 'placeholder', this.value)" />
+            </div>
+          </div>
+
+          ${(q.inputType === 'select' || q.inputType === 'multi_select') ? this._renderTplOptionsEditor(i, q.options || []) : ''}
+        </div>
+      `).join('')}
+
+      <button class="ll-btn ll-btn-secondary" style="width:100%; justify-content:center; margin-top:0.5rem;" onclick="llApp._tplAddQuestion()">+ Add Question</button>
+
+      <div style="margin-top:1.5rem; text-align:right;">
+        <button class="ll-btn ll-btn-secondary" style="color:var(--ll-error);" onclick="llApp._tplDeleteSection()">Delete Section</button>
+      </div>
+    `;
+  }
+
+  _renderTplOptionsEditor(qIndex, options) {
+    return `
+      <div class="ll-tpl-options-editor">
+        <label class="ll-label">Options</label>
+        ${options.map((opt, oi) => `
+          <div class="ll-tpl-option-row">
+            <input type="text" class="ll-input" value="${this._esc(opt.label || '')}" placeholder="Label" onblur="llApp._tplUpdateOption(${qIndex}, ${oi}, 'label', this.value)" style="flex:1;" />
+            <input type="text" class="ll-input" value="${this._esc(opt.value || '')}" placeholder="Value" onblur="llApp._tplUpdateOption(${qIndex}, ${oi}, 'value', this.value)" style="flex:1;" />
+            <button class="ll-tpl-delete-btn" onclick="llApp._tplRemoveOption(${qIndex}, ${oi})">x</button>
+          </div>
+        `).join('')}
+        <button class="ll-btn ll-btn-secondary ll-btn-sm" style="margin-top:0.375rem;" onclick="llApp._tplAddOption(${qIndex})">+ Add Option</button>
+      </div>
+    `;
+  }
+
+  _tplBackToList() {
+    this._tplEditing = null;
+    this._tplData = null;
+    this._tplWorkingData = null;
+    this._tplActiveSection = null;
+    this._renderAdminTab();
+  }
+
+  _tplSelectSection(sid) {
+    this._tplActiveSection = sid;
+    const editor = document.getElementById('ll-tpl-section-editor');
+    if (editor) editor.innerHTML = this._renderTplSectionEditor();
+    // Update sidebar active state
+    document.querySelectorAll('.ll-tpl-sidebar-item').forEach(el => el.classList.remove('active'));
+    const items = document.querySelectorAll('.ll-tpl-sidebar-item');
+    items.forEach(el => {
+      if (el.textContent.trim() === (this._tplWorkingData.sections[sid]?.name || sid).trim()) el.classList.add('active');
+    });
+  }
+
+  _tplUpdateSection(field, value) {
+    const sid = this._tplActiveSection;
+    if (!sid || !this._tplWorkingData.sections[sid]) return;
+    this._tplWorkingData.sections[sid][field] = value;
+  }
+
+  _tplUpdateQuestion(qIndex, field, value) {
+    const sid = this._tplActiveSection;
+    if (!sid || !this._tplWorkingData.sections[sid]) return;
+    const q = this._tplWorkingData.sections[sid].questions[qIndex];
+    if (!q) return;
+    q[field] = value;
+    // If inputType changed to select/multi_select, ensure options array exists
+    if (field === 'inputType' && (value === 'select' || value === 'multi_select') && !q.options) {
+      q.options = [];
+    }
+    // Re-render if inputType changed (to show/hide options editor)
+    if (field === 'inputType') {
+      const editor = document.getElementById('ll-tpl-section-editor');
+      if (editor) editor.innerHTML = this._renderTplSectionEditor();
+    }
+  }
+
+  _tplMoveQuestion(qIndex, direction) {
+    const sid = this._tplActiveSection;
+    if (!sid || !this._tplWorkingData.sections[sid]) return;
+    const qs = this._tplWorkingData.sections[sid].questions;
+    const newIndex = qIndex + direction;
+    if (newIndex < 0 || newIndex >= qs.length) return;
+    [qs[qIndex], qs[newIndex]] = [qs[newIndex], qs[qIndex]];
+    const editor = document.getElementById('ll-tpl-section-editor');
+    if (editor) editor.innerHTML = this._renderTplSectionEditor();
+  }
+
+  _tplDeleteQuestion(qIndex) {
+    const sid = this._tplActiveSection;
+    if (!sid || !this._tplWorkingData.sections[sid]) return;
+    this._tplWorkingData.sections[sid].questions.splice(qIndex, 1);
+    const editor = document.getElementById('ll-tpl-section-editor');
+    if (editor) editor.innerHTML = this._renderTplSectionEditor();
+  }
+
+  _tplAddQuestion() {
+    const sid = this._tplActiveSection;
+    if (!sid || !this._tplWorkingData.sections[sid]) return;
+    const qs = this._tplWorkingData.sections[sid].questions;
+    const key = 'q_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    qs.push({
+      key,
+      label: 'New Question',
+      inputType: 'text',
+      required: false,
+      pii: false,
+      helpText: '',
+      placeholder: '',
+    });
+    const editor = document.getElementById('ll-tpl-section-editor');
+    if (editor) editor.innerHTML = this._renderTplSectionEditor();
+  }
+
+  _tplUpdateOption(qIndex, optIndex, field, value) {
+    const sid = this._tplActiveSection;
+    if (!sid || !this._tplWorkingData.sections[sid]) return;
+    const q = this._tplWorkingData.sections[sid].questions[qIndex];
+    if (!q || !q.options || !q.options[optIndex]) return;
+    q.options[optIndex][field] = value;
+  }
+
+  _tplAddOption(qIndex) {
+    const sid = this._tplActiveSection;
+    if (!sid || !this._tplWorkingData.sections[sid]) return;
+    const q = this._tplWorkingData.sections[sid].questions[qIndex];
+    if (!q) return;
+    if (!q.options) q.options = [];
+    q.options.push({ label: '', value: '' });
+    const editor = document.getElementById('ll-tpl-section-editor');
+    if (editor) editor.innerHTML = this._renderTplSectionEditor();
+  }
+
+  _tplRemoveOption(qIndex, optIndex) {
+    const sid = this._tplActiveSection;
+    if (!sid || !this._tplWorkingData.sections[sid]) return;
+    const q = this._tplWorkingData.sections[sid].questions[qIndex];
+    if (!q || !q.options) return;
+    q.options.splice(optIndex, 1);
+    const editor = document.getElementById('ll-tpl-section-editor');
+    if (editor) editor.innerHTML = this._renderTplSectionEditor();
+  }
+
+  _tplAddSection() {
+    const name = prompt('Section name:');
+    if (!name || !name.trim()) return;
+    const id = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    if (!id) { llToast.warning('Invalid section name.'); return; }
+    if (this._tplWorkingData.sections[id]) { llToast.warning('A section with this ID already exists.'); return; }
+    this._tplWorkingData.sections[id] = {
+      id,
+      name: name.trim(),
+      description: '',
+      phase: 'discovery',
+      questions: [],
+    };
+    this._tplActiveSection = id;
+    this._renderAdminTab();
+  }
+
+  async _tplDeleteSection() {
+    const sid = this._tplActiveSection;
+    if (!sid) return;
+    if (!await llConfirm(`Delete section "${this._tplWorkingData.sections[sid]?.name || sid}"? This cannot be undone.`)) return;
+    delete this._tplWorkingData.sections[sid];
+    this._tplActiveSection = null;
+    this._renderAdminTab();
+  }
+
+  async _tplSave() {
+    const name = document.getElementById('ll-tpl-name')?.value?.trim();
+    const desc = document.getElementById('ll-tpl-desc')?.value?.trim() || '';
+    if (!name) { llToast.warning('Template name is required.'); return; }
+    this._tplName = name;
+    this._tplDesc = desc;
+    try {
+      await window.llClient.saveTemplate(this._tplEditing, name, desc, this._tplWorkingData);
+      llToast.success('Template saved successfully.');
+    } catch (err) {
+      console.error('Save template error:', err);
+      llToast.error('Failed to save template: ' + err.message);
+    }
   }
 
   _getSectionNames() {
