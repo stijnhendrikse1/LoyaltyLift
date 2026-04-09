@@ -73,12 +73,12 @@
   border: none;
   padding: 2rem;
 }
+.ll-card-hover { transition: all 0.2s ease; }
 .ll-card-hover:hover {
   box-shadow: 0 32px 48px -12px rgba(83,95,113,0.12);
   background: var(--ll-surface-lowest);
   cursor: pointer;
   transform: translateY(-1px);
-  transition: all 0.2s ease;
 }
 
 /* Typography */
@@ -114,7 +114,7 @@
 }
 .ll-btn-secondary {
   background: transparent; color: var(--ll-on-surface);
-  border: 1px solid rgba(197,198,204,0.15);
+  border: 1px solid rgba(197,198,204,0.4);
 }
 .ll-btn-secondary:hover:not(:disabled) { background: var(--ll-surface-high); }
 .ll-btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; }
@@ -237,6 +237,7 @@
 }
 .ll-save-status.saving { color: var(--ll-warning); }
 .ll-save-status.saved { color: var(--ll-teal); }
+.ll-save-status.error { color: var(--ll-error); }
 
 /* Loading spinner */
 .ll-spinner {
@@ -472,7 +473,7 @@ window.llSectionTemplates = {};
 window._loadTemplatesPromise = null;
 window._loadTemplates = function() {
   if (window._loadTemplatesPromise) return window._loadTemplatesPromise;
-  if (Object.keys(window.llSectionTemplates).length > 1) return Promise.resolve();
+  if (Object.keys(window.llSectionTemplates).length > 0) return Promise.resolve();
   window._loadTemplatesPromise = fetch('templates.json')
     .then(r => r.json())
     .then(data => { window.llSectionTemplates = data; })
@@ -803,7 +804,7 @@ class LoyaltyLiftClient {
       visible: !s.conditional,
     }));
     await Promise.all([
-      this.supabase.from('project_members').insert({ project_id: project.id, user_id: this._user.id, role: this.isLjiMember ? 'lji_admin' : 'client_admin' }),
+      this.supabase.from('project_members').insert({ project_id: project.id, user_id: this._user.id, role: this.isLjiAdmin ? 'lji_admin' : (this.isLjiMember ? 'lji_member' : 'client_admin') }),
       this.supabase.from('project_sections').insert(sectionRows),
     ]);
 
@@ -1095,6 +1096,8 @@ class LoyaltyLiftClient {
       .delete()
       .eq('id', projectId);
     if (error) { console.error('deleteProject:', error); throw error; }
+    this._invalidate('projects');
+    this._invalidate('project_' + projectId);
   }
 
   async getSurveyOverrides() {
@@ -1231,8 +1234,8 @@ class LLFormEngine {
           <p class="ll-subtitle">${this._esc(section.description || '')}</p>
         </div>
         <div class="ll-flex ll-gap-2">
-          <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llFormEngine.onBack()">Back</button>
-          <button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-submit-btn" onclick="llFormEngine.onSubmit()">Submit for Review</button>
+          <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="window.llFormEngine?.onBack()">Back</button>
+          <button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-submit-btn" onclick="window.llFormEngine?.onSubmit()">Submit for Review</button>
         </div>
       </div>
       <div class="ll-card" style="padding: 2rem;">
@@ -1602,7 +1605,7 @@ const llToast = {
     this._ensure();
     const el = document.createElement('div');
     el.className = `ll-toast ll-toast-${type}`;
-    el.innerHTML = `<span>${message}</span><button class="ll-toast-close" onclick="this.parentElement.classList.add('ll-toast-out'); setTimeout(() => this.parentElement.remove(), 200)">&times;</button>`;
+    el.innerHTML = `<span>${message.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</span><button class="ll-toast-close" onclick="this.parentElement.classList.add('ll-toast-out'); setTimeout(() => this.parentElement.remove(), 200)">&times;</button>`;
     this._container.appendChild(el);
     if (duration > 0) {
       setTimeout(() => { el.classList.add('ll-toast-out'); setTimeout(() => el.remove(), 200); }, duration);
@@ -1621,7 +1624,7 @@ function llConfirm(message) {
     overlay.className = 'll-confirm-overlay';
     overlay.innerHTML = `
       <div class="ll-confirm-box">
-        <div class="ll-confirm-msg">${message}</div>
+        <div class="ll-confirm-msg">${message.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</div>
         <div class="ll-confirm-actions">
           <button class="ll-btn ll-btn-secondary" id="ll-confirm-no">Cancel</button>
           <button class="ll-btn ll-btn-primary" id="ll-confirm-yes">Confirm</button>
@@ -1978,8 +1981,8 @@ class LLApp {
           </div>
           <div class="ll-flex ll-gap-2 ll-items-center">
             <span class="ll-badge ll-badge-blue">${phaseLabels[project.phase]}</span>
-            ${isLji ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._showManageMembers('${project.id}')">Manage Members</button>` : ''}
-            ${isLji && project.phase !== 'launch' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._advancePhase('${project.id}')">Advance Phase</button>` : ''}
+            ${window.llClient.isLjiAdmin ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._showManageMembers('${project.id}')">Manage Members</button>` : ''}
+            ${window.llClient.isLjiAdmin && project.phase !== 'launch' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._advancePhase('${project.id}')">Advance Phase</button>` : ''}
             <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
           </div>
         </div>
@@ -2013,7 +2016,7 @@ class LLApp {
                         <span class="ll-text-sm" style="font-weight:500;">${this._esc(name)}</span>
                         <div class="ll-flex ll-gap-2 ll-items-center">
                           <span class="ll-badge ${si.badge}">${si.label}</span>
-                          ${isLji && s.status === 'in_review' ? `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="event.stopPropagation(); llApp._approveSection('${project.id}', '${s.section_id}')">Approve</button>` : ''}
+                          ${window.llClient.isLjiAdmin && s.status === 'in_review' ? `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="event.stopPropagation(); llApp._approveSection('${project.id}', '${s.section_id}')">Approve</button>` : ''}
                         </div>
                       </div>
                     </div>
@@ -2053,7 +2056,7 @@ class LLApp {
     // Load config (templates are likely already cached)
     const sectionConfig = await this._loadSectionConfig(sectionId);
     if (!sectionConfig) {
-      document.getElementById('ll-section-form').innerHTML = `<div class="ll-card"><p>Section template not found: ${sectionId}</p></div>`;
+      document.getElementById('ll-section-form').innerHTML = `<div class="ll-card"><p>Section template not found: ${this._esc(sectionId)}</p></div>`;
       return;
     }
 
@@ -2628,6 +2631,8 @@ class LLApp {
               <li>It replaces the traditional 35+ tab Excel spreadsheet with a structured, guided digital experience.</li>
               <li>The questionnaire is organized into <strong>3 phases</strong>: Discovery, Solution Design, and Launch Readiness.</li>
               <li>Each phase contains multiple sections, and each section contains questions specific to that topic.</li>
+              <li>Both <strong>LJI staff</strong> and <strong>clients</strong> can create projects. A client who creates a project automatically becomes the <strong>Client Admin</strong> for that project.</li>
+              <li>The app is hosted on GitHub Pages at <strong>smfhcp.github.io/LoyaltyLift</strong>.</li>
             </ul>
           </div>
         </div>
@@ -2640,7 +2645,7 @@ class LLApp {
           <div class="ll-help-section-body">
             <p><strong>Projects</strong> &mdash; Each client engagement has its own project. A project tracks the entire onboarding questionnaire for one loyalty program.</p>
 
-            <p><strong>Phases</strong> &mdash; Projects progress through 3 phases:</p>
+            <p><strong>Phases</strong> &mdash; Projects progress through 3 phases with <strong>42 total sections</strong>:</p>
             <ul>
               <li><strong>Discovery</strong> (12 sections): Core program setup &mdash; tenancy, program details, loyalty accounts, policies, sponsors, member enrollment, tiers, earning/redemption rules, offers, data migration, and marketing.</li>
               <li><strong>Solution Design</strong> (19 sections): Detailed data models, entity configurations, member services, batch processing, role management, and integrations.</li>
@@ -2656,9 +2661,11 @@ class LLApp {
               <li><strong>Skipped</strong> &mdash; Not applicable for this project.</li>
             </ul>
 
-            <p><strong>Auto-save</strong> &mdash; All form inputs save automatically when you click away from the field. A "Saved" indicator appears in the bottom-right corner.</p>
+            <p><strong>Auto-save</strong> &mdash; All form inputs save automatically when you leave the field (on blur), not on every keystroke. A <strong>"Saved"</strong> indicator appears briefly in the bottom-right corner to confirm each save.</p>
 
-            <p><strong>Conditional Questions</strong> &mdash; Some questions appear or disappear based on your answers to other questions. For example, tier management questions only show if you indicate your program has tiers.</p>
+            <p><strong>Conditional Visibility</strong> &mdash; Both individual questions and entire sections can appear or disappear based on your answers. For example, tier management questions only show if you indicate your program has tiers, and industry-specific sections are hidden unless the relevant industry is selected.</p>
+
+            <p><strong>Survey Template Customization</strong> &mdash; LJI Admins can customize the survey templates via the Admin Panel &mdash; toggling questions as required or optional and setting default values. These customizations apply to all new form loads.</p>
 
             <p><strong>Phase Advancement</strong> &mdash; Once all sections in a phase are approved (or skipped), an LJI admin can advance the project to the next phase, unlocking new sections.</p>
           </div>
@@ -2684,18 +2691,18 @@ class LLApp {
                 <tr><td>View assigned projects</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
                 <tr><td>Fill in questionnaire</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
                 <tr><td>Submit sections for review</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
+                <tr><td>Create projects</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td><td class="ll-check">${Y}</td></tr>
+                <tr><td>Manage project members</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}*</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Approve/reject sections</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Create new projects</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Delete projects</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Advance project phases</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Invite users to projects</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}*</td><td class="ll-cross">${N}</td></tr>
+                <tr><td>Customize survey templates</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Access admin panel</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>Manage user roles</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
-                <tr><td>Edit survey templates</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td><td class="ll-cross">${N}</td></tr>
                 <tr><td>View PII-encrypted data</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td><td class="ll-check">${Y}</td><td class="ll-cross">${N}</td></tr>
               </tbody>
             </table>
-            <p style="font-size:0.75rem; margin-top:0.25rem;">* Client Admins can only invite client roles.</p>
+            <p style="font-size:0.75rem; margin-top:0.25rem;">* Client Admins can manage members for their own project only.</p>
 
             <ul>
               <li><strong>LJI Admin</strong> &mdash; Full control. Can create projects, manage users, approve sections, advance phases, edit survey templates, and access the admin panel. This is for LJI's project leads and senior staff.</li>
@@ -2714,11 +2721,14 @@ class LLApp {
           <div class="ll-help-section-body">
             <ul>
               <li>All data is stored in Supabase PostgreSQL with Row Level Security (RLS).</li>
+              <li>The Supabase project is hosted in the EU (<strong>eu-west-1</strong>).</li>
+              <li>All communication between the browser and the server is over <strong>HTTPS</strong>.</li>
               <li>PII (Personally Identifiable Information) fields are flagged and stored with column-level encryption using pgcrypto AES.</li>
               <li>Only LJI Admins and Client Admins can view PII data.</li>
               <li>Client Members can enter PII data but cannot read it back (write-only access).</li>
               <li>Each project is isolated &mdash; users can only see projects they are members of.</li>
               <li>File uploads are stored in secure Supabase Storage with project-scoped access.</li>
+              <li>A <strong>5-minute client-side cache</strong> is used for performance, reducing redundant network requests.</li>
             </ul>
           </div>
         </div>
@@ -2742,9 +2752,25 @@ class LLApp {
           </button>
           <div class="ll-help-section-body">
             <ul>
-              <li><strong>Users tab</strong> &mdash; View all registered users, change their roles.</li>
-              <li><strong>Projects tab</strong> &mdash; View all projects, create new ones, delete existing ones.</li>
-              <li><strong>Survey Templates tab</strong> &mdash; Customize the questionnaire &mdash; toggle questions as required/optional, set default values. Changes apply to all new form loads.</li>
+              <li><strong>Users tab</strong> &mdash; View all registered users and change their roles.</li>
+              <li><strong>Projects tab</strong> &mdash; View all projects across all clients, create new projects, and delete existing ones.</li>
+              <li><strong>Survey Templates tab</strong> &mdash; Expand each section to see its questions. Toggle individual questions as required or optional, set default values for any field, and save changes per section. Customizations apply to all new form loads.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Manage Members -->
+        <div class="ll-help-section">
+          <button class="ll-help-section-header" onclick="llApp._toggleHelpSection(this)">
+            Manage Members <span class="ll-help-chevron">&#9660;</span>
+          </button>
+          <div class="ll-help-section-body">
+            <ul>
+              <li>LJI Admins see a <strong>"Manage Members"</strong> button on each project card on the dashboard.</li>
+              <li>From the Manage Members dialog, you can add any registered user to the project and assign them a specific role (LJI Member, Client Admin, or Client Member).</li>
+              <li>You can also remove existing members from the project.</li>
+              <li>Users can only see projects they are members of &mdash; adding a member grants them access, and removing one revokes it.</li>
+              <li>Client Admins can manage members for their own project only.</li>
             </ul>
           </div>
         </div>
@@ -2756,11 +2782,13 @@ class LLApp {
           </button>
           <div class="ll-help-section-body">
             <ul>
+              <li>Click the <strong>LJI logo</strong> in the top-left to return to the dashboard from any page.</li>
+              <li>Use the <strong>"?"</strong> button on any page to open this help panel.</li>
               <li>Use the keyboard <strong>Tab</strong> key to move between fields quickly.</li>
               <li>Required fields are marked with a red asterisk (<span style="color:var(--ll-error); font-weight:700;">*</span>).</li>
               <li>Help text appears below each question label in gray.</li>
               <li>The progress bar on the dashboard shows overall completion percentage.</li>
-              <li>Click the LJI logo in the top-left to return to the dashboard from any page.</li>
+              <li>If you see stale data, try a hard-refresh with <strong>Ctrl+Shift+R</strong> (or Cmd+Shift+R on Mac).</li>
             </ul>
           </div>
         </div>
