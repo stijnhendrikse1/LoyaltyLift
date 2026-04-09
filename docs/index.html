@@ -1590,7 +1590,7 @@ class LLFormEngine {
 
       case 'currency':
         input = `<div class="ll-flex ll-gap-2">
-          <select class="ll-select" style="width:100px;" data-key="${q.key}_currency" onchange="llFormEngine._onCurrencyChange('${q.key}', this)">
+          <select class="ll-select" style="width:100px;" data-key="${q.key}_currency" onchange="LLFormEngine._onCurrencyChange('${q.key}', this)">
             <option value="USD" ${(this.responses[q.key + '_currency'] || 'USD') === 'USD' ? 'selected' : ''}>USD</option>
             <option value="EUR" ${this.responses[q.key + '_currency'] === 'EUR' ? 'selected' : ''}>EUR</option>
             <option value="GBP" ${this.responses[q.key + '_currency'] === 'GBP' ? 'selected' : ''}>GBP</option>
@@ -1614,7 +1614,7 @@ class LLFormEngine {
           ${(q.options || []).map(o => {
             const checked = Array.isArray(value) && value.includes(o.value);
             return `<label class="ll-flex ll-items-center ll-gap-2" style="font-size:0.875rem;">
-              <input type="checkbox" value="${this._escAttr(o.value)}" ${checked ? 'checked' : ''} onchange="llFormEngine._onMultiSelect('${q.key}')" />
+              <input type="checkbox" value="${this._escAttr(o.value)}" ${checked ? 'checked' : ''} onchange="LLFormEngine._onMultiSelect('${q.key}')" />
               ${this._esc(o.label)}
             </label>`;
           }).join('')}
@@ -1636,7 +1636,7 @@ class LLFormEngine {
 
       case 'file':
         input = `<div>
-          <input type="file" id="ll-file-${q.key}" style="display:none;" onchange="llFormEngine._onFileSelect('${q.key}', this)" />
+          <input type="file" id="ll-file-${q.key}" style="display:none;" onchange="LLFormEngine._onFileSelect('${q.key}', this)" />
           <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="document.getElementById('ll-file-${q.key}').click()">Choose File</button>
           <span class="ll-text-xs ll-text-muted" id="ll-file-name-${q.key}" style="margin-left:0.5rem;">${strVal ? this._esc(strVal) : 'No file selected'}</span>
         </div>`;
@@ -1880,6 +1880,7 @@ class LLFormEngine {
 }
 
 window.LLFormEngine = LLFormEngine;
+window.llFormEngine = null; // instance set when section loads
   </script>
 
   <!-- Main Application -->
