@@ -1094,7 +1094,7 @@ class LoyaltyLiftClient {
   async listAllProfiles() {
     const { data, error } = await this.supabase
       .from('profiles')
-      .select('id, email, full_name, avatar_url, role, created_at')
+      .select('id, email, full_name, avatar_url, role, is_superadmin, created_at')
       .order('created_at', { ascending: false });
     if (error) { console.error('listAllProfiles:', error); throw error; }
     return data;
@@ -2258,14 +2258,18 @@ class LLApp {
         <div id="ll-mm-list">
           ${(project.members || []).map(m => {
             const profile = allProfiles.find(p => p.id === m.user_id);
+            const isSuperadmin = profile?.is_superadmin;
             return `<div class="ll-flex ll-justify-between ll-items-center" style="padding:0.75rem 0; border-bottom:1px solid rgba(197,198,204,0.15);">
               <div>
                 <span class="ll-text-sm" style="font-weight:500;">${this._esc(profile?.full_name || profile?.email || m.user_id)}</span>
                 <span class="ll-text-xs ll-text-muted" style="margin-left:0.5rem;">${this._esc(profile?.email || '')}</span>
+                ${isSuperadmin ? '<span class="ll-badge ll-badge-green" style="margin-left:0.375rem;">Superadmin</span>' : ''}
               </div>
               <div class="ll-flex ll-gap-2 ll-items-center">
-                <span class="ll-badge ll-badge-blue">${m.role}</span>
-                <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error); font-size:0.6875rem;" onclick="llApp._removeMember('${projectId}', '${m.user_id}')">Remove</button>
+                <select class="ll-input" style="width:140px; font-size:0.75rem; padding:0.25rem 0.5rem;" ${isSuperadmin ? 'disabled' : ''} onchange="llApp._changeMemberRole('${projectId}', '${m.user_id}', this.value)">
+                  ${['lji_admin','lji_member','client_admin','client_member'].map(r => `<option value="${r}" ${m.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+                </select>
+                ${isSuperadmin ? '' : `<button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error); font-size:0.6875rem;" onclick="llApp._removeMember('${projectId}', '${m.user_id}')">Remove</button>`}
               </div>
             </div>`;
           }).join('')}
@@ -2299,6 +2303,25 @@ class LLApp {
       console.error('Add member error:', err);
       llToast.error('Failed to add member. ' + err.message);
     } finally { btn.disabled = false; }
+  }
+
+  async _changeMemberRole(projectId, userId, newRole) {
+    try {
+      const { error } = await window.llClient.supabase
+        .from('project_members')
+        .update({ role: newRole })
+        .eq('project_id', projectId)
+        .eq('user_id', userId);
+      if (error) throw error;
+      window.llClient._invalidate('project');
+      llToast.success('Role updated.');
+    } catch (err) {
+      console.error('Change role error:', err);
+      llToast.error('Failed to change role. ' + (err.message || ''));
+      // Refresh modal to reset dropdown
+      document.querySelector('.ll-confirm-overlay')?.remove();
+      this._showManageMembers(projectId);
+    }
   }
 
   async _removeMember(projectId, userId) {
