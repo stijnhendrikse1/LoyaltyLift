@@ -1480,15 +1480,20 @@ class LoyaltyLiftClient {
 
   async triggerExtraction(projectId, uploadId) {
     const { data: { session } } = await this.supabase.auth.getSession();
-    const resp = await fetch(`${this.supabase.supabaseUrl}/functions/v1/extract-responses`, {
+    if (!session) throw new Error('Not authenticated');
+    const resp = await fetch(`${LL_CONFIG.supabaseUrl}/functions/v1/extract-responses`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${session.access_token}`,
+        'apikey': LL_CONFIG.supabaseAnonKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ project_id: projectId, upload_id: uploadId }),
     });
-    if (!resp.ok) throw new Error(await resp.text());
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => 'Unknown error');
+      throw new Error(`Extraction failed (${resp.status}): ${errText}`);
+    }
     return resp.json();
   }
 
