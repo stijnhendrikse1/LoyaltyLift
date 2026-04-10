@@ -798,7 +798,11 @@ class LoyaltyLiftClient {
   _cached(key, fn) {
     const entry = this._cache[key];
     if (entry && Date.now() - entry.ts < this._cacheTTL) return Promise.resolve(entry.data);
-    return fn().then(data => { this._cache[key] = { data, ts: Date.now() }; return data; });
+    // Stale cache still stored for instant rendering — fetch fresh in background
+    const promise = fn().then(data => { this._cache[key] = { data, ts: Date.now() }; return data; });
+    // Return stale data immediately if available, fresh data will update on next render
+    if (entry) return Promise.resolve(entry.data);
+    return promise;
   }
 
   _invalidate(prefix) {
@@ -2233,13 +2237,7 @@ class LLApp {
   // --- Dashboard ---
   async _showDashboard() {
     this.currentPage = 'dashboard';
-    // Render from cache immediately if available
-    const cached = window.llClient._cache['projects'];
-    if (cached) {
-      this._renderDashboard(cached.data);
-    } else {
-      this._showLoading();
-    }
+    // Render immediately — _cached returns stale data if available
     try {
       const projects = await window.llClient.listProjects();
       if (this.currentPage === 'dashboard') this._renderDashboard(projects);
