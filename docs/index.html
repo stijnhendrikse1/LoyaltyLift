@@ -1495,7 +1495,7 @@ class LoyaltyLiftClient {
     await this.supabase.from('client_uploads').delete().eq('id', uploadId);
   }
 
-  async triggerExtraction(projectId, uploadId) {
+  async triggerExtraction(projectId, uploadId, promptId) {
     const { data: { session } } = await this.supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
     const resp = await fetch(`${LL_CONFIG.supabaseUrl}/functions/v1/extract-responses`, {
@@ -1505,7 +1505,7 @@ class LoyaltyLiftClient {
         'apikey': LL_CONFIG.supabaseAnonKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ project_id: projectId, upload_id: uploadId }),
+      body: JSON.stringify({ project_id: projectId, upload_id: uploadId, prompt_id: promptId || 'extract_responses' }),
     });
     if (!resp.ok) {
       const errText = await resp.text().catch(() => 'Unknown error');
@@ -1525,12 +1525,16 @@ class LoyaltyLiftClient {
   }
 
   async acceptSuggestion(suggestion) {
-    // Save to responses
+    // Save to responses - value needs to be JSON-encoded string for the form engine
+    // suggested_value from DB is already the raw value, wrap it once for storage
+    const val = typeof suggestion.suggested_value === 'string'
+      ? JSON.stringify(suggestion.suggested_value)
+      : JSON.stringify(String(suggestion.suggested_value));
     await this.supabase.from('responses').upsert({
       project_id: suggestion.project_id,
       section_id: suggestion.section_id,
       question_key: suggestion.question_key,
-      value: JSON.stringify(suggestion.suggested_value),
+      value: val,
       responded_by: this._user.id,
     }, { onConflict: 'project_id,section_id,question_key' });
     // Mark suggestion as accepted
@@ -3093,20 +3097,34 @@ class LLApp {
     content.innerHTML = `
       <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1.5rem;">
         <h2 class="ll-h2" style="margin:0;">AI Prompts</h2>
+        <button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._duplicateAIPrompt('extract_responses')">+ Create New Prompt</button>
       </div>
       <div class="ll-flex ll-flex-col ll-gap-6">
-        ${this._aiPrompts.map((p, idx) => `
+        ${this._aiPrompts.map((p, idx) => {
+          const isDefault = p.id === 'extract_responses';
+          return `
           <div class="ll-card" style="padding:2rem;" id="ll-ai-prompt-card-${p.id}">
+            <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1rem;">
+              <div class="ll-flex ll-gap-2 ll-items-center">
+                ${isDefault ? '<span class="ll-badge ll-badge-blue">Default</span>' : ''}
+                <span class="ll-text-sm" style="font-weight:600;">${this._esc(p.name)}</span>
+              </div>
+              <div class="ll-flex ll-gap-2">
+                <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._duplicateAIPrompt('${p.id}')">Duplicate</button>
+                ${!isDefault ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error);" onclick="llApp._deleteAIPrompt('${p.id}')">Delete</button>` : ''}
+              </div>
+            </div>
             <div class="ll-grid-2" style="gap:1rem; margin-bottom:1rem;">
               <div>
                 <label class="ll-label">Name</label>
-                <input class="ll-input" id="ll-aip-name-${p.id}" value="${this._esc(p.name || '')}" />
+                <input class="ll-input" id="ll-aip-name-${p.id}" value="${this._esc(p.name || '')}" ${isDefault ? 'disabled' : ''} />
               </div>
               <div>
                 <label class="ll-label">Description</label>
-                <input class="ll-input" id="ll-aip-desc-${p.id}" value="${this._esc(p.description || '')}" />
+                <input class="ll-input" id="ll-aip-desc-${p.id}" value="${this._esc(p.description || '')}" ${isDefault ? 'disabled' : ''} />
               </div>
-            </div>
+            </div>`;
+        }).join('')}
             <div class="ll-grid-2" style="gap:1rem; margin-bottom:1rem;">
               <div>
                 <label class="ll-label">Model</label>
@@ -3132,12 +3150,49 @@ class LLApp {
             </div>
             <div class="ll-flex ll-justify-between ll-items-center">
               <span class="ll-text-xs ll-text-muted">ID: ${p.id}</span>
-              <button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._saveAIPrompt('${p.id}')">Save</button>
+              ${isDefault ? '<span class="ll-text-xs ll-text-muted">Default prompt — duplicate to customize</span>' : `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._saveAIPrompt('${p.id}')">Save</button>`}
             </div>
           </div>
-        `).join('')}
+        `; }).join('')}
       </div>
     `;
+  }
+
+  async _duplicateAIPrompt(sourceId) {
+    try {
+      const { data: source } = await window.llClient.supabase.from('ai_prompts').select('*').eq('id', sourceId).single();
+      if (!source) { llToast.error('Source prompt not found.'); return; }
+      const newId = 'custom_' + Date.now();
+      const { error } = await window.llClient.supabase.from('ai_prompts').insert({
+        id: newId,
+        name: source.name + ' (Copy)',
+        description: source.description,
+        system_prompt: source.system_prompt,
+        user_prompt_template: source.user_prompt_template,
+        model: source.model,
+        max_tokens: source.max_tokens,
+        updated_by: window.llClient.user?.id,
+      });
+      if (error) throw error;
+      llToast.success('Prompt duplicated.');
+      await this._renderAdminAIPrompts(document.getElementById('ll-admin-content'));
+    } catch (err) {
+      console.error('Duplicate prompt error:', err);
+      llToast.error('Failed to duplicate prompt.');
+    }
+  }
+
+  async _deleteAIPrompt(id) {
+    if (id === 'extract_responses') { llToast.warning('Cannot delete the default prompt.'); return; }
+    if (!await llConfirm('Delete this prompt?')) return;
+    try {
+      await window.llClient.supabase.from('ai_prompts').delete().eq('id', id);
+      llToast.success('Prompt deleted.');
+      await this._renderAdminAIPrompts(document.getElementById('ll-admin-content'));
+    } catch (err) {
+      console.error('Delete prompt error:', err);
+      llToast.error('Failed to delete prompt.');
+    }
   }
 
   async _saveAIPrompt(id) {
@@ -4585,7 +4640,10 @@ class LLApp {
             <div class="ll-card">
               <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:0.75rem;">
                 <h2 class="ll-h2" style="margin-bottom:0;">Uploaded Files</h2>
-                <button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-import-analyze-btn" onclick="llApp._analyzeImportFiles()">Analyze Files</button>
+                <div class="ll-flex ll-gap-2 ll-items-center">
+                  <select class="ll-input" id="ll-import-prompt-select" style="width:180px; font-size:0.6875rem; padding:0.25rem 0.5rem;"></select>
+                  <button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-import-analyze-btn" onclick="llApp._analyzeImportFiles()">Analyze Files</button>
+                </div>
               </div>
               <div id="ll-import-file-list">
                 <p class="ll-text-sm ll-text-muted">No files uploaded yet.</p>
@@ -4638,14 +4696,20 @@ class LLApp {
 
   async _loadImportData(projectId) {
     try {
-      const uploads = await window.llClient.getClientUploads(projectId);
+      const [uploads, suggestions] = await Promise.all([
+        window.llClient.getClientUploads(projectId),
+        window.llClient.getSuggestedResponses(projectId),
+      ]);
       this._importUploads = uploads;
       this._renderImportFiles();
-
-      const suggestions = await window.llClient.getSuggestedResponses(projectId);
       this._importSuggestions = suggestions;
-      if (suggestions.length > 0) {
-        this._renderSuggestions();
+      if (suggestions.length > 0) this._renderSuggestions();
+
+      // Load prompt selector
+      const { data: prompts } = await window.llClient.supabase.from('ai_prompts').select('id, name').order('name');
+      const sel = document.getElementById('ll-import-prompt-select');
+      if (sel && prompts) {
+        sel.innerHTML = prompts.map(p => `<option value="${p.id}" ${p.id === 'extract_responses' ? 'selected' : ''}>${this._esc(p.name)}</option>`).join('');
       }
     } catch (err) {
       console.error('Load import data error:', err);
@@ -4804,7 +4868,8 @@ class LLApp {
     let triggered = 0;
     for (const u of uploads) {
       try {
-        await window.llClient.triggerExtraction(projectId, u.id);
+        const promptId = document.getElementById('ll-import-prompt-select')?.value || 'extract_responses';
+        await window.llClient.triggerExtraction(projectId, u.id, promptId);
         u.status = 'processing';
         triggered++;
       } catch (err) {
