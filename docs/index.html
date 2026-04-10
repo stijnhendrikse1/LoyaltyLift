@@ -3943,6 +3943,7 @@ class LLApp {
               <li><strong>Skipped</strong> &mdash; Not applicable for this project.</li>
             </ul>
             <p>All sections in a phase must be <strong>Approved</strong> (or Skipped) before an LJI staff member can advance the project to the next phase.</p>
+            <p><strong>Custom templates</strong> can define different phases beyond the default Discovery/Design/Launch. Projects created with a custom template will display the phases defined in that template.</p>
           </div>
         </div>
 
@@ -4024,7 +4025,7 @@ class LLApp {
               <li><strong>Users</strong> &mdash; View all registered users, change roles via dropdown, delete users (superadmins are protected). Shows superadmin badge where applicable.</li>
               <li><strong>Projects</strong> &mdash; View all projects with progress stats, create new projects, delete projects with confirmation.</li>
               <li><strong>Survey Templates</strong> &mdash; Expand each section to see its questions. Toggle required/optional per question, set default values, save changes per section. These overrides apply to all form loads.</li>
-              <li><strong>Template Editor</strong> &mdash; Create custom survey templates that start as a copy of the default. Edit section names, descriptions, phases. Add/remove/reorder sections and questions. Change question types, required status, help text, placeholders, options for dropdowns. Custom templates can be selected when creating new projects.</li>
+              <li><strong>Template Editor</strong> &mdash; Create custom survey templates that start as a copy of the default. Edit section names, descriptions, phases. Add/remove/reorder sections and questions. Change question types, required status, help text, placeholders, options for dropdowns. Custom templates can be selected when creating new projects. Supports <strong>custom phases</strong> &mdash; create, rename, reorder, and delete phases so templates are not limited to the default Discovery/Design/Launch structure.</li>
               <li><strong>Feedback</strong> &mdash; View all user feedback with filter buttons for status (New, In Progress, Resolved, Closed) and type (Suggestion, Review, Bug Report). Each item shows the message, submitter, date, star rating (for reviews), status dropdown, and admin notes field.</li>
             </ul>
           </div>
@@ -4043,6 +4044,15 @@ class LLApp {
               <li>Remove members (superadmins cannot be removed).</li>
               <li>Users can only see projects they are members of.</li>
             </ul>
+
+            <p style="margin-top:0.75rem;"><strong>Customizing Visibility</strong></p>
+            <ul>
+              <li>LJI staff can click <strong>"Customize"</strong> on a project to enter customization mode.</li>
+              <li>In customization mode, sections can be <strong>shown or hidden</strong> per project.</li>
+              <li>Click a section to open a modal where individual questions can be shown or hidden.</li>
+              <li>Hidden sections and questions are <strong>not visible to the client</strong>.</li>
+              <li>This allows tailoring the questionnaire per client without creating a separate template.</li>
+            </ul>
           </div>
         </div>
 
@@ -4058,6 +4068,7 @@ class LLApp {
               <li>Includes a <strong>Summary sheet</strong> with project info and section statuses.</li>
               <li>One sheet per section with columns: Question, Answer, Help Text, Required, Last Updated.</li>
               <li>Per-section export also available via the download button on each section card.</li>
+              <li>Feedback can also be exported from the Admin panel's <strong>Feedback</strong> tab.</li>
             </ul>
           </div>
         </div>
@@ -4075,6 +4086,11 @@ class LLApp {
               <li><strong>Bug Report</strong> &mdash; What happened and what you expected.</li>
             </ul>
             <p>LJI admins review feedback in the Admin panel's <strong>Feedback</strong> tab. Filter by status and type, update status, and add admin notes.</p>
+            <ul>
+              <li>The default filter shows <strong>Active</strong> items (New + In Progress + Resolved).</li>
+              <li>Closed feedback items are hidden from the default view &mdash; use the <strong>"Closed"</strong> or <strong>"All"</strong> filter to see them.</li>
+              <li>The <strong>Export All</strong> button downloads all feedback including closed items as an Excel file.</li>
+            </ul>
           </div>
         </div>
 
@@ -4093,6 +4109,7 @@ class LLApp {
               <li>Supabase hosted in EU (<strong>eu-west-1</strong>).</li>
               <li>All communication over <strong>HTTPS</strong>.</li>
               <li><strong>5-minute client-side cache</strong> for performance.</li>
+              <li>Auth tokens <strong>auto-refresh</strong> to maintain session during extended use.</li>
             </ul>
           </div>
         </div>
@@ -4110,6 +4127,7 @@ class LLApp {
               <li>Hard-refresh (<strong>Ctrl+Shift+R</strong>) if you see stale data.</li>
               <li>The progress bar shows overall completion percentage.</li>
               <li>Example projects let you explore the platform without affecting real data.</li>
+              <li>Session stays alive automatically &mdash; no need to worry about timeouts during long idle periods.</li>
             </ul>
           </div>
         </div>
