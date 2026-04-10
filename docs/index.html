@@ -2025,13 +2025,15 @@ class LLApp {
     try {
       const projects = await window.llClient.listProjects();
       this._renderDashboard(projects);
-      // Prefetch all project details in background
+      // Prefetch everything in background for instant navigation
       projects.forEach(p => {
         window.llClient.getProject(p.id);
+        window.llClient.getVisibilityOverrides(p.id);
       });
-      // Prefetch templates + overrides in background
       if (window._loadTemplates) window._loadTemplates();
       window.llClient.getSurveyOverrides();
+      window.llClient.listTemplates().catch(() => {});
+      window.llClient.listAllProfiles().catch(() => {});
     } catch (err) {
       console.error('Dashboard error:', err);
       this.container.innerHTML = `<div class="ll-container"><div class="ll-card"><p class="ll-text-sm" style="color:var(--ll-error);">Failed to load projects. ${err.message}</p></div></div>`;
@@ -2111,9 +2113,11 @@ class LLApp {
   // --- New Project ---
   async _showNewProject() {
     this.currentPage = 'new-project';
-    // Load templates for dropdown
-    let templates = [];
-    try { templates = await window.llClient.listTemplates(); } catch (e) { /* ignore */ }
+    // Use cached templates or empty list (don't block render)
+    const cachedTpl = window.llClient._cache['survey_templates'];
+    let templates = cachedTpl ? cachedTpl.data : [];
+    // Prefetch for next time
+    window.llClient.listTemplates().catch(() => {});
     this.container.innerHTML = `
       <div class="ll-header">
         <div class="ll-flex ll-justify-between ll-items-center">
@@ -2241,11 +2245,15 @@ class LLApp {
       } catch (e) { /* use default names */ }
     }
 
-    // Fetch visibility overrides for this project
-    let visOverrides = [];
-    try {
-      visOverrides = await window.llClient.getVisibilityOverrides(project.id);
-    } catch (e) { console.error('Failed to load visibility overrides:', e); }
+    // Use cached visibility overrides (don't await — render first, re-render if needed)
+    const cachedVis = window.llClient._cache['visibility_' + project.id];
+    let visOverrides = cachedVis ? cachedVis.data : [];
+    // Fetch in background and re-render only if changed
+    if (!cachedVis) {
+      window.llClient.getVisibilityOverrides(project.id).then(v => {
+        if (v.length > 0 && this.currentPage === 'project') this._renderProject(project);
+      }).catch(() => {});
+    }
 
     const isSectionHidden = (sectionId) => visOverrides.some(v => v.section_id === sectionId && !v.question_key && v.hidden);
 
@@ -2522,10 +2530,11 @@ class LLApp {
 
     if (!config) return null;
 
-    // Apply project-level visibility overrides (filter out hidden questions)
+    // Apply project-level visibility overrides (use cache first, don't block)
     if (projectId && !skipVisibilityFilter) {
       try {
-        const visOverrides = await window.llClient.getVisibilityOverrides(projectId);
+        const cachedVis = window.llClient._cache['visibility_' + projectId];
+        const visOverrides = cachedVis ? cachedVis.data : await window.llClient.getVisibilityOverrides(projectId);
         // Check if entire section is hidden
         const sectionHidden = visOverrides.some(v => v.section_id === sectionId && !v.question_key && v.hidden);
         if (sectionHidden) return null;
