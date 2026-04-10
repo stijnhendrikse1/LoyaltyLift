@@ -1923,19 +1923,12 @@ class LLApp {
     window.location.hash = hash;
   }
 
-  async _handleRoute() {
-    // Refresh auth session if stale (prevents dormant token issues)
-    try {
-      const { data } = await window.llClient.supabase.auth.getSession();
-      if (data?.session) {
-        window.llClient._user = data.session.user;
-      } else {
-        this._showLogin();
-        return;
-      }
-    } catch (e) {
-      console.error('Session refresh failed:', e);
-    }
+  _handleRoute() {
+    // Refresh session in background (don't block navigation)
+    window.llClient.supabase.auth.getSession().then(({ data }) => {
+      if (data?.session) { window.llClient._user = data.session.user; }
+      else if (!data?.session && this.currentPage !== 'login') { this._showLogin(); }
+    }).catch(() => {});
 
     const hash = window.location.hash.replace('#', '');
     const parts = hash.split('/');
