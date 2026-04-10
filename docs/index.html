@@ -3418,16 +3418,27 @@ class LLApp {
     const sections = this._tplWorkingData.sections || {};
     const sectionIds = Object.keys(sections);
 
+    // Get phases (custom or default)
+    if (!this._tplWorkingData.phases) {
+      this._tplWorkingData.phases = [
+        { id: 'discovery', name: 'Discovery' },
+        { id: 'design', name: 'Solution Design' },
+        { id: 'launch', name: 'Launch Readiness' },
+      ];
+    }
+    const phases = this._tplWorkingData.phases;
+    const phaseLabels = {};
+    phases.forEach(p => { phaseLabels[p.id] = p.name; });
+
     // Group sections by phase
-    const phaseGroups = { discovery: [], design: [], launch: [] };
+    const phaseGroups = {};
+    phases.forEach(p => { phaseGroups[p.id] = []; });
     sectionIds.forEach(sid => {
       const s = sections[sid];
-      const phase = s.phase || 'discovery';
+      const phase = s.phase || phases[0]?.id || 'discovery';
       if (!phaseGroups[phase]) phaseGroups[phase] = [];
       phaseGroups[phase].push(sid);
     });
-
-    const phaseLabels = { discovery: 'Discovery', design: 'Solution Design', launch: 'Launch Readiness' };
 
     content.innerHTML = `
       <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1rem;">
@@ -3453,13 +3464,30 @@ class LLApp {
 
       <div class="ll-tpl-editor">
         <div class="ll-tpl-sidebar">
+          <div style="margin-bottom:0.5rem; font-size:0.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--ll-on-surface-variant);">Phases (${phases.length})</div>
+          <div style="margin-bottom:0.75rem;">
+            ${phases.map((p, i) => `
+              <div class="ll-flex ll-items-center ll-gap-1" style="margin-bottom:0.25rem;">
+                <input class="ll-input" style="flex:1; font-size:0.6875rem; padding:0.25rem 0.5rem;" value="${this._esc(p.name)}" onblur="llApp._tplRenamePhase(${i}, this.value)" />
+                <button class="ll-btn ll-btn-secondary ll-btn-sm" style="font-size:0.5625rem; padding:0.125rem 0.375rem; color:var(--ll-on-surface-variant);" onclick="llApp._tplMovePhase(${i}, -1)" ${i === 0 ? 'disabled' : ''}>&#9650;</button>
+                <button class="ll-btn ll-btn-secondary ll-btn-sm" style="font-size:0.5625rem; padding:0.125rem 0.375rem; color:var(--ll-on-surface-variant);" onclick="llApp._tplMovePhase(${i}, 1)" ${i === phases.length - 1 ? 'disabled' : ''}>&#9660;</button>
+                ${phases.length > 1 ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" style="font-size:0.5625rem; padding:0.125rem 0.375rem; color:var(--ll-error);" onclick="llApp._tplDeletePhase(${i})">&#10005;</button>` : ''}
+              </div>
+            `).join('')}
+            <button class="ll-btn ll-btn-secondary ll-btn-sm" style="width:100%; font-size:0.6875rem; justify-content:center; margin-top:0.25rem;" onclick="llApp._tplAddPhase()">+ Add Phase</button>
+          </div>
           <div style="margin-bottom:0.75rem; font-size:0.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--ll-on-surface-variant);">Sections (${sectionIds.length})</div>
-          ${['discovery', 'design', 'launch'].map(phase => {
-            const ids = phaseGroups[phase] || [];
-            if (ids.length === 0) return '';
+          ${phases.map(phase => {
+            const ids = phaseGroups[phase.id] || [];
+            if (ids.length === 0 && !this._customizeMode) return `
+              <div class="ll-tpl-phase-group">
+                <div class="ll-tpl-phase-label">${this._esc(phase.name)}</div>
+                <div class="ll-text-xs ll-text-muted" style="padding:0.25rem 0.5rem;">No sections</div>
+              </div>
+            `;
             return `
               <div class="ll-tpl-phase-group">
-                <div class="ll-tpl-phase-label">${phaseLabels[phase]}</div>
+                <div class="ll-tpl-phase-label">${this._esc(phase.name)}</div>
                 ${ids.map(sid => `
                   <button class="ll-tpl-sidebar-item ${this._tplActiveSection === sid ? 'active' : ''}" onclick="llApp._tplSelectSection('${sid}')">
                     ${this._esc(sections[sid].name || sid)}
@@ -3496,9 +3524,9 @@ class LLApp {
           <div>
             <label class="ll-label">Phase</label>
             <select class="ll-select" onchange="llApp._tplUpdateSection('phase', this.value)">
-              <option value="discovery" ${section.phase === 'discovery' ? 'selected' : ''}>Discovery</option>
-              <option value="design" ${section.phase === 'design' ? 'selected' : ''}>Solution Design</option>
-              <option value="launch" ${section.phase === 'launch' ? 'selected' : ''}>Launch Readiness</option>
+              ${(this._tplWorkingData.phases || [{id:'discovery',name:'Discovery'},{id:'design',name:'Solution Design'},{id:'launch',name:'Launch Readiness'}]).map(p =>
+                `<option value="${p.id}" ${section.phase === p.id ? 'selected' : ''}>${this._esc(p.name)}</option>`
+              ).join('')}
             </select>
           </div>
         </div>
@@ -3696,17 +3724,55 @@ class LLApp {
     if (editor) editor.innerHTML = this._renderTplSectionEditor();
   }
 
+  _tplAddPhase() {
+    const name = prompt('Phase name:');
+    if (!name || !name.trim()) return;
+    const id = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    if (!id) { llToast.warning('Invalid phase name.'); return; }
+    if (this._tplWorkingData.phases.some(p => p.id === id)) { llToast.warning('A phase with this ID already exists.'); return; }
+    this._tplWorkingData.phases.push({ id, name: name.trim() });
+    this._renderTemplateDetail(document.getElementById('ll-admin-content'));
+  }
+
+  _tplRenamePhase(index, newName) {
+    if (!newName.trim()) return;
+    const oldId = this._tplWorkingData.phases[index].id;
+    this._tplWorkingData.phases[index].name = newName.trim();
+    // Don't change the ID — sections reference it
+  }
+
+  _tplMovePhase(index, direction) {
+    const phases = this._tplWorkingData.phases;
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= phases.length) return;
+    [phases[index], phases[newIndex]] = [phases[newIndex], phases[index]];
+    this._renderTemplateDetail(document.getElementById('ll-admin-content'));
+  }
+
+  async _tplDeletePhase(index) {
+    const phase = this._tplWorkingData.phases[index];
+    const sectionsInPhase = Object.values(this._tplWorkingData.sections).filter(s => s.phase === phase.id);
+    if (sectionsInPhase.length > 0) {
+      if (!await llConfirm(`Phase "${phase.name}" has ${sectionsInPhase.length} section(s). They will be moved to the first phase. Continue?`)) return;
+      const firstPhaseId = this._tplWorkingData.phases.find((p, i) => i !== index)?.id;
+      sectionsInPhase.forEach(s => { s.phase = firstPhaseId; });
+    }
+    this._tplWorkingData.phases.splice(index, 1);
+    this._renderTemplateDetail(document.getElementById('ll-admin-content'));
+  }
+
   _tplAddSection() {
     const name = prompt('Section name:');
     if (!name || !name.trim()) return;
     const id = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
     if (!id) { llToast.warning('Invalid section name.'); return; }
     if (this._tplWorkingData.sections[id]) { llToast.warning('A section with this ID already exists.'); return; }
+    const defaultPhase = this._tplWorkingData.phases?.[0]?.id || 'discovery';
     this._tplWorkingData.sections[id] = {
       id,
       name: name.trim(),
       description: '',
-      phase: 'discovery',
+      phase: defaultPhase,
       questions: [],
     };
     this._tplActiveSection = id;
