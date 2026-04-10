@@ -2329,11 +2329,9 @@ class LLApp {
   // --- New Project ---
   async _showNewProject() {
     this.currentPage = 'new-project';
-    // Use cached templates or empty list (don't block render)
-    const cachedTpl = window.llClient._cache['survey_templates'];
-    let templates = cachedTpl ? cachedTpl.data : [];
-    // Prefetch for next time
-    window.llClient.listTemplates().catch(() => {});
+    // Fetch templates — await so dropdown is populated
+    let templates = [];
+    try { templates = await window.llClient.listTemplates(); } catch (e) { /* ignore */ }
     this.container.innerHTML = `
       <div class="ll-header">
         <div class="ll-flex ll-justify-between ll-items-center">
