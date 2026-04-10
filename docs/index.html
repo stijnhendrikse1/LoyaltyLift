@@ -1909,6 +1909,10 @@ class LLApp {
     const { user } = await window.llClient.init();
     if (user) {
       this._handleRoute();
+      // Keep session alive every 10 minutes
+      setInterval(() => {
+        window.llClient.supabase.auth.getSession().catch(() => {});
+      }, 600000);
     } else {
       this._showLogin();
     }
@@ -1919,7 +1923,20 @@ class LLApp {
     window.location.hash = hash;
   }
 
-  _handleRoute() {
+  async _handleRoute() {
+    // Refresh auth session if stale (prevents dormant token issues)
+    try {
+      const { data } = await window.llClient.supabase.auth.getSession();
+      if (data?.session) {
+        window.llClient._user = data.session.user;
+      } else {
+        this._showLogin();
+        return;
+      }
+    } catch (e) {
+      console.error('Session refresh failed:', e);
+    }
+
     const hash = window.location.hash.replace('#', '');
     const parts = hash.split('/');
     const page = parts[0] || 'dashboard';
