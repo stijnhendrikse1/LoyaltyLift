@@ -4927,7 +4927,8 @@ class LLApp {
   }
 
   _renderSuggestions(filter) {
-    filter = filter || 'all';
+    filter = filter || this._sugFilter || 'all';
+    this._sugFilter = filter;
     const container = document.getElementById('ll-import-suggestions');
     const filtersEl = document.getElementById('ll-import-suggestion-filters');
     if (!container) return;
@@ -4941,30 +4942,32 @@ class LLApp {
 
     if (filtersEl) filtersEl.style.display = 'block';
 
+    const pending = suggestions.filter(s => s.status === 'pending');
+    const accepted = suggestions.filter(s => s.status === 'accepted');
+    const rejected = suggestions.filter(s => s.status === 'rejected');
+    const hideAccepted = this._hideAcceptedSuggestions ?? true;
+
     // Update counts
-    const counts = { all: suggestions.length, high: 0, medium: 0, low: 0 };
-    suggestions.forEach(s => { if (counts[s.confidence] !== undefined) counts[s.confidence]++; });
+    const counts = { all: pending.length, high: 0, medium: 0, low: 0 };
+    pending.forEach(s => { if (counts[s.confidence] !== undefined) counts[s.confidence]++; });
     ['all', 'high', 'medium', 'low'].forEach(k => {
-      const el = document.getElementById(`ll-sug-count-${k}`);
-      if (el) el.textContent = `(${counts[k]})`;
+      const el = document.getElementById('ll-sug-count-' + k);
+      if (el) el.textContent = '(' + counts[k] + ')';
     });
 
-    // Update active filter button
     document.querySelectorAll('.ll-import-filter').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.filter === filter);
     });
 
-    const filtered = filter === 'all' ? suggestions : suggestions.filter(s => s.confidence === filter);
-
-    if (filtered.length === 0) {
-      container.innerHTML = '<p class="ll-text-sm ll-text-muted">No suggestions match this filter.</p>';
-      return;
-    }
+    // Filter pending by confidence
+    let filtered = filter === 'all' ? pending : pending.filter(s => s.confidence === filter);
+    // Append accepted/rejected at end if not hidden
+    if (!hideAccepted) filtered = [...filtered, ...accepted, ...rejected];
 
     const confidenceBadge = (c) => {
       const cls = c === 'high' ? 'll-confidence-high' : c === 'medium' ? 'll-confidence-medium' : 'll-confidence-low';
       const bg = c === 'high' ? 'rgba(13,148,136,0.1)' : c === 'medium' ? 'rgba(245,158,11,0.1)' : 'rgba(220,38,38,0.1)';
-      return `<span class="ll-badge ${cls}" style="background:${bg};">${c}</span>`;
+      return '<span class="ll-badge ' + cls + '" style="background:' + bg + ';">' + c + '</span>';
     };
 
     const formatValue = (v) => {
@@ -4973,30 +4976,38 @@ class LLApp {
       return String(v);
     };
 
-    container.innerHTML = filtered.map(s => {
-      const accepted = s.status === 'accepted';
-      const rejected = s.status === 'rejected';
-      return `
-        <div class="ll-suggestion-card ${accepted ? 'accepted' : ''}" data-suggestion-id="${s.id}">
-          <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:0.375rem;">
-            <div>
-              <span class="ll-text-xs ll-text-muted">${this._esc(s.section_id)}</span>
-              <span class="ll-text-sm" style="font-weight:600; margin-left:0.25rem;">${this._esc(s.question_key)}</span>
-            </div>
-            ${confidenceBadge(s.confidence)}
-          </div>
-          <div class="ll-text-sm" style="margin-bottom:0.375rem; font-weight:500;">${this._esc(formatValue(s.suggested_value))}</div>
-          ${s.source_excerpt ? `<div class="ll-text-xs ll-text-muted" style="margin-bottom:0.5rem; font-style:italic;">"${this._esc(s.source_excerpt)}"</div>` : ''}
-          <div class="ll-flex ll-gap-2">
-            ${accepted ? '<span class="ll-badge ll-badge-green">Accepted</span>' :
-              rejected ? '<span class="ll-badge ll-badge-red">Rejected</span>' : `
-              <button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._acceptImportSuggestion('${s.id}')">Accept</button>
-              <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._rejectImportSuggestion('${s.id}')">Reject</button>
-            `}
-          </div>
-        </div>
-      `;
+    let html = '<div style="margin-bottom:0.75rem;"><label class="ll-flex ll-items-center ll-gap-2" style="font-size:0.75rem; cursor:pointer;"><input type="checkbox" ' + (hideAccepted ? 'checked' : '') + ' onchange="llApp._toggleHideAccepted(this.checked)" /> Hide accepted (' + accepted.length + ')</label></div>';
+
+    if (filtered.length === 0) {
+      html += '<p class="ll-text-sm ll-text-muted">No pending suggestions. ' + (accepted.length > 0 ? 'Uncheck "Hide accepted" to see accepted answers.' : '') + '</p>';
+      container.innerHTML = html;
+      return;
+    }
+
+    html += filtered.map(s => {
+      const isAccepted = s.status === 'accepted';
+      const isDiscarded = s.status === 'rejected';
+      return '<div class="ll-suggestion-card ' + (isAccepted ? 'accepted' : '') + '" data-suggestion-id="' + s.id + '">' +
+        '<div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:0.375rem;">' +
+          '<div><span class="ll-text-xs ll-text-muted">' + this._esc(s.section_id) + '</span> <span class="ll-text-sm" style="font-weight:600;">' + this._esc(s.question_key) + '</span></div>' +
+          confidenceBadge(s.confidence) +
+        '</div>' +
+        '<div class="ll-text-sm" style="margin-bottom:0.375rem; font-weight:500;">' + this._esc(formatValue(s.suggested_value)) + '</div>' +
+        (s.source_excerpt ? '<div class="ll-text-xs ll-text-muted" style="margin-bottom:0.5rem; font-style:italic;">"' + this._esc(s.source_excerpt) + '"</div>' : '') +
+        '<div class="ll-flex ll-gap-2">' +
+          (isAccepted ? '<span class="ll-badge ll-badge-green">Accepted</span>' :
+           isDiscarded ? '<span class="ll-badge ll-badge-red">Discarded</span>' :
+           '<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._acceptImportSuggestion(\'' + s.id + '\')">Accept</button>' +
+           '<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._discardImportSuggestion(\'' + s.id + '\')">Discard</button>') +
+        '</div></div>';
     }).join('');
+
+    container.innerHTML = html;
+  }
+
+  _toggleHideAccepted(hide) {
+    this._hideAcceptedSuggestions = hide;
+    this._renderSuggestions();
   }
 
   _filterSuggestions(filter) {
@@ -5018,7 +5029,7 @@ class LLApp {
     }
   }
 
-  async _rejectImportSuggestion(suggestionId) {
+  async _discardImportSuggestion(suggestionId) {
     const suggestion = (this._importSuggestions || []).find(s => s.id === suggestionId);
     if (!suggestion) return;
     try {
