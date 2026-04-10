@@ -2669,6 +2669,7 @@ class LLApp {
             <div class="ll-flex ll-items-center ll-gap-2">
               <img src="lji-logo.png" alt="LJI" style="height:32px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
               <span style="font-size:1.25rem; font-weight:800; color:var(--ll-primary); letter-spacing:-0.03em; margin-left:0.375rem;">LoyaltyLift</span>
+              <span style="color:var(--ll-on-surface-variant); font-size:0.875rem; font-weight:500; margin-left:0.25rem;">/ ${this._esc(this.currentProject?.program_name || '')}</span>
             </div>
           </div>
           <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
@@ -4647,13 +4648,13 @@ class LLApp {
     this.currentPage = 'import';
 
     const client = window.llClient;
-    const { data: project } = await client.supabase
-      .from('projects')
-      .select('id, name')
-      .eq('id', projectId)
-      .single();
-
-    const projectName = project ? this._esc(project.name) : 'Project';
+    const cachedProj = this.currentProject?.id === projectId ? this.currentProject : null;
+    let projectName = cachedProj?.program_name || '';
+    if (!projectName) {
+      const { data: proj } = await client.supabase.from('projects').select('program_name').eq('id', projectId).single();
+      projectName = proj?.program_name || 'Project';
+    }
+    projectName = this._esc(projectName);
 
     this.container.innerHTML = `
       <div class="ll-header">
@@ -4662,7 +4663,7 @@ class LLApp {
             <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('project', { projectId: '${projectId}' })">&larr; Back</button>
             <img src="lji-logo.png" alt="LJI" style="height:28px;" />
             <span class="ll-h1" style="font-size:1.125rem;">Smart Import</span>
-            <span class="ll-text-xs ll-text-muted">${projectName}</span>
+            <span style="color:var(--ll-on-surface-variant); font-size:0.875rem; font-weight:500;">/ ${projectName}</span>
           </div>
         </div>
       </div>
