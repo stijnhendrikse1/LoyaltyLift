@@ -316,6 +316,9 @@
   display: flex; align-items: center; justify-content: center; z-index: 100;
   backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
   animation: ll-fade-in 0.15s ease;
+  font-family: var(--ll-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 @keyframes ll-fade-in { from { opacity: 0; } to { opacity: 1; } }
 .ll-confirm-box {
@@ -371,6 +374,8 @@
   position: fixed; right: 0; top: 0; bottom: 0; width: 480px;
   background: var(--ll-surface-lowest); overflow-y: auto;
   box-shadow: -8px 0 32px rgba(9,21,37,0.12); z-index: 61;
+  font-family: var(--ll-font);
+  -webkit-font-smoothing: antialiased;
   animation: ll-help-slide-in 0.3s ease;
 }
 @keyframes ll-help-slide-in {
