@@ -1529,13 +1529,18 @@ class LoyaltyLiftClient {
   }
 
   async acceptSuggestion(suggestion) {
-    // suggested_value is JSONB — Supabase returns it already parsed
-    // responses.value is also JSONB — pass it directly, Supabase handles the encoding
+    // suggested_value from JSONB may be double-quoted string like '"SkyMiles"'
+    // Unwrap: if it's a string that looks like a JSON-encoded string, parse it once
+    let val = suggestion.suggested_value;
+    if (typeof val === 'string' && val.startsWith('"') && val.endsWith('"')) {
+      try { val = JSON.parse(val); } catch {}
+    }
+    // responses.value is JSONB — pass the clean value, Supabase handles encoding
     await this.supabase.from('responses').upsert({
       project_id: suggestion.project_id,
       section_id: suggestion.section_id,
       question_key: suggestion.question_key,
-      value: suggestion.suggested_value,
+      value: val,
       responded_by: this._user.id,
     }, { onConflict: 'project_id,section_id,question_key' });
     // Mark suggestion as accepted
