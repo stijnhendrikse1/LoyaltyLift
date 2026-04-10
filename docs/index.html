@@ -3413,7 +3413,7 @@ class LLApp {
             <div class="ll-flex ll-flex-col ll-gap-1" id="ll-admin-nav">
               <button class="ll-nav-item ${this._adminTab === 'users' ? 'active' : ''}" onclick="llApp._switchAdminTab('users')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Users</button>
               <button class="ll-nav-item ${this._adminTab === 'projects' ? 'active' : ''}" onclick="llApp._switchAdminTab('projects')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Projects</button>
-              <button class="ll-nav-item ${this._adminTab === 'templates' ? 'active' : ''}" onclick="llApp._switchAdminTab('templates')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Survey Templates</button>
+              <button class="ll-nav-item ${this._adminTab === 'templates' ? 'active' : ''}" onclick="llApp._switchAdminTab('templates')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Default Overrides</button>
               <button class="ll-nav-item ${this._adminTab === 'template_editor' ? 'active' : ''}" onclick="llApp._switchAdminTab('template_editor')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Template Editor</button>
               <button class="ll-nav-item ${this._adminTab === 'feedback' ? 'active' : ''}" onclick="llApp._switchAdminTab('feedback')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Feedback</button>
               <button class="ll-nav-item ${this._adminTab === 'ai_prompts' ? 'active' : ''}" onclick="llApp._switchAdminTab('ai_prompts')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">AI Prompts</button>
@@ -3596,7 +3596,8 @@ class LLApp {
     const sectionNames = this._getSectionNames();
 
     content.innerHTML = `
-      <h2 class="ll-h2">Survey Templates (${sectionIds.length} sections)</h2>
+      <h2 class="ll-h2">Default Template Overrides</h2>
+      <p class="ll-text-sm ll-text-muted" style="margin-bottom:1rem;">Toggle required/optional and set default values for questions in the default template. These changes apply to all projects using the default template.</p>
       <div class="ll-flex ll-flex-col ll-gap-3" id="ll-admin-templates">
         ${sectionIds.map(sid => {
           const section = templates[sid];
@@ -4406,7 +4407,7 @@ class LLApp {
             <ul>
               <li><strong>Users</strong> &mdash; View all registered users, change roles via dropdown, delete users (superadmins are protected). Shows superadmin badge where applicable.</li>
               <li><strong>Projects</strong> &mdash; View all projects with progress stats, create new projects, delete projects with confirmation.</li>
-              <li><strong>Survey Templates</strong> &mdash; Expand each section to see its questions. Toggle required/optional per question, set default values, save changes per section. These overrides apply to all form loads.</li>
+              <li><strong>Default Overrides</strong> &mdash; Quick toggles for the default template: mark questions as required/optional and set default values. Changes apply to all projects using the default template.</li>
               <li><strong>Template Editor</strong> &mdash; Create custom survey templates that start as a copy of the default. Edit section names, descriptions, phases. Add/remove/reorder sections and questions. Change question types, required status, help text, placeholders, options for dropdowns. Custom templates can be selected when creating new projects. Supports <strong>custom phases</strong> &mdash; create, rename, reorder, and delete phases so templates are not limited to the default Discovery/Design/Launch structure.</li>
               <li><strong>Feedback</strong> &mdash; View all user feedback with filter buttons for status (New, In Progress, Resolved, Closed) and type (Suggestion, Review, Bug Report). Each item shows the message, submitter, date, star rating (for reviews), status dropdown, and admin notes field.</li>
             </ul>
