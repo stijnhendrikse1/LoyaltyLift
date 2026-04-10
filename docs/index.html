@@ -2046,11 +2046,15 @@ class LLApp {
   }
 
   _handleRoute() {
-    // Refresh session in background (don't block navigation)
-    window.llClient.supabase.auth.getSession().then(({ data }) => {
-      if (data?.session) { window.llClient._user = data.session.user; }
-      else if (!data?.session && this.currentPage !== 'login') { this._showLogin(); }
-    }).catch(() => {});
+    // Refresh session in background only if stale (>5 min since last check)
+    const now = Date.now();
+    if (!this._lastSessionCheck || now - this._lastSessionCheck > 300000) {
+      this._lastSessionCheck = now;
+      window.llClient.supabase.auth.getSession().then(({ data }) => {
+        if (data?.session) { window.llClient._user = data.session.user; }
+        else if (!data?.session && this.currentPage !== 'login') { this._showLogin(); }
+      }).catch(() => {});
+    }
 
     const hash = window.location.hash.replace('#', '');
     const parts = hash.split('/');
@@ -2156,10 +2160,16 @@ class LLApp {
   // --- Dashboard ---
   async _showDashboard() {
     this.currentPage = 'dashboard';
-    this._showLoading();
+    // Render from cache immediately if available
+    const cached = window.llClient._cache['projects'];
+    if (cached) {
+      this._renderDashboard(cached.data);
+    } else {
+      this._showLoading();
+    }
     try {
       const projects = await window.llClient.listProjects();
-      this._renderDashboard(projects);
+      if (this.currentPage === 'dashboard') this._renderDashboard(projects);
       // Prefetch everything in background for instant navigation
       projects.forEach(p => {
         window.llClient.getProject(p.id);
@@ -3128,7 +3138,6 @@ class LLApp {
       this.navigate('dashboard');
       return;
     }
-    this._showLoading();
     this._adminTab = this._adminTab || 'users';
     this._adminOverrides = null;
 
