@@ -3017,8 +3017,12 @@ class LLApp {
       <div class="ll-header">
         <div class="ll-flex ll-justify-between ll-items-center">
           <div class="ll-flex ll-items-center ll-gap-3">
-            <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('dashboard')">Back</button>
-            <h1 class="ll-h1">Admin Panel</h1>
+            <img src="lji-logo.png" alt="LJI" style="height:36px; cursor:pointer;" onclick="llApp.navigate('dashboard')" />
+            <div style="margin-left:0.5rem;">
+              <div style="font-size:1.375rem; font-weight:800; color:var(--ll-primary); letter-spacing:-0.03em; line-height:1.1;">LoyaltyLift</div>
+              <div style="font-size:0.5rem; font-weight:600; color:var(--ll-on-surface-variant); text-transform:uppercase; letter-spacing:0.1em;">Discovery Assessment</div>
+            </div>
+            <span style="margin-left:0.5rem; font-size:0.875rem; font-weight:600; color:var(--ll-on-surface-variant);">/ Admin</span>
           </div>
           <div class="ll-flex ll-items-center ll-gap-3">
             <span class="ll-text-sm ll-text-muted">${window.llClient.profile?.full_name || window.llClient.user?.email}</span>
