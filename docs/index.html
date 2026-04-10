@@ -3132,14 +3132,24 @@ class LLApp {
               <div>
                 <label class="ll-label">Model</label>
                 <select class="ll-select" id="ll-aip-model-${p.id}">
-                  <option value="claude-sonnet-4-20250514" ${p.model === 'claude-sonnet-4-20250514' ? 'selected' : ''}>claude-sonnet-4-20250514</option>
-                  <option value="claude-opus-4-20250514" ${p.model === 'claude-opus-4-20250514' ? 'selected' : ''}>claude-opus-4-20250514</option>
-                  <option value="claude-haiku-4-5-20251001" ${p.model === 'claude-haiku-4-5-20251001' ? 'selected' : ''}>claude-haiku-4-5-20251001</option>
+                  <option value="claude-haiku-4-5-20251001" ${p.model === 'claude-haiku-4-5-20251001' ? 'selected' : ''}>Haiku 4.5 (Fast, low cost)</option>
+                  <option value="claude-sonnet-4-20250514" ${p.model === 'claude-sonnet-4-20250514' ? 'selected' : ''}>Sonnet 4 (Balanced)</option>
+                  <option value="claude-opus-4-20250514" ${p.model === 'claude-opus-4-20250514' ? 'selected' : ''}>Opus 4 (Most capable)</option>
                 </select>
               </div>
               <div>
+                <label class="ll-label">Analysis Depth</label>
+                <select class="ll-select" id="ll-aip-depth-${p.id}" onchange="llApp._setAnalysisDepth('${p.id}', this.value)">
+                  <option value="basic" ${(p.max_tokens || 4096) <= 2048 ? 'selected' : ''}>Basic (faster, key facts only)</option>
+                  <option value="medium" ${(p.max_tokens || 4096) > 2048 && (p.max_tokens || 4096) <= 4096 ? 'selected' : ''}>Medium (balanced)</option>
+                  <option value="deep" ${(p.max_tokens || 4096) > 4096 ? 'selected' : ''}>Deep (thorough, slower)</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-bottom:0.5rem;">
                 <label class="ll-label">Max Tokens</label>
-                <input class="ll-input" type="number" id="ll-aip-maxtokens-${p.id}" value="${p.max_tokens || 4096}" min="1" max="100000" />
+                <input class="ll-input" type="number" id="ll-aip-maxtokens-${p.id}" value="${p.max_tokens || 4096}" min="256" max="100000" style="width:160px;" />
+                <span class="ll-text-xs ll-text-muted" style="margin-left:0.5rem;">Adjusts automatically with depth, or set manually</span>
               </div>
             </div>
             <div style="margin-bottom:1rem;">
@@ -3214,6 +3224,12 @@ class LLApp {
       console.error('Delete prompt error:', err);
       llToast.error('Failed to delete prompt.');
     }
+  }
+
+  _setAnalysisDepth(promptId, depth) {
+    const tokenMap = { basic: 1024, medium: 4096, deep: 16384 };
+    const el = document.getElementById('ll-aip-maxtokens-' + promptId);
+    if (el) el.value = tokenMap[depth] || 4096;
   }
 
   async _saveAIPrompt(id, quiet) {
