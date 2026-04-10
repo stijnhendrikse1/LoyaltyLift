@@ -1463,10 +1463,27 @@ class LoyaltyLiftClient {
     return data;
   }
 
+  async addClientUrl(projectId, url) {
+    const hostname = new URL(url).hostname;
+    const { data, error } = await this.supabase
+      .from('client_uploads')
+      .insert({
+        project_id: projectId,
+        file_name: hostname,
+        source_type: 'url',
+        source_url: url,
+        uploaded_by: this._user.id,
+      })
+      .select('id, file_name, status, source_type, source_url')
+      .single();
+    if (error) throw error;
+    return data;
+  }
+
   async getClientUploads(projectId) {
     const { data, error } = await this.supabase
       .from('client_uploads')
-      .select('id, file_name, storage_path, mime_type, file_size, status, extracted_text, extraction_result, created_at')
+      .select('id, file_name, storage_path, mime_type, file_size, status, source_type, source_url, extracted_text, extraction_result, created_at')
       .eq('project_id', projectId)
       .order('created_at', { ascending: false });
     if (error) throw error;
@@ -4556,6 +4573,13 @@ class LLApp {
                 <p class="ll-text-xs ll-text-muted">Accepted: PDF, XLSX, CSV, DOCX, TXT</p>
               </div>
               <input type="file" id="ll-import-file-input" multiple accept=".pdf,.xlsx,.csv,.docx,.txt" style="display:none;" />
+              <div style="margin-top:1rem;">
+                <label class="ll-label">Or add a URL to scan</label>
+                <div class="ll-flex ll-gap-2">
+                  <input type="url" class="ll-input" id="ll-import-url" placeholder="https://example.com/loyalty-program-details" style="flex:1;" />
+                  <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._addImportUrl('${projectId}')">Add URL</button>
+                </div>
+              </div>
             </div>
 
             <div class="ll-card">
@@ -4628,6 +4652,24 @@ class LLApp {
     }
   }
 
+  async _addImportUrl(projectId) {
+    const input = document.getElementById('ll-import-url');
+    const url = input?.value?.trim();
+    if (!url) { llToast.warning('Please enter a URL.'); return; }
+    try { new URL(url); } catch { llToast.warning('Please enter a valid URL.'); return; }
+    try {
+      const upload = await window.llClient.addClientUrl(projectId, url);
+      this._importUploads = this._importUploads || [];
+      this._importUploads.unshift(upload);
+      this._renderImportFiles();
+      input.value = '';
+      llToast.success('URL added.');
+    } catch (err) {
+      console.error('Add URL error:', err);
+      llToast.error('Failed to add URL.');
+    }
+  }
+
   async _handleImportFiles(fileList) {
     const allowed = ['.pdf', '.xlsx', '.csv', '.docx', '.txt'];
     const projectId = this._importProjectId;
@@ -4673,19 +4715,25 @@ class LLApp {
       return (bytes / 1048576).toFixed(1) + ' MB';
     };
 
-    container.innerHTML = uploads.map(u => `
-      <div class="ll-upload-item" data-upload-id="${u.id}">
-        <div>
-          <span class="ll-text-sm" style="font-weight:500;">${this._esc(u.file_name)}</span>
-          <span class="ll-text-xs ll-text-muted" style="margin-left:0.5rem;">${formatSize(u.file_size)}</span>
+    container.innerHTML = uploads.map(u => {
+      const isUrl = u.source_type === 'url';
+      const icon = isUrl ? '&#127760;' : '&#128196;';
+      const label = isUrl ? u.source_url : u.file_name;
+      const size = isUrl ? '' : formatSize(u.file_size);
+      return `
+        <div class="ll-upload-item" data-upload-id="${u.id}">
+          <div style="min-width:0; flex:1;">
+            <span class="ll-text-sm" style="font-weight:500;">${icon} ${this._esc(label)}</span>
+            ${size ? `<span class="ll-text-xs ll-text-muted" style="margin-left:0.5rem;">${size}</span>` : ''}
+          </div>
+          <div class="ll-flex ll-gap-2 ll-items-center" style="flex-shrink:0;">
+            ${statusBadge(u.status || 'uploaded')}
+            ${(u.status === 'completed' || u.status === 'failed') ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" style="padding:0.25rem 0.5rem;" onclick="llApp._showExtractedText('${u.id}')">View Text</button>` : ''}
+            <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error); padding:0.25rem 0.5rem;" onclick="llApp._deleteImportFile('${u.id}', '${u.storage_path || ''}')">&times;</button>
+          </div>
         </div>
-        <div class="ll-flex ll-gap-2 ll-items-center">
-          ${statusBadge(u.status || 'uploaded')}
-          ${(u.status === 'completed' || u.status === 'failed') ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" style="padding:0.25rem 0.5rem;" onclick="llApp._showExtractedText('${u.id}')" title="View Extracted Text">View Text</button>` : ''}
-          <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error); padding:0.25rem 0.5rem;" onclick="llApp._deleteImportFile('${u.id}', '${u.storage_path}')" title="Delete">&times;</button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   async _deleteImportFile(uploadId, storagePath) {
