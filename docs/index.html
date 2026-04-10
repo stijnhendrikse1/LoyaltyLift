@@ -1940,7 +1940,8 @@ class LLApp {
       document.getElementById('ll-login-sent').style.display = 'block';
     } catch (err) {
       console.error('Login error:', err);
-      llToast.error('Failed to send magic link. Please try again.');
+      const msg = err.message?.includes('rate') ? 'Email rate limit reached. Please wait an hour and try again.' : 'Failed to send magic link. Please try again.';
+      llToast.error(msg);
       btn.disabled = false;
       btn.textContent = 'Send Magic Link';
     }
