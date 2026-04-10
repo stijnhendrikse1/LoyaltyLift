@@ -2724,18 +2724,20 @@ class LLApp {
 
     this._feedbackItems = items;
     this._feedbackProfiles = profiles;
-    this._feedbackFilterStatus = this._feedbackFilterStatus || 'all';
+    this._feedbackFilterStatus = this._feedbackFilterStatus || 'active';
     this._feedbackFilterType = this._feedbackFilterType || 'all';
 
-    const statusCounts = { all: items.length, new: 0, in_progress: 0, resolved: 0, closed: 0 };
+    const activeItems = items.filter(fb => fb.status !== 'closed');
+    const statusCounts = { active: activeItems.length, new: 0, in_progress: 0, resolved: 0, closed: 0 };
     items.forEach(fb => { statusCounts[fb.status] = (statusCounts[fb.status] || 0) + 1; });
     const typeCounts = { all: items.length, suggestion: 0, review: 0, bug: 0 };
     items.forEach(fb => { typeCounts[fb.type] = (typeCounts[fb.type] || 0) + 1; });
 
-    const filtered = items.filter(fb =>
-      (this._feedbackFilterStatus === 'all' || fb.status === this._feedbackFilterStatus) &&
-      (this._feedbackFilterType === 'all' || fb.type === this._feedbackFilterType)
-    );
+    const filtered = items.filter(fb => {
+      const statusMatch = this._feedbackFilterStatus === 'active' ? fb.status !== 'closed' : this._feedbackFilterStatus === 'all' ? true : fb.status === this._feedbackFilterStatus;
+      const typeMatch = this._feedbackFilterType === 'all' || fb.type === this._feedbackFilterType;
+      return statusMatch && typeMatch;
+    });
 
     const filterBtn = (label, value, field, count) => {
       const isActive = this['_feedbackFilter' + (field === 'status' ? 'Status' : 'Type')] === value;
@@ -2743,15 +2745,19 @@ class LLApp {
     };
 
     content.innerHTML = `
-      <h2 class="ll-h2">Feedback</h2>
+      <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1rem;">
+        <h2 class="ll-h2" style="margin:0;">Feedback</h2>
+        <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._exportFeedback()">Export All</button>
+      </div>
       <div style="margin-bottom:1rem;">
         <div class="ll-label" style="margin-bottom:0.375rem;">Status</div>
         <div class="ll-flex ll-gap-2" style="flex-wrap:wrap;">
-          ${filterBtn('All', 'all', 'status', statusCounts.all)}
+          ${filterBtn('Active', 'active', 'status', statusCounts.active)}
           ${filterBtn('New', 'new', 'status', statusCounts.new)}
           ${filterBtn('In Progress', 'in_progress', 'status', statusCounts.in_progress)}
           ${filterBtn('Resolved', 'resolved', 'status', statusCounts.resolved)}
           ${filterBtn('Closed', 'closed', 'status', statusCounts.closed)}
+          ${filterBtn('All', 'all', 'status', items.length)}
         </div>
       </div>
       <div style="margin-bottom:1.25rem;">
@@ -2812,6 +2818,40 @@ class LLApp {
   async _updateFeedbackNotes(id, notes) {
     const { error } = await window.llClient.supabase.from('feedback').update({ admin_notes: notes }).eq('id', id);
     if (error) { console.error('Update feedback notes:', error); return; }
+  }
+
+  async _exportFeedback() {
+    llToast.info('Generating export...');
+    try {
+      const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
+      const { data } = await window.llClient.supabase
+        .from('feedback')
+        .select('id, user_id, type, rating, message, detail, status, admin_notes, created_at')
+        .order('created_at', { ascending: false });
+      const profiles = await window.llClient.listAllProfiles();
+      const rows = (data || []).map(fb => {
+        const p = profiles.find(pr => pr.id === fb.user_id);
+        return {
+          Date: new Date(fb.created_at).toLocaleDateString(),
+          Type: fb.type,
+          Status: fb.status,
+          Rating: fb.rating || '',
+          Message: fb.message,
+          Detail: fb.detail || '',
+          'Admin Notes': fb.admin_notes || '',
+          'Submitted By': p?.full_name || p?.email || 'Unknown',
+          Email: p?.email || '',
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Feedback');
+      XLSX.writeFile(wb, 'loyaltylift_feedback_export.xlsx');
+      llToast.success('Feedback exported.');
+    } catch (err) {
+      console.error('Export feedback error:', err);
+      llToast.error('Failed to export feedback.');
+    }
   }
 
   // --- Manage Members Modal ---
