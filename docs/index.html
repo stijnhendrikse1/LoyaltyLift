@@ -1525,16 +1525,13 @@ class LoyaltyLiftClient {
   }
 
   async acceptSuggestion(suggestion) {
-    // Save to responses - value needs to be JSON-encoded string for the form engine
-    // suggested_value from DB is already the raw value, wrap it once for storage
-    const val = typeof suggestion.suggested_value === 'string'
-      ? JSON.stringify(suggestion.suggested_value)
-      : JSON.stringify(String(suggestion.suggested_value));
+    // suggested_value is JSONB — Supabase returns it already parsed
+    // responses.value is also JSONB — pass it directly, Supabase handles the encoding
     await this.supabase.from('responses').upsert({
       project_id: suggestion.project_id,
       section_id: suggestion.section_id,
       question_key: suggestion.question_key,
-      value: val,
+      value: suggestion.suggested_value,
       responded_by: this._user.id,
     }, { onConflict: 'project_id,section_id,question_key' });
     // Mark suggestion as accepted
