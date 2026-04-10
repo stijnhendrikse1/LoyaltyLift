@@ -4690,6 +4690,7 @@ class LLApp {
                   <button class="ll-btn ll-btn-secondary ll-btn-sm ll-import-filter" data-filter="low" onclick="llApp._filterSuggestions('low')">Low <span id="ll-sug-count-low"></span></button>
                 </div>
                 <button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._acceptAllHighConfidence()" id="ll-import-accept-all-btn">Accept All High Confidence</button>
+                <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error);" onclick="llApp._discardAllShown()">Discard All Shown</button>
               </div>
               <div id="ll-import-suggestions">
                 <p class="ll-text-sm ll-text-muted">Upload and analyze files to see suggestions.</p>
@@ -5062,11 +5063,9 @@ class LLApp {
 
   async _acceptAllHighConfidence() {
     const projectId = this._importProjectId;
-    const ok = await llConfirm('Accept all high-confidence suggestions? This will save them as responses.');
-    if (!ok) return;
+    if (!await llConfirm('Accept all high-confidence suggestions? This will save them as responses.')) return;
     try {
       const count = await window.llClient.acceptAllHighConfidence(projectId);
-      // Refresh local state
       const suggestions = await window.llClient.getSuggestedResponses(projectId);
       this._importSuggestions = suggestions;
       this._renderSuggestions();
@@ -5074,6 +5073,26 @@ class LLApp {
     } catch (err) {
       console.error('Accept all error:', err);
       llToast.error('Failed to accept suggestions.');
+    }
+  }
+
+  async _discardAllShown() {
+    const filter = this._sugFilter || 'all';
+    const pending = (this._importSuggestions || []).filter(s => s.status === 'pending');
+    const toDiscard = filter === 'all' ? pending : pending.filter(s => s.confidence === filter);
+    if (toDiscard.length === 0) { llToast.info('No pending suggestions to discard.'); return; }
+    if (!await llConfirm('Discard ' + toDiscard.length + ' shown suggestion(s)? This cannot be undone.')) return;
+    try {
+      for (const s of toDiscard) {
+        await window.llClient.rejectSuggestion(s.id);
+      }
+      const suggestions = await window.llClient.getSuggestedResponses(this._importProjectId);
+      this._importSuggestions = suggestions;
+      this._renderSuggestions();
+      llToast.success('Discarded ' + toDiscard.length + ' suggestion(s).');
+    } catch (err) {
+      console.error('Discard all error:', err);
+      llToast.error('Failed to discard suggestions.');
     }
   }
 
