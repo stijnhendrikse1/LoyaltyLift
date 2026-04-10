@@ -550,12 +550,14 @@
 window.llSectionTemplates = {};
 window._loadTemplatesPromise = null;
 window._loadTemplates = function() {
-  if (window._loadTemplatesPromise) return window._loadTemplatesPromise;
   if (Object.keys(window.llSectionTemplates).length > 0) return Promise.resolve();
-  window._loadTemplatesPromise = fetch('templates.json')
-    .then(r => r.json())
-    .then(data => { window.llSectionTemplates = data; })
-    .catch(err => { console.error('Failed to load templates:', err); });
+  if (window._loadTemplatesPromise) return window._loadTemplatesPromise;
+  const baseUrl = document.querySelector('script[src*="supabase"]')?.src ? '' : '';
+  const url = new URL('templates.json', window.location.href.split('#')[0]).href;
+  window._loadTemplatesPromise = fetch(url)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(data => { window.llSectionTemplates = data; console.log('Templates loaded:', Object.keys(data).length, 'sections'); })
+    .catch(err => { console.error('Failed to load templates:', err); window._loadTemplatesPromise = null; });
   return window._loadTemplatesPromise;
 };
 window._loadTemplates();
@@ -1826,7 +1828,9 @@ class LLApp {
 
     window.addEventListener('ll-auth-change', (e) => this._onAuthChange(e.detail));
     window.addEventListener('ll-navigate', (e) => this.navigate(e.detail.page, e.detail));
-    window.addEventListener('hashchange', () => this._handleRoute());
+    window.addEventListener('hashchange', () => {
+      try { this._handleRoute(); } catch (err) { console.error('Route error:', err); }
+    });
   }
 
   async init() {
@@ -1854,24 +1858,29 @@ class LLApp {
       return;
     }
 
+    const run = (fn) => fn.catch(err => {
+      console.error('Navigation error:', err);
+      this.container.innerHTML = `<div class="ll-container"><div class="ll-card" style="padding:2rem;"><p style="color:var(--ll-error); font-weight:600;">Something went wrong</p><p class="ll-text-sm ll-text-muted" style="margin-top:0.5rem;">${err.message || 'Unknown error'}</p><button class="ll-btn ll-btn-primary ll-btn-sm" style="margin-top:1rem;" onclick="location.reload()">Reload</button></div></div>`;
+    });
+
     switch (page) {
       case 'dashboard':
-        this._showDashboard();
+        run(this._showDashboard());
         break;
       case 'project':
-        this._showProject(parts[1]);
+        run(this._showProject(parts[1]));
         break;
       case 'section':
-        this._showSection(parts[1], parts[2]);
+        run(this._showSection(parts[1], parts[2]));
         break;
       case 'new-project':
-        this._showNewProject();
+        run(this._showNewProject());
         break;
       case 'admin':
-        this._showAdmin();
+        run(this._showAdmin());
         break;
       default:
-        this._showDashboard();
+        run(this._showDashboard());
     }
   }
 
