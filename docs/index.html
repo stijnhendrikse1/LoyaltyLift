@@ -594,7 +594,7 @@
 </head>
 <body>
   <div id="ll-app" class="ll-app"></div>
-  <footer style="text-align:center; padding:1.5rem; font-size:0.625rem; color:#44474c; text-transform:uppercase; letter-spacing:0.08em; font-family:'Inter',sans-serif;">LOYALTYLIFT DISCOVERY V0.2 | &copy; 2026 T2D3 LLC</footer>
+  <footer style="text-align:center; padding:1.5rem; font-size:0.625rem; color:#44474c; text-transform:uppercase; letter-spacing:0.08em; font-family:'Inter',sans-serif;">LOYALTYLIFT DISCOVERY V0.3 | &copy; 2026 T2D3 LLC</footer>
   <button class="ll-feedback-btn" onclick="llApp._showFeedback()">&#9993; Feedback</button>
 
   <!-- Supabase JS SDK -->
@@ -2033,11 +2033,19 @@ const llToast = {
       document.body.appendChild(this._container);
     }
   },
+  _esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; },
   show(message, type = 'info', duration = 4000) {
     this._ensure();
     const el = document.createElement('div');
     el.className = `ll-toast ll-toast-${type}`;
-    el.innerHTML = `<span>${message.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</span><button class="ll-toast-close" onclick="this.parentElement.classList.add('ll-toast-out'); setTimeout(() => this.parentElement.remove(), 200)">&times;</button>`;
+    const span = document.createElement('span');
+    span.textContent = message;
+    const btn = document.createElement('button');
+    btn.className = 'll-toast-close';
+    btn.innerHTML = '&times;';
+    btn.onclick = () => { el.classList.add('ll-toast-out'); setTimeout(() => el.remove(), 200); };
+    el.appendChild(span);
+    el.appendChild(btn);
     this._container.appendChild(el);
     if (duration > 0) {
       setTimeout(() => { el.classList.add('ll-toast-out'); setTimeout(() => el.remove(), 200); }, duration);
@@ -2054,9 +2062,11 @@ function llConfirm(message) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.className = 'll-confirm-overlay';
+    const safeMsg = document.createElement('div');
+    safeMsg.textContent = message;
     overlay.innerHTML = `
       <div class="ll-confirm-box">
-        <div class="ll-confirm-msg">${message.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</div>
+        <div class="ll-confirm-msg"></div>
         <div class="ll-confirm-actions">
           <button class="ll-btn ll-btn-secondary" id="ll-confirm-no">Cancel</button>
           <button class="ll-btn ll-btn-primary" id="ll-confirm-yes">Confirm</button>
@@ -2064,6 +2074,7 @@ function llConfirm(message) {
       </div>
     `;
     document.body.appendChild(overlay);
+    overlay.querySelector('.ll-confirm-msg').textContent = message;
     overlay.querySelector('#ll-confirm-yes').onclick = () => { overlay.remove(); resolve(true); };
     overlay.querySelector('#ll-confirm-no').onclick = () => { overlay.remove(); resolve(false); };
     overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); resolve(false); } });
@@ -3123,8 +3134,7 @@ class LLApp {
                 <label class="ll-label">Description</label>
                 <input class="ll-input" id="ll-aip-desc-${p.id}" value="${this._esc(p.description || '')}" ${isDefault ? 'disabled' : ''} />
               </div>
-            </div>`;
-        }).join('')}
+            </div>
             <div class="ll-grid-2" style="gap:1rem; margin-bottom:1rem;">
               <div>
                 <label class="ll-label">Model</label>
@@ -3150,7 +3160,7 @@ class LLApp {
             </div>
             <div class="ll-flex ll-justify-between ll-items-center">
               <span class="ll-text-xs ll-text-muted">ID: ${p.id}</span>
-              ${isDefault ? '<span class="ll-text-xs ll-text-muted">Default prompt — duplicate to customize</span>' : `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._saveAIPrompt('${p.id}')">Save</button>`}
+              ${isDefault ? '<span class="ll-text-xs ll-text-muted">Default prompt -- duplicate to customize</span>' : '<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._saveAIPrompt(\'' + p.id + '\')">Save</button>'}
             </div>
           </div>
         `; }).join('')}
