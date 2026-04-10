@@ -1536,17 +1536,21 @@ class LoyaltyLiftClient {
       try { val = JSON.parse(val); } catch {}
     }
     // responses.value is JSONB — pass the clean value, Supabase handles encoding
-    await this.supabase.from('responses').upsert({
+    const { error: upsertErr } = await this.supabase.from('responses').upsert({
       project_id: suggestion.project_id,
       section_id: suggestion.section_id,
       question_key: suggestion.question_key,
       value: val,
       responded_by: this._user.id,
     }, { onConflict: 'project_id,section_id,question_key' });
+    if (upsertErr) { console.error('acceptSuggestion upsert error:', upsertErr); throw upsertErr; }
+    // Invalidate section cache so form shows updated data
+    this._invalidate('section_' + suggestion.project_id);
     // Mark suggestion as accepted
-    await this.supabase.from('suggested_responses')
+    const { error: updateErr } = await this.supabase.from('suggested_responses')
       .update({ status: 'accepted' })
       .eq('id', suggestion.id);
+    if (updateErr) console.error('acceptSuggestion update error:', updateErr);
   }
 
   async rejectSuggestion(id) {
