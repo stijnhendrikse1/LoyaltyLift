@@ -527,6 +527,33 @@
 .ll-tpl-collapsible-content.open { display: block; }
 .ll-tpl-card-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
 
+/* Visibility customization */
+.ll-hidden-item { opacity: 0.4; text-decoration: line-through; }
+.ll-vis-toggle {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.15rem 0.5rem; font-size: 0.625rem; font-weight: 600;
+  border-radius: var(--ll-radius-sm); border: 1px solid var(--ll-outline);
+  cursor: pointer; transition: all 0.15s; font-family: var(--ll-font);
+  text-transform: uppercase; letter-spacing: 0.04em; background: var(--ll-surface-low);
+  color: var(--ll-on-surface-variant);
+}
+.ll-vis-toggle:hover { background: var(--ll-surface-high); }
+.ll-vis-toggle.ll-vis-hidden { background: rgba(220,38,38,0.08); color: var(--ll-error); border-color: rgba(220,38,38,0.2); }
+.ll-vis-toggle.ll-vis-visible { background: rgba(13,148,136,0.08); color: var(--ll-teal); border-color: rgba(13,148,136,0.2); }
+.ll-vis-modal-list { list-style: none; padding: 0; margin: 0; }
+.ll-vis-modal-list li {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.625rem 0; border-bottom: 1px solid var(--ll-surface-high);
+  font-size: 0.875rem;
+}
+.ll-vis-modal-list li:last-child { border-bottom: none; }
+.ll-vis-modal-list li.ll-hidden-item span { text-decoration: line-through; opacity: 0.5; }
+.ll-customize-banner {
+  background: linear-gradient(135deg, var(--ll-secondary), #60a5fa);
+  color: white; padding: 0.5rem 1rem; text-align: center;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .ll-grid-2, .ll-grid-3 { grid-template-columns: 1fr; }
@@ -1211,6 +1238,44 @@ class LoyaltyLiftClient {
     if (error) { console.error('deleteUser:', error); throw error; }
   }
 
+  // --- Visibility Overrides ---
+  async getVisibilityOverrides(projectId) {
+    return this._cached('visibility_' + projectId, async () => {
+      const { data, error } = await this.supabase
+        .from('project_visibility_overrides')
+        .select('id, project_id, section_id, question_key, hidden')
+        .eq('project_id', projectId);
+      if (error) { console.error('getVisibilityOverrides:', error); throw error; }
+      return data || [];
+    });
+  }
+
+  async setVisibilityOverride(projectId, sectionId, questionKey, hidden) {
+    if (!hidden) {
+      // Remove override (no override = visible)
+      const query = this.supabase
+        .from('project_visibility_overrides')
+        .delete()
+        .eq('project_id', projectId)
+        .eq('section_id', sectionId);
+      if (questionKey) {
+        query.eq('question_key', questionKey);
+      } else {
+        query.is('question_key', null);
+      }
+      const { error } = await query;
+      if (error) { console.error('deleteVisibilityOverride:', error); throw error; }
+    } else {
+      // Upsert override
+      const row = { project_id: projectId, section_id: sectionId, question_key: questionKey || null, hidden: true };
+      const { error } = await this.supabase
+        .from('project_visibility_overrides')
+        .upsert(row, { onConflict: 'project_id,section_id,question_key' });
+      if (error) { console.error('setVisibilityOverride:', error); throw error; }
+    }
+    this._invalidate('visibility_' + projectId);
+  }
+
   async getSurveyOverrides() {
     return this._cached('survey_overrides', async () => {
       const { data, error } = await this.supabase
@@ -1825,6 +1890,7 @@ class LLApp {
     this.formEngine = null;
     this.currentPage = null;
     this.currentProject = null;
+    this._customizeMode = false;
 
     window.addEventListener('ll-auth-change', (e) => this._onAuthChange(e.detail));
     window.addEventListener('ll-navigate', (e) => this.navigate(e.detail.page, e.detail));
@@ -2146,7 +2212,7 @@ class LLApp {
     }
   }
 
-  _renderProject(project) {
+  async _renderProject(project) {
     const phaseLabels = { discovery: 'Discovery', design: 'Solution Design', launch: 'Launch Readiness' };
     const statusIcons = {
       not_started: { badge: 'll-badge-gray', label: 'Not Started' },
@@ -2170,12 +2236,23 @@ class LLApp {
       } catch (e) { /* use default names */ }
     }
 
+    // Fetch visibility overrides for this project
+    let visOverrides = [];
+    try {
+      visOverrides = await window.llClient.getVisibilityOverrides(project.id);
+    } catch (e) { console.error('Failed to load visibility overrides:', e); }
+
+    const isSectionHidden = (sectionId) => visOverrides.some(v => v.section_id === sectionId && !v.question_key && v.hidden);
+
     // Group sections by phase
     const phases = ['discovery', 'design', 'launch'];
     const grouped = {};
     phases.forEach(ph => { grouped[ph] = project.sections.filter(s => s.phase === ph); });
 
+    const customizeMode = this._customizeMode;
+
     this.container.innerHTML = `
+      ${customizeMode ? '<div class="ll-customize-banner">Customization Mode &mdash; Toggle visibility for sections and questions. Click a section to manage question visibility.</div>' : ''}
       <div class="ll-header">
         <div class="ll-flex ll-justify-between ll-items-center">
           <div class="ll-flex ll-items-center ll-gap-3">
@@ -2190,6 +2267,8 @@ class LLApp {
             ${window.llClient.isLjiAdmin ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._showManageMembers('${project.id}')">Manage Members</button>` : ''}
             ${window.llClient.isLjiMember && project.phase !== 'launch' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._advancePhase('${project.id}')">Advance Phase</button>` : ''}
             ${window.llClient.isLjiMember ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._exportProject('${project.id}')" title="Export to Excel">&#128228; Export</button>` : ''}
+            ${isLji && !customizeMode ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._toggleCustomizeMode('${project.id}')" title="Customize section/question visibility">Customize</button>` : ''}
+            ${customizeMode ? `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._toggleCustomizeMode('${project.id}')">Done Customizing</button>` : ''}
             <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
           </div>
         </div>
@@ -2206,25 +2285,34 @@ class LLApp {
 
         ${phases.map(ph => {
           const phaseSections = grouped[ph] || [];
-          const visible = phaseSections.filter(s => s.visible);
-          if (visible.length === 0 && ph !== project.phase) return '';
+          // In customization mode show all sections; otherwise only visible and non-hidden
+          const displaySections = customizeMode
+            ? phaseSections.filter(s => s.visible)
+            : phaseSections.filter(s => s.visible && !isSectionHidden(s.section_id));
+          if (displaySections.length === 0 && ph !== project.phase) return '';
           const isCurrentPhase = ph === project.phase;
           return `
             <div style="margin-bottom:2rem;">
               <h3 class="ll-h3" style="margin-bottom:0.75rem; ${!isCurrentPhase ? 'opacity:0.5;' : ''}">${phaseLabels[ph]}</h3>
               <div class="ll-flex ll-flex-col ll-gap-2">
-                ${visible.map(s => {
+                ${displaySections.map(s => {
                   const si = statusIcons[s.status] || statusIcons.not_started;
                   const name = sectionNames[s.section_id] || s.section_id;
-                  const clickable = isCurrentPhase || s.status !== 'not_started';
+                  const sHidden = isSectionHidden(s.section_id);
+                  const clickable = customizeMode || isCurrentPhase || s.status !== 'not_started';
+                  const clickAction = customizeMode
+                    ? `onclick="llApp._showQuestionVisibilityModal('${project.id}', '${s.section_id}')"`
+                    : (clickable ? `onclick="llApp.navigate('section', { projectId: '${project.id}', sectionId: '${s.section_id}' })"` : '');
                   return `
-                    <div class="ll-card ${clickable ? 'll-card-hover' : ''}" ${clickable ? `onclick="llApp.navigate('section', { projectId: '${project.id}', sectionId: '${s.section_id}' })"` : ''} style="${!isCurrentPhase ? 'opacity:0.6;' : ''}">
+                    <div class="ll-card ${clickable ? 'll-card-hover' : ''}" ${clickAction} style="${!isCurrentPhase && !customizeMode ? 'opacity:0.6;' : ''} ${sHidden && customizeMode ? 'opacity:0.4;' : ''}">
                       <div class="ll-flex ll-justify-between ll-items-center">
-                        <span class="ll-text-sm" style="font-weight:500;">${this._esc(name)}</span>
+                        <span class="ll-text-sm ${sHidden && customizeMode ? 'll-hidden-item' : ''}" style="font-weight:500;">${this._esc(name)}</span>
                         <div class="ll-flex ll-gap-2 ll-items-center">
+                          ${sHidden && customizeMode ? '<span class="ll-badge ll-badge-red">Hidden</span>' : ''}
                           <span class="ll-badge ${si.badge}">${si.label}</span>
-                          ${window.llClient.isLjiMember && s.status !== 'not_started' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" style="padding:0.15rem 0.4rem; font-size:0.75rem; min-width:auto;" onclick="event.stopPropagation(); llApp._exportSection('${project.id}', '${s.section_id}')" title="Export section">&#8681;</button>` : ''}
-                          ${window.llClient.isLjiMember && s.status === 'in_review' ? `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="event.stopPropagation(); llApp._approveSection('${project.id}', '${s.section_id}')">Approve</button>` : ''}
+                          ${customizeMode ? `<button class="ll-vis-toggle ${sHidden ? 'll-vis-hidden' : 'll-vis-visible'}" onclick="event.stopPropagation(); llApp._toggleSectionVisibility('${project.id}', '${s.section_id}', ${!sHidden})">${sHidden ? 'Show' : 'Hide'}</button>` : ''}
+                          ${!customizeMode && window.llClient.isLjiMember && s.status !== 'not_started' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" style="padding:0.15rem 0.4rem; font-size:0.75rem; min-width:auto;" onclick="event.stopPropagation(); llApp._exportSection('${project.id}', '${s.section_id}')" title="Export section">&#8681;</button>` : ''}
+                          ${!customizeMode && window.llClient.isLjiMember && s.status === 'in_review' ? `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="event.stopPropagation(); llApp._approveSection('${project.id}', '${s.section_id}')">Approve</button>` : ''}
                         </div>
                       </div>
                     </div>
@@ -2236,6 +2324,99 @@ class LLApp {
         }).join('')}
       </div>
     `;
+  }
+
+  // --- Visibility Customization ---
+  _toggleCustomizeMode(projectId) {
+    this._customizeMode = !this._customizeMode;
+    if (this.currentProject) this._renderProject(this.currentProject);
+  }
+
+  async _toggleSectionVisibility(projectId, sectionId, hide) {
+    try {
+      await window.llClient.setVisibilityOverride(projectId, sectionId, null, hide);
+      // Re-fetch and re-render
+      const project = this.currentProject || await window.llClient.getProject(projectId);
+      this._renderProject(project);
+    } catch (err) {
+      console.error('Toggle section visibility error:', err);
+      llToast.error('Failed to update visibility.');
+    }
+  }
+
+  async _showQuestionVisibilityModal(projectId, sectionId) {
+    // Load section config to get all questions
+    const sectionConfig = await this._loadSectionConfig(sectionId, projectId, true);
+    if (!sectionConfig) { llToast.error('Could not load section config.'); return; }
+
+    const visOverrides = await window.llClient.getVisibilityOverrides(projectId);
+    const hiddenKeys = new Set(
+      visOverrides.filter(v => v.section_id === sectionId && v.question_key && v.hidden).map(v => v.question_key)
+    );
+
+    const sectionNames = this._getSectionNames();
+    const sectionName = sectionNames[sectionId] || sectionConfig.name || sectionId;
+    const questions = sectionConfig.questions || [];
+
+    const typeBadge = (q) => {
+      const t = q.type || 'text';
+      return `<span class="ll-badge ll-badge-gray" style="font-size:0.5625rem;">${t}</span>`;
+    };
+
+    const overlay = document.createElement('div');
+    overlay.className = 'll-modal-overlay';
+    overlay.id = 'll-vis-modal-overlay';
+    overlay.innerHTML = `
+      <div class="ll-modal" style="max-width:600px; max-height:85vh;">
+        <h3 class="ll-h2">${this._esc(sectionName)} &mdash; Question Visibility</h3>
+        <p class="ll-text-sm ll-text-muted" style="margin-bottom:1rem;">Toggle visibility for individual questions in this section.</p>
+        <ul class="ll-vis-modal-list" id="ll-vis-q-list">
+          ${questions.map(q => {
+            const isHidden = hiddenKeys.has(q.key);
+            return `
+              <li class="${isHidden ? 'll-hidden-item' : ''}" data-qkey="${q.key}">
+                <div class="ll-flex ll-items-center ll-gap-2" style="flex:1; min-width:0;">
+                  <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${this._esc(q.label || q.key)}</span>
+                  ${typeBadge(q)}
+                </div>
+                <button class="ll-vis-toggle ${isHidden ? 'll-vis-hidden' : 'll-vis-visible'}" onclick="llApp._toggleQuestionVisibility('${projectId}', '${sectionId}', '${q.key}', ${!isHidden}, this)">${isHidden ? 'Show' : 'Hide'}</button>
+              </li>
+            `;
+          }).join('')}
+          ${questions.length === 0 ? '<li class="ll-text-sm ll-text-muted">No questions in this section.</li>' : ''}
+        </ul>
+        <div style="margin-top:1.25rem; text-align:right;">
+          <button class="ll-btn ll-btn-secondary" onclick="document.getElementById('ll-vis-modal-overlay').remove()">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  }
+
+  async _toggleQuestionVisibility(projectId, sectionId, questionKey, hide, btn) {
+    try {
+      await window.llClient.setVisibilityOverride(projectId, sectionId, questionKey, hide);
+      // Update the UI inline
+      const li = btn.closest('li');
+      if (hide) {
+        li.classList.add('ll-hidden-item');
+        btn.textContent = 'Show';
+        btn.classList.remove('ll-vis-visible');
+        btn.classList.add('ll-vis-hidden');
+        // Update onclick to toggle back
+        btn.setAttribute('onclick', `llApp._toggleQuestionVisibility('${projectId}', '${sectionId}', '${questionKey}', false, this)`);
+      } else {
+        li.classList.remove('ll-hidden-item');
+        btn.textContent = 'Hide';
+        btn.classList.remove('ll-vis-hidden');
+        btn.classList.add('ll-vis-visible');
+        btn.setAttribute('onclick', `llApp._toggleQuestionVisibility('${projectId}', '${sectionId}', '${questionKey}', true, this)`);
+      }
+    } catch (err) {
+      console.error('Toggle question visibility error:', err);
+      llToast.error('Failed to update question visibility.');
+    }
   }
 
   // --- Section Form ---
@@ -2277,7 +2458,9 @@ class LLApp {
     await this.formEngine.load(projectId, sectionId, sectionConfig, readOnly);
   }
 
-  async _loadSectionConfig(sectionId, projectId) {
+  async _loadSectionConfig(sectionId, projectId, skipVisibilityFilter) {
+    let config = null;
+
     // Check if the project uses a custom template
     if (projectId) {
       const project = this.currentProject || await window.llClient.getProject(projectId);
@@ -2286,7 +2469,7 @@ class LLApp {
           const tmpl = await window.llClient.getTemplate(project.template_id);
           const tmplSections = tmpl.template_data?.sections || {};
           if (tmplSections[sectionId]) {
-            return JSON.parse(JSON.stringify(tmplSections[sectionId]));
+            config = JSON.parse(JSON.stringify(tmplSections[sectionId]));
           }
         } catch (err) {
           console.error('Failed to load custom template, falling back to default:', err);
@@ -2294,41 +2477,64 @@ class LLApp {
       }
     }
 
-    // Ensure templates are loaded
-    if (window._loadTemplates) await window._loadTemplates();
-    if (window.llSectionTemplates && window.llSectionTemplates[sectionId]) {
-      // Deep clone so we don't mutate the original template
-      const config = JSON.parse(JSON.stringify(window.llSectionTemplates[sectionId]));
-      // Merge overrides from database
-      try {
-        const overrides = await window.llClient.getSurveyOverrides();
-        const sectionOverrides = overrides.filter(o => o.section_id === sectionId);
-        sectionOverrides.forEach(o => {
-          const q = config.questions.find(q => q.key === o.question_key);
-          if (q) {
-            if (o.is_required !== null) q.required = o.is_required;
-            if (o.default_value !== null) q.placeholder = String(o.default_value);
-          }
-        });
-      } catch (err) {
-        console.error('Failed to load survey overrides:', err);
+    if (!config) {
+      // Ensure templates are loaded
+      if (window._loadTemplates) await window._loadTemplates();
+      if (window.llSectionTemplates && window.llSectionTemplates[sectionId]) {
+        // Deep clone so we don't mutate the original template
+        config = JSON.parse(JSON.stringify(window.llSectionTemplates[sectionId]));
+        // Merge overrides from database
+        try {
+          const overrides = await window.llClient.getSurveyOverrides();
+          const sectionOverrides = overrides.filter(o => o.section_id === sectionId);
+          sectionOverrides.forEach(o => {
+            const q = config.questions.find(q => q.key === o.question_key);
+            if (q) {
+              if (o.is_required !== null) q.required = o.is_required;
+              if (o.default_value !== null) q.placeholder = String(o.default_value);
+            }
+          });
+        } catch (err) {
+          console.error('Failed to load survey overrides:', err);
+        }
+      } else {
+        // Fallback: try to load dynamically
+        try {
+          const script = document.createElement('script');
+          script.src = `/loyaltylift/templates/${sectionId}.js`;
+          await new Promise((resolve, reject) => {
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+          config = window.llSectionTemplates?.[sectionId] ? JSON.parse(JSON.stringify(window.llSectionTemplates[sectionId])) : null;
+        } catch (err) {
+          console.error('Failed to load section template:', sectionId, err);
+          return null;
+        }
       }
-      return config;
     }
-    // Fallback: try to load dynamically
-    try {
-      const script = document.createElement('script');
-      script.src = `/loyaltylift/templates/${sectionId}.js`;
-      await new Promise((resolve, reject) => {
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-      return window.llSectionTemplates?.[sectionId] || null;
-    } catch (err) {
-      console.error('Failed to load section template:', sectionId, err);
-      return null;
+
+    if (!config) return null;
+
+    // Apply project-level visibility overrides (filter out hidden questions)
+    if (projectId && !skipVisibilityFilter) {
+      try {
+        const visOverrides = await window.llClient.getVisibilityOverrides(projectId);
+        // Check if entire section is hidden
+        const sectionHidden = visOverrides.some(v => v.section_id === sectionId && !v.question_key && v.hidden);
+        if (sectionHidden) return null;
+        // Filter out hidden questions
+        const hiddenQuestions = visOverrides.filter(v => v.section_id === sectionId && v.question_key && v.hidden);
+        if (hiddenQuestions.length > 0) {
+          config.questions = config.questions.filter(q => !hiddenQuestions.some(h => h.question_key === q.key));
+        }
+      } catch (err) {
+        console.error('Failed to apply visibility overrides:', err);
+      }
     }
+
+    return config;
   }
 
   async _approveSection(projectId, sectionId) {
