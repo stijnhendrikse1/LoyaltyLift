@@ -1600,6 +1600,14 @@ class LLFormEngine {
           ${this.readOnly ? '<span class="ll-badge ll-badge-gray" style="padding:0.375rem 0.75rem; font-size:0.75rem;">Read Only</span>' : '<button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-submit-btn" onclick="window.llFormEngine?.onSubmit()">Submit for Review</button>'}
         </div>
       </div>
+      <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:0.75rem;">
+        <div class="ll-flex ll-gap-2">
+          <button class="ll-btn ${!this._questionFilter || this._questionFilter === 'all' ? 'll-btn-primary' : 'll-btn-secondary'} ll-btn-sm" onclick="window.llFormEngine._filterQuestions('all')">All</button>
+          <button class="ll-btn ${this._questionFilter === 'unanswered' ? 'll-btn-primary' : 'll-btn-secondary'} ll-btn-sm" onclick="window.llFormEngine._filterQuestions('unanswered')">Unanswered</button>
+          <button class="ll-btn ${this._questionFilter === 'answered' ? 'll-btn-primary' : 'll-btn-secondary'} ll-btn-sm" onclick="window.llFormEngine._filterQuestions('answered')">Answered</button>
+        </div>
+        <span class="ll-text-xs ll-text-muted" id="ll-q-progress"></span>
+      </div>
       <div class="ll-card" style="padding: 2rem;">
     `;
 
@@ -1614,10 +1622,11 @@ class LLFormEngine {
     this.container.innerHTML = html;
     if (this.readOnly) {
       this.container.querySelectorAll('input, textarea, select, button[type="file"]').forEach(el => { el.disabled = true; el.style.opacity = '0.7'; });
-      this.container.querySelectorAll('.ll-toggle, [onclick]').forEach(el => { if (!el.textContent.includes('Back')) el.style.pointerEvents = 'none'; });
+      this.container.querySelectorAll('.ll-toggle, [onclick]').forEach(el => { if (!el.textContent.includes('Back') && !el.textContent.includes('All') && !el.textContent.includes('answered') && !el.textContent.includes('Answered') && !el.textContent.includes('Unanswered')) el.style.pointerEvents = 'none'; });
     } else {
       this._bindEvents();
     }
+    this._updateProgress();
   }
 
   _renderQuestion(q, index) {
@@ -1843,9 +1852,44 @@ class LLFormEngine {
     this.sectionConfig.questions.forEach(q => {
       const el = document.getElementById(`ll-q-${q.key}`);
       if (!el) return;
-      const visible = this._checkVisibility(q);
-      el.style.display = visible ? '' : 'none';
+      const condVisible = this._checkVisibility(q);
+      const hasAnswer = this._hasAnswer(q.key);
+      const filterVisible = !this._questionFilter || this._questionFilter === 'all' ||
+        (this._questionFilter === 'answered' && hasAnswer) ||
+        (this._questionFilter === 'unanswered' && !hasAnswer);
+      el.style.display = (condVisible && filterVisible) ? '' : 'none';
     });
+    this._updateProgress();
+  }
+
+  _hasAnswer(key) {
+    const val = this.responses[key];
+    if (val === null || val === undefined || val === '') return false;
+    if (typeof val === 'string' && !val.trim()) return false;
+    if (Array.isArray(val) && val.length === 0) return false;
+    return true;
+  }
+
+  _filterQuestions(filter) {
+    this._questionFilter = filter;
+    this._updateConditionalVisibility();
+    // Update filter button styles
+    this.container.querySelectorAll('.ll-flex .ll-btn-sm').forEach(btn => {
+      if (btn.textContent.trim() === 'All' || btn.textContent.trim() === 'Answered' || btn.textContent.trim() === 'Unanswered') {
+        const isActive = (filter === 'all' && btn.textContent.trim() === 'All') ||
+          (filter === 'answered' && btn.textContent.trim() === 'Answered') ||
+          (filter === 'unanswered' && btn.textContent.trim() === 'Unanswered');
+        btn.className = `ll-btn ${isActive ? 'll-btn-primary' : 'll-btn-secondary'} ll-btn-sm`;
+      }
+    });
+  }
+
+  _updateProgress() {
+    const el = document.getElementById('ll-q-progress');
+    if (!el || !this.sectionConfig) return;
+    const visible = this.sectionConfig.questions.filter(q => this._checkVisibility(q));
+    const answered = visible.filter(q => this._hasAnswer(q.key));
+    el.textContent = `${answered.length} of ${visible.length} answered`;
   }
 
   _showSaveStatus(state) {
