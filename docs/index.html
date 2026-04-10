@@ -3157,12 +3157,28 @@ class LLApp {
             </div>
             <div class="ll-flex ll-justify-between ll-items-center">
               <span class="ll-text-xs ll-text-muted">ID: ${p.id}</span>
-              ${isDefault ? '<span class="ll-text-xs ll-text-muted">Default prompt -- duplicate to customize</span>' : '<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._saveAIPrompt(\'' + p.id + '\')">Save</button>'}
+              ${isDefault ? '<span class="ll-text-xs ll-text-muted">Default prompt -- duplicate to customize</span>' : '<span class="ll-text-xs ll-text-muted" id="ll-aip-status-' + p.id + '"></span> <button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._saveAIPrompt(\'' + p.id + '\')">Save</button>'}
             </div>
           </div>
         `; }).join('')}
       </div>
     `;
+
+    // Add autosave (3s debounce) to all editable prompt fields
+    this._aiPrompts.filter(p => p.id !== 'extract_responses').forEach(p => {
+      const fields = ['name', 'desc', 'model', 'maxtokens', 'system', 'user'].map(f => document.getElementById('ll-aip-' + f + '-' + p.id)).filter(Boolean);
+      let timer = null;
+      const autoSave = () => {
+        clearTimeout(timer);
+        const indicator = document.getElementById('ll-aip-status-' + p.id);
+        if (indicator) indicator.textContent = 'Unsaved changes...';
+        timer = setTimeout(() => { this._saveAIPrompt(p.id, true); }, 3000);
+      };
+      fields.forEach(el => {
+        el.addEventListener('input', autoSave);
+        el.addEventListener('change', autoSave);
+      });
+    });
   }
 
   async _duplicateAIPrompt(sourceId) {
@@ -3204,13 +3220,14 @@ class LLApp {
     }
   }
 
-  async _saveAIPrompt(id) {
+  async _saveAIPrompt(id, quiet) {
     const name = document.getElementById(`ll-aip-name-${id}`)?.value;
     const description = document.getElementById(`ll-aip-desc-${id}`)?.value;
     const model = document.getElementById(`ll-aip-model-${id}`)?.value;
     const max_tokens = parseInt(document.getElementById(`ll-aip-maxtokens-${id}`)?.value) || 4096;
     const system_prompt = document.getElementById(`ll-aip-system-${id}`)?.value;
     const user_prompt_template = document.getElementById(`ll-aip-user-${id}`)?.value;
+    const indicator = document.getElementById('ll-aip-status-' + id);
 
     try {
       const { error } = await window.llClient.supabase
@@ -3218,10 +3235,13 @@ class LLApp {
         .update({ name, description, model, max_tokens, system_prompt, user_prompt_template })
         .eq('id', id);
       if (error) throw error;
-      llToast.success('AI prompt saved.');
+      if (indicator) indicator.textContent = 'Saved';
+      if (!quiet) llToast.success('AI prompt saved.');
+      setTimeout(() => { if (indicator) indicator.textContent = ''; }, 2000);
     } catch (err) {
       console.error('Save AI prompt error:', err);
-      llToast.error('Failed to save AI prompt.');
+      if (indicator) indicator.textContent = 'Save failed';
+      if (!quiet) llToast.error('Failed to save AI prompt.');
     }
   }
 
