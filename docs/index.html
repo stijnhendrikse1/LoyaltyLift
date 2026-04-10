@@ -559,6 +559,29 @@
   font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
 }
 
+/* Smart Import */
+.ll-dropzone {
+  border: 2px dashed rgba(197,198,204,0.4);
+  border-radius: 1rem; padding: 2.5rem; text-align: center;
+  transition: all 0.2s; cursor: pointer;
+}
+.ll-dropzone:hover, .ll-dropzone.dragover {
+  border-color: var(--ll-secondary); background: rgba(59,130,246,0.03);
+}
+.ll-upload-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1rem; border-radius: 0.5rem;
+  background: var(--ll-surface-low); margin-bottom: 0.5rem;
+}
+.ll-suggestion-card {
+  padding: 1rem; border-radius: 0.75rem; background: var(--ll-surface-lowest);
+  margin-bottom: 0.5rem; transition: opacity 0.2s;
+}
+.ll-suggestion-card.accepted { opacity: 0.5; }
+.ll-confidence-high { color: var(--ll-teal); }
+.ll-confidence-medium { color: var(--ll-warning); }
+.ll-confidence-low { color: var(--ll-error); }
+
 /* Responsive */
 @media (max-width: 768px) {
   .ll-grid-2, .ll-grid-3 { grid-template-columns: 1fr; }
@@ -1414,6 +1437,100 @@ class LoyaltyLiftClient {
       { id: 'airline_redemption', phase: 'launch', conditional: true },
     ];
   }
+
+  // --- Smart Import client methods ---
+
+  async uploadClientFile(projectId, file) {
+    const path = `${projectId}/${Date.now()}_${file.name}`;
+    const { error: uploadError } = await this.supabase.storage
+      .from('client-uploads')
+      .upload(path, file);
+    if (uploadError) throw uploadError;
+
+    const { data, error } = await this.supabase
+      .from('client_uploads')
+      .insert({
+        project_id: projectId,
+        file_name: file.name,
+        storage_path: path,
+        mime_type: file.type,
+        file_size: file.size,
+        uploaded_by: this._user.id,
+      })
+      .select('id, file_name, storage_path, status')
+      .single();
+    if (error) throw error;
+    return data;
+  }
+
+  async getClientUploads(projectId) {
+    const { data, error } = await this.supabase
+      .from('client_uploads')
+      .select('id, file_name, storage_path, mime_type, file_size, status, extraction_result, created_at')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  }
+
+  async deleteClientUpload(uploadId, storagePath) {
+    await this.supabase.storage.from('client-uploads').remove([storagePath]);
+    await this.supabase.from('client_uploads').delete().eq('id', uploadId);
+  }
+
+  async triggerExtraction(projectId, uploadId) {
+    const { data: { session } } = await this.supabase.auth.getSession();
+    const resp = await fetch(`${this.supabase.supabaseUrl}/functions/v1/extract-responses`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ project_id: projectId, upload_id: uploadId }),
+    });
+    if (!resp.ok) throw new Error(await resp.text());
+    return resp.json();
+  }
+
+  async getSuggestedResponses(projectId) {
+    const { data, error } = await this.supabase
+      .from('suggested_responses')
+      .select('id, section_id, question_key, suggested_value, confidence, source_excerpt, status, upload_id')
+      .eq('project_id', projectId)
+      .order('confidence');
+    if (error) throw error;
+    return data || [];
+  }
+
+  async acceptSuggestion(suggestion) {
+    // Save to responses
+    await this.supabase.from('responses').upsert({
+      project_id: suggestion.project_id,
+      section_id: suggestion.section_id,
+      question_key: suggestion.question_key,
+      value: JSON.stringify(suggestion.suggested_value),
+      responded_by: this._user.id,
+    }, { onConflict: 'project_id,section_id,question_key' });
+    // Mark suggestion as accepted
+    await this.supabase.from('suggested_responses')
+      .update({ status: 'accepted' })
+      .eq('id', suggestion.id);
+  }
+
+  async rejectSuggestion(id) {
+    await this.supabase.from('suggested_responses')
+      .update({ status: 'rejected' })
+      .eq('id', id);
+  }
+
+  async acceptAllHighConfidence(projectId) {
+    const suggestions = await this.getSuggestedResponses(projectId);
+    const high = suggestions.filter(s => s.confidence === 'high' && s.status === 'pending');
+    for (const s of high) {
+      await this.acceptSuggestion({ ...s, project_id: projectId });
+    }
+    return high.length;
+  }
 }
 
 // Global instance
@@ -1960,6 +2077,9 @@ class LLApp {
       case 'admin':
         run(this._showAdmin());
         break;
+      case 'import':
+        run(this._showSmartImport(parts[1]));
+        break;
       default:
         run(this._showDashboard());
     }
@@ -2290,6 +2410,7 @@ class LLApp {
             ${window.llClient.isLjiAdmin ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._showManageMembers('${project.id}')">Manage Members</button>` : ''}
             ${window.llClient.isLjiMember && project.phase !== 'launch' ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._advancePhase('${project.id}')">Advance Phase</button>` : ''}
             ${window.llClient.isLjiMember ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._exportProject('${project.id}')" title="Export to Excel">&#128228; Export</button>` : ''}
+            ${window.llClient.isLjiMember ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('import', { projectId: '${project.id}' })" title="Smart Import">&#128225; Smart Import</button>` : ''}
             ${isLji && !customizeMode ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._toggleCustomizeMode('${project.id}')" title="Customize section/question visibility">Customize</button>` : ''}
             ${customizeMode ? `<button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._toggleCustomizeMode('${project.id}')">Done Customizing</button>` : ''}
             <button class="ll-help-btn" onclick="llApp._showHelp()" title="Help">?</button>
@@ -4248,6 +4369,374 @@ class LLApp {
       llToast.error('Failed to send feedback.');
       btn.disabled = false;
       btn.textContent = type === 'suggestion' ? 'Submit Suggestion' : type === 'review' ? 'Submit Review' : 'Submit Bug Report';
+    }
+  }
+
+  // --- Smart Import Page ---
+  async _showSmartImport(projectId) {
+    this._importProjectId = projectId;
+    this.currentPage = 'import';
+
+    const client = window.llClient;
+    const { data: project } = await client.supabase
+      .from('projects')
+      .select('id, name')
+      .eq('id', projectId)
+      .single();
+
+    const projectName = project ? this._esc(project.name) : 'Project';
+
+    this.container.innerHTML = `
+      <div class="ll-header">
+        <div class="ll-flex ll-items-center ll-justify-between" style="max-width:1200px; margin:0 auto;">
+          <div class="ll-flex ll-items-center ll-gap-3">
+            <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp.navigate('project', { projectId: '${projectId}' })">&larr; Back</button>
+            <img src="lji-logo.png" alt="LJI" style="height:28px;" />
+            <span class="ll-h1" style="font-size:1.125rem;">Smart Import</span>
+            <span class="ll-text-xs ll-text-muted">${projectName}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ll-container">
+        <div style="display:grid; grid-template-columns:3fr 2fr; gap:1.5rem;">
+          <!-- Left column: File Upload -->
+          <div>
+            <div class="ll-card" style="margin-bottom:1rem;">
+              <h2 class="ll-h2">Upload Files</h2>
+              <div class="ll-dropzone" id="ll-import-dropzone">
+                <div style="font-size:2rem; margin-bottom:0.5rem;">&#128194;</div>
+                <p class="ll-text-sm" style="font-weight:600; margin-bottom:0.25rem;">Drop files here or click to browse</p>
+                <p class="ll-text-xs ll-text-muted">Accepted: PDF, XLSX, CSV, DOCX, TXT</p>
+              </div>
+              <input type="file" id="ll-import-file-input" multiple accept=".pdf,.xlsx,.csv,.docx,.txt" style="display:none;" />
+            </div>
+
+            <div class="ll-card">
+              <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:0.75rem;">
+                <h2 class="ll-h2" style="margin-bottom:0;">Uploaded Files</h2>
+                <button class="ll-btn ll-btn-primary ll-btn-sm" id="ll-import-analyze-btn" onclick="llApp._analyzeImportFiles()">Analyze Files</button>
+              </div>
+              <div id="ll-import-file-list">
+                <p class="ll-text-sm ll-text-muted">No files uploaded yet.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right column: Suggested Answers -->
+          <div>
+            <div class="ll-card">
+              <h2 class="ll-h2">Suggested Answers</h2>
+              <div id="ll-import-suggestion-filters" style="display:none; margin-bottom:0.75rem;">
+                <div class="ll-flex ll-gap-2 ll-items-center" style="flex-wrap:wrap; margin-bottom:0.5rem;">
+                  <button class="ll-btn ll-btn-secondary ll-btn-sm ll-import-filter active" data-filter="all" onclick="llApp._filterSuggestions('all')">All <span id="ll-sug-count-all"></span></button>
+                  <button class="ll-btn ll-btn-secondary ll-btn-sm ll-import-filter" data-filter="high" onclick="llApp._filterSuggestions('high')">High <span id="ll-sug-count-high"></span></button>
+                  <button class="ll-btn ll-btn-secondary ll-btn-sm ll-import-filter" data-filter="medium" onclick="llApp._filterSuggestions('medium')">Medium <span id="ll-sug-count-medium"></span></button>
+                  <button class="ll-btn ll-btn-secondary ll-btn-sm ll-import-filter" data-filter="low" onclick="llApp._filterSuggestions('low')">Low <span id="ll-sug-count-low"></span></button>
+                </div>
+                <button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._acceptAllHighConfidence()" id="ll-import-accept-all-btn">Accept All High Confidence</button>
+              </div>
+              <div id="ll-import-suggestions">
+                <p class="ll-text-sm ll-text-muted">Upload and analyze files to see suggestions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Load existing data
+    await this._loadImportData(projectId);
+
+    // Setup drag-and-drop
+    const dropzone = document.getElementById('ll-import-dropzone');
+    const fileInput = document.getElementById('ll-import-file-input');
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      this._handleImportFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', (e) => {
+      this._handleImportFiles(e.target.files);
+      fileInput.value = '';
+    });
+  }
+
+  async _loadImportData(projectId) {
+    try {
+      const uploads = await window.llClient.getClientUploads(projectId);
+      this._importUploads = uploads;
+      this._renderImportFiles();
+
+      const suggestions = await window.llClient.getSuggestedResponses(projectId);
+      this._importSuggestions = suggestions;
+      if (suggestions.length > 0) {
+        this._renderSuggestions();
+      }
+    } catch (err) {
+      console.error('Load import data error:', err);
+    }
+  }
+
+  async _handleImportFiles(fileList) {
+    const allowed = ['.pdf', '.xlsx', '.csv', '.docx', '.txt'];
+    const projectId = this._importProjectId;
+
+    for (const file of fileList) {
+      const ext = '.' + file.name.split('.').pop().toLowerCase();
+      if (!allowed.includes(ext)) {
+        llToast.warning(`Skipped ${file.name} — unsupported file type.`);
+        continue;
+      }
+
+      try {
+        const uploaded = await window.llClient.uploadClientFile(projectId, file);
+        this._importUploads = this._importUploads || [];
+        this._importUploads.unshift({ ...uploaded, file_size: file.size, mime_type: file.type });
+        this._renderImportFiles();
+        llToast.success(`Uploaded ${file.name}`);
+      } catch (err) {
+        console.error('Upload error:', err);
+        llToast.error(`Failed to upload ${file.name}`);
+      }
+    }
+  }
+
+  _renderImportFiles() {
+    const container = document.getElementById('ll-import-file-list');
+    if (!container) return;
+    const uploads = this._importUploads || [];
+    if (uploads.length === 0) {
+      container.innerHTML = '<p class="ll-text-sm ll-text-muted">No files uploaded yet.</p>';
+      return;
+    }
+
+    const statusBadge = (s) => {
+      const map = { uploaded: 'blue', processing: 'yellow', completed: 'green', failed: 'red' };
+      return `<span class="ll-badge ll-badge-${map[s] || 'gray'}">${s}</span>`;
+    };
+
+    const formatSize = (bytes) => {
+      if (!bytes) return '';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    };
+
+    container.innerHTML = uploads.map(u => `
+      <div class="ll-upload-item" data-upload-id="${u.id}">
+        <div>
+          <span class="ll-text-sm" style="font-weight:500;">${this._esc(u.file_name)}</span>
+          <span class="ll-text-xs ll-text-muted" style="margin-left:0.5rem;">${formatSize(u.file_size)}</span>
+        </div>
+        <div class="ll-flex ll-gap-2 ll-items-center">
+          ${statusBadge(u.status || 'uploaded')}
+          <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error); padding:0.25rem 0.5rem;" onclick="llApp._deleteImportFile('${u.id}', '${u.storage_path}')" title="Delete">&times;</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async _deleteImportFile(uploadId, storagePath) {
+    const ok = await llConfirm('Delete this file? This cannot be undone.');
+    if (!ok) return;
+    try {
+      await window.llClient.deleteClientUpload(uploadId, storagePath);
+      this._importUploads = (this._importUploads || []).filter(u => u.id !== uploadId);
+      this._renderImportFiles();
+      llToast.success('File deleted.');
+    } catch (err) {
+      console.error('Delete error:', err);
+      llToast.error('Failed to delete file.');
+    }
+  }
+
+  async _analyzeImportFiles() {
+    const projectId = this._importProjectId;
+    const uploads = (this._importUploads || []).filter(u => u.status === 'uploaded' || !u.status);
+
+    if (uploads.length === 0) {
+      llToast.warning('No new files to analyze.');
+      return;
+    }
+
+    const btn = document.getElementById('ll-import-analyze-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Analyzing...'; }
+
+    let triggered = 0;
+    for (const u of uploads) {
+      try {
+        await window.llClient.triggerExtraction(projectId, u.id);
+        u.status = 'processing';
+        triggered++;
+      } catch (err) {
+        console.error('Extraction trigger error:', err);
+        u.status = 'failed';
+        llToast.error(`Failed to analyze ${u.file_name}`);
+      }
+    }
+    this._renderImportFiles();
+
+    if (triggered > 0) {
+      llToast.info(`Analyzing ${triggered} file(s)...`);
+      this._pollImportStatus(projectId);
+    }
+
+    if (btn) { btn.disabled = false; btn.textContent = 'Analyze Files'; }
+  }
+
+  async _pollImportStatus(projectId) {
+    const poll = async () => {
+      try {
+        const uploads = await window.llClient.getClientUploads(projectId);
+        this._importUploads = uploads;
+        this._renderImportFiles();
+
+        const processing = uploads.filter(u => u.status === 'processing');
+        if (processing.length > 0) {
+          setTimeout(poll, 3000);
+        } else {
+          // All done, load suggestions
+          const suggestions = await window.llClient.getSuggestedResponses(projectId);
+          this._importSuggestions = suggestions;
+          this._renderSuggestions();
+          if (suggestions.length > 0) {
+            llToast.success(`Analysis complete! ${suggestions.length} suggestion(s) found.`);
+          } else {
+            llToast.info('Analysis complete. No suggestions generated.');
+          }
+        }
+      } catch (err) {
+        console.error('Poll error:', err);
+      }
+    };
+    setTimeout(poll, 3000);
+  }
+
+  _renderSuggestions(filter) {
+    filter = filter || 'all';
+    const container = document.getElementById('ll-import-suggestions');
+    const filtersEl = document.getElementById('ll-import-suggestion-filters');
+    if (!container) return;
+
+    const suggestions = this._importSuggestions || [];
+    if (suggestions.length === 0) {
+      container.innerHTML = '<p class="ll-text-sm ll-text-muted">Upload and analyze files to see suggestions.</p>';
+      if (filtersEl) filtersEl.style.display = 'none';
+      return;
+    }
+
+    if (filtersEl) filtersEl.style.display = 'block';
+
+    // Update counts
+    const counts = { all: suggestions.length, high: 0, medium: 0, low: 0 };
+    suggestions.forEach(s => { if (counts[s.confidence] !== undefined) counts[s.confidence]++; });
+    ['all', 'high', 'medium', 'low'].forEach(k => {
+      const el = document.getElementById(`ll-sug-count-${k}`);
+      if (el) el.textContent = `(${counts[k]})`;
+    });
+
+    // Update active filter button
+    document.querySelectorAll('.ll-import-filter').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.filter === filter);
+    });
+
+    const filtered = filter === 'all' ? suggestions : suggestions.filter(s => s.confidence === filter);
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<p class="ll-text-sm ll-text-muted">No suggestions match this filter.</p>';
+      return;
+    }
+
+    const confidenceBadge = (c) => {
+      const cls = c === 'high' ? 'll-confidence-high' : c === 'medium' ? 'll-confidence-medium' : 'll-confidence-low';
+      const bg = c === 'high' ? 'rgba(13,148,136,0.1)' : c === 'medium' ? 'rgba(245,158,11,0.1)' : 'rgba(220,38,38,0.1)';
+      return `<span class="ll-badge ${cls}" style="background:${bg};">${c}</span>`;
+    };
+
+    const formatValue = (v) => {
+      if (v === null || v === undefined) return '';
+      if (typeof v === 'object') return JSON.stringify(v);
+      return String(v);
+    };
+
+    container.innerHTML = filtered.map(s => {
+      const accepted = s.status === 'accepted';
+      const rejected = s.status === 'rejected';
+      return `
+        <div class="ll-suggestion-card ${accepted ? 'accepted' : ''}" data-suggestion-id="${s.id}">
+          <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:0.375rem;">
+            <div>
+              <span class="ll-text-xs ll-text-muted">${this._esc(s.section_id)}</span>
+              <span class="ll-text-sm" style="font-weight:600; margin-left:0.25rem;">${this._esc(s.question_key)}</span>
+            </div>
+            ${confidenceBadge(s.confidence)}
+          </div>
+          <div class="ll-text-sm" style="margin-bottom:0.375rem; font-weight:500;">${this._esc(formatValue(s.suggested_value))}</div>
+          ${s.source_excerpt ? `<div class="ll-text-xs ll-text-muted" style="margin-bottom:0.5rem; font-style:italic;">"${this._esc(s.source_excerpt)}"</div>` : ''}
+          <div class="ll-flex ll-gap-2">
+            ${accepted ? '<span class="ll-badge ll-badge-green">Accepted</span>' :
+              rejected ? '<span class="ll-badge ll-badge-red">Rejected</span>' : `
+              <button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._acceptImportSuggestion('${s.id}')">Accept</button>
+              <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="llApp._rejectImportSuggestion('${s.id}')">Reject</button>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  _filterSuggestions(filter) {
+    this._renderSuggestions(filter);
+  }
+
+  async _acceptImportSuggestion(suggestionId) {
+    const projectId = this._importProjectId;
+    const suggestion = (this._importSuggestions || []).find(s => s.id === suggestionId);
+    if (!suggestion) return;
+    try {
+      await window.llClient.acceptSuggestion({ ...suggestion, project_id: projectId });
+      suggestion.status = 'accepted';
+      this._renderSuggestions();
+      llToast.success('Suggestion accepted.');
+    } catch (err) {
+      console.error('Accept error:', err);
+      llToast.error('Failed to accept suggestion.');
+    }
+  }
+
+  async _rejectImportSuggestion(suggestionId) {
+    const suggestion = (this._importSuggestions || []).find(s => s.id === suggestionId);
+    if (!suggestion) return;
+    try {
+      await window.llClient.rejectSuggestion(suggestionId);
+      suggestion.status = 'rejected';
+      this._renderSuggestions();
+      llToast.info('Suggestion rejected.');
+    } catch (err) {
+      console.error('Reject error:', err);
+      llToast.error('Failed to reject suggestion.');
+    }
+  }
+
+  async _acceptAllHighConfidence() {
+    const projectId = this._importProjectId;
+    const ok = await llConfirm('Accept all high-confidence suggestions? This will save them as responses.');
+    if (!ok) return;
+    try {
+      const count = await window.llClient.acceptAllHighConfidence(projectId);
+      // Refresh local state
+      const suggestions = await window.llClient.getSuggestedResponses(projectId);
+      this._importSuggestions = suggestions;
+      this._renderSuggestions();
+      llToast.success(`Accepted ${count} high-confidence suggestion(s).`);
+    } catch (err) {
+      console.error('Accept all error:', err);
+      llToast.error('Failed to accept suggestions.');
     }
   }
 
