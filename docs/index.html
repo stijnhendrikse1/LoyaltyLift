@@ -3166,13 +3166,15 @@ class LLApp {
   }
 
   async _duplicateAIPrompt(sourceId) {
+    const name = prompt('Name for the new prompt:');
+    if (!name || !name.trim()) return;
     try {
       const { data: source } = await window.llClient.supabase.from('ai_prompts').select('*').eq('id', sourceId).single();
       if (!source) { llToast.error('Source prompt not found.'); return; }
       const newId = 'custom_' + Date.now();
       const { error } = await window.llClient.supabase.from('ai_prompts').insert({
         id: newId,
-        name: source.name + ' (Copy)',
+        name: name.trim(),
         description: source.description,
         system_prompt: source.system_prompt,
         user_prompt_template: source.user_prompt_template,
