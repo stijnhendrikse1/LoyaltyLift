@@ -1466,7 +1466,7 @@ class LoyaltyLiftClient {
   async getClientUploads(projectId) {
     const { data, error } = await this.supabase
       .from('client_uploads')
-      .select('id, file_name, storage_path, mime_type, file_size, status, extraction_result, created_at')
+      .select('id, file_name, storage_path, mime_type, file_size, status, extracted_text, extraction_result, created_at')
       .eq('project_id', projectId)
       .order('created_at', { ascending: false });
     if (error) throw error;
@@ -3014,6 +3014,92 @@ class LLApp {
     }
   }
 
+  // --- Admin AI Prompts Tab ---
+  async _renderAdminAIPrompts(content) {
+    const { data: prompts, error } = await window.llClient.supabase
+      .from('ai_prompts')
+      .select('*')
+      .order('name', { ascending: true });
+    if (error) throw error;
+
+    this._aiPrompts = prompts || [];
+
+    if (this._aiPrompts.length === 0) {
+      content.innerHTML = '<div class="ll-card"><p class="ll-text-sm ll-text-muted">No AI prompts found in the ai_prompts table.</p></div>';
+      return;
+    }
+
+    content.innerHTML = `
+      <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1.5rem;">
+        <h2 class="ll-h2" style="margin:0;">AI Prompts</h2>
+      </div>
+      <div class="ll-flex ll-flex-col ll-gap-6">
+        ${this._aiPrompts.map((p, idx) => `
+          <div class="ll-card" style="padding:2rem;" id="ll-ai-prompt-card-${p.id}">
+            <div class="ll-grid-2" style="gap:1rem; margin-bottom:1rem;">
+              <div>
+                <label class="ll-label">Name</label>
+                <input class="ll-input" id="ll-aip-name-${p.id}" value="${this._esc(p.name || '')}" />
+              </div>
+              <div>
+                <label class="ll-label">Description</label>
+                <input class="ll-input" id="ll-aip-desc-${p.id}" value="${this._esc(p.description || '')}" />
+              </div>
+            </div>
+            <div class="ll-grid-2" style="gap:1rem; margin-bottom:1rem;">
+              <div>
+                <label class="ll-label">Model</label>
+                <select class="ll-select" id="ll-aip-model-${p.id}">
+                  <option value="claude-sonnet-4-20250514" ${p.model === 'claude-sonnet-4-20250514' ? 'selected' : ''}>claude-sonnet-4-20250514</option>
+                  <option value="claude-opus-4-20250514" ${p.model === 'claude-opus-4-20250514' ? 'selected' : ''}>claude-opus-4-20250514</option>
+                  <option value="claude-haiku-4-5-20251001" ${p.model === 'claude-haiku-4-5-20251001' ? 'selected' : ''}>claude-haiku-4-5-20251001</option>
+                </select>
+              </div>
+              <div>
+                <label class="ll-label">Max Tokens</label>
+                <input class="ll-input" type="number" id="ll-aip-maxtokens-${p.id}" value="${p.max_tokens || 4096}" min="1" max="100000" />
+              </div>
+            </div>
+            <div style="margin-bottom:1rem;">
+              <label class="ll-label">System Prompt</label>
+              <textarea class="ll-textarea" id="ll-aip-system-${p.id}" style="min-height:200px; font-family:'Courier New',Courier,monospace; font-size:0.8125rem;">${this._esc(p.system_prompt || '')}</textarea>
+            </div>
+            <div style="margin-bottom:1rem;">
+              <label class="ll-label">User Prompt Template</label>
+              <textarea class="ll-textarea" id="ll-aip-user-${p.id}" style="min-height:200px; font-family:'Courier New',Courier,monospace; font-size:0.8125rem;">${this._esc(p.user_prompt_template || '')}</textarea>
+              <p class="ll-text-xs ll-text-muted" style="margin-top:0.375rem;">Available variables: <code>{{document_text}}</code>, <code>{{questions_json}}</code></p>
+            </div>
+            <div class="ll-flex ll-justify-between ll-items-center">
+              <span class="ll-text-xs ll-text-muted">ID: ${p.id}</span>
+              <button class="ll-btn ll-btn-primary ll-btn-sm" onclick="llApp._saveAIPrompt('${p.id}')">Save</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  async _saveAIPrompt(id) {
+    const name = document.getElementById(`ll-aip-name-${id}`)?.value;
+    const description = document.getElementById(`ll-aip-desc-${id}`)?.value;
+    const model = document.getElementById(`ll-aip-model-${id}`)?.value;
+    const max_tokens = parseInt(document.getElementById(`ll-aip-maxtokens-${id}`)?.value) || 4096;
+    const system_prompt = document.getElementById(`ll-aip-system-${id}`)?.value;
+    const user_prompt_template = document.getElementById(`ll-aip-user-${id}`)?.value;
+
+    try {
+      const { error } = await window.llClient.supabase
+        .from('ai_prompts')
+        .update({ name, description, model, max_tokens, system_prompt, user_prompt_template })
+        .eq('id', id);
+      if (error) throw error;
+      llToast.success('AI prompt saved.');
+    } catch (err) {
+      console.error('Save AI prompt error:', err);
+      llToast.error('Failed to save AI prompt.');
+    }
+  }
+
   // --- Manage Members Modal ---
   async _showManageMembers(projectId) {
     const project = await window.llClient.getProject(projectId);
@@ -3168,6 +3254,7 @@ class LLApp {
               <button class="ll-nav-item ${this._adminTab === 'templates' ? 'active' : ''}" onclick="llApp._switchAdminTab('templates')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Survey Templates</button>
               <button class="ll-nav-item ${this._adminTab === 'template_editor' ? 'active' : ''}" onclick="llApp._switchAdminTab('template_editor')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Template Editor</button>
               <button class="ll-nav-item ${this._adminTab === 'feedback' ? 'active' : ''}" onclick="llApp._switchAdminTab('feedback')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">Feedback</button>
+              <button class="ll-nav-item ${this._adminTab === 'ai_prompts' ? 'active' : ''}" onclick="llApp._switchAdminTab('ai_prompts')" style="text-align:left; border-bottom:none; padding:0.625rem 1rem; border-radius:0.5rem;">AI Prompts</button>
             </div>
           </div>
           <div id="ll-admin-content" style="flex:1; min-width:0;">
@@ -3187,7 +3274,7 @@ class LLApp {
     });
     const navItems = document.querySelectorAll('#ll-admin-nav .ll-nav-item');
     navItems.forEach(btn => btn.classList.remove('active'));
-    const tabMap = { users: 0, projects: 1, templates: 2, template_editor: 3, feedback: 4 };
+    const tabMap = { users: 0, projects: 1, templates: 2, template_editor: 3, feedback: 4, ai_prompts: 5 };
     navItems[tabMap[tab]]?.classList.add('active');
 
     const content = document.getElementById('ll-admin-content');
@@ -3204,6 +3291,7 @@ class LLApp {
         case 'templates': await this._renderAdminTemplates(content); break;
         case 'feedback': await this._renderAdminFeedback(content); break;
         case 'template_editor': await this._renderTemplateEditor(content); break;
+        case 'ai_prompts': await this._renderAdminAIPrompts(content); break;
       }
     } catch (err) {
       console.error('Admin tab error:', err);
@@ -4549,6 +4637,7 @@ class LLApp {
         </div>
         <div class="ll-flex ll-gap-2 ll-items-center">
           ${statusBadge(u.status || 'uploaded')}
+          ${(u.status === 'completed' || u.status === 'failed') ? `<button class="ll-btn ll-btn-secondary ll-btn-sm" style="padding:0.25rem 0.5rem;" onclick="llApp._showExtractedText('${u.id}')" title="View Extracted Text">View Text</button>` : ''}
           <button class="ll-btn ll-btn-secondary ll-btn-sm" style="color:var(--ll-error); padding:0.25rem 0.5rem;" onclick="llApp._deleteImportFile('${u.id}', '${u.storage_path}')" title="Delete">&times;</button>
         </div>
       </div>
@@ -4566,6 +4655,45 @@ class LLApp {
     } catch (err) {
       console.error('Delete error:', err);
       llToast.error('Failed to delete file.');
+    }
+  }
+
+  async _showExtractedText(uploadId) {
+    try {
+      const { data, error } = await window.llClient.supabase
+        .from('client_uploads')
+        .select('file_name, extracted_text, extraction_result')
+        .eq('id', uploadId)
+        .single();
+      if (error) throw error;
+
+      const fileName = this._esc(data.file_name || 'Unknown file');
+      const text = data.extracted_text || '(No extracted text available)';
+      const result = data.extraction_result || {};
+      const suggestionsCount = result.suggestions_count ?? result.suggestionsCount ?? 'N/A';
+      const textLength = text.length;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'll-modal-overlay';
+      overlay.id = 'll-extracted-text-overlay';
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      overlay.innerHTML = `
+        <div class="ll-modal" style="max-width:700px; width:95%;">
+          <div class="ll-flex ll-justify-between ll-items-center" style="margin-bottom:1rem;">
+            <h3 class="ll-h2" style="margin:0;">Extracted Text: ${fileName}</h3>
+            <button class="ll-btn ll-btn-secondary ll-btn-sm" onclick="document.getElementById('ll-extracted-text-overlay').remove()">Close</button>
+          </div>
+          <div class="ll-flex ll-gap-4" style="margin-bottom:1rem;">
+            <span class="ll-badge ll-badge-blue">Suggestions: ${suggestionsCount}</span>
+            <span class="ll-badge ll-badge-gray">Text length: ${textLength.toLocaleString()} chars</span>
+          </div>
+          <pre style="background:var(--ll-surface-low); padding:1rem; border-radius:var(--ll-radius-sm); font-size:0.8125rem; white-space:pre-wrap; word-wrap:break-word; max-height:50vh; overflow-y:auto; font-family:'Courier New',Courier,monospace;">${this._esc(text)}</pre>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    } catch (err) {
+      console.error('Show extracted text error:', err);
+      llToast.error('Failed to load extracted text.');
     }
   }
 
